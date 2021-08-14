@@ -8,6 +8,15 @@ const isDev = NODE_ENV === 'development'
 export const withLabLogic = (bot) => {
   if (isDev) bot.use(Telegraf.log())
 
+  bot.command('start', ({ reply }) =>
+    reply('One time keyboard', Markup
+      .keyboard(['/onetime'])
+      .oneTime()
+      .resize()
+      .extra()
+    )
+  )
+
   bot.command('onetime', ({ reply }) =>
     reply('One time keyboard', Markup
       .keyboard(['/simple', '/inline', '/pyramid'])
