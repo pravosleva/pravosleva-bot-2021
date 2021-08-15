@@ -6,10 +6,10 @@ Telegram bot experience with TypeScript
 
 ## Roadmap DX
 - [ ] eslint, prettier
-- [ ] quick deploy (by scp?)
+- [x] quick deploy (by scp?)
 
 ## Roadmap Buisness
-- [ ] any logic?
+- [ ] smartprice helper
 
 ## Quick deploy by `scp`
 
