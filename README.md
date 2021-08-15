@@ -1,8 +1,9 @@
-# pravosleva-bot-2021
-
+# pravosleva-bot-2021 [@pravosleva_bot](https://t.me/pravosleva_bot)
 Telegram bot experience with TypeScript
 
+## Development
 ### `yarn dev`
+_See `.env.example`_
 
 ## Roadmap DX
 - [ ] eslint, prettier
