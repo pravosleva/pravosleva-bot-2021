@@ -1,20 +1,27 @@
 # pravosleva-bot-2021 [@pravosleva_bot](https://t.me/pravosleva_bot)
+
 Telegram bot experience with TypeScript
 
 ## Development
+
 ### `yarn dev`
+
 _See `.env.example`_
 
 ## Roadmap DX
-- [ ] eslint, prettier
+
+- [x] eslint, prettier
 - [x] quick deploy (by scp?)
+- [ ] git hooks
 
 ## Roadmap Buisness
+
 - [ ] smartprice helper
 
 ## Quick deploy by `scp`
 
 `deploy-app-config.json`
+
 ```json
 {
   "prod:restart-all": {
@@ -45,5 +52,4 @@ _See `.env.example`_
   "dev": {},
   "staging": {}
 }
-
 ```
