@@ -2,9 +2,9 @@ import { Markup } from 'telegraf'
 
 // NOTE: https://github.com/LetItCode/telegraf
 
-export const withSmartpriceLogic = (bot) => {
+export const withSmartpriceLogic = (bot: any) => {
   // 1. Menu:
-  bot.command('smartprice', (ctx) => {
+  bot.command('smartprice', (ctx: any) => {
     const { reply } = ctx
     return reply(
       'Choose anything:',
@@ -19,6 +19,7 @@ export const withSmartpriceLogic = (bot) => {
           Markup.callbackButton('Online Trade-In', 'smartprice.online_tardein'),
           Markup.callbackButton('Ringeo', 'smartprice.ringeo'),
           Markup.callbackButton('Sentry', 'smartprice.sentry'),
+          Markup.callbackButton('Yandex Metrika', 'smartprice.yandex_metrika'),
         ],
         { columns: 2 }
       )
@@ -145,6 +146,26 @@ export const withSmartpriceLogic = (bot) => {
   bot.action('smartprice.sentry.access', ({ replyWithMarkdown }) => {
     return replyWithMarkdown(
       '[Sentry access](http://code-samples.space/notes/60e6d2b95eed1167a96fea37)'
+    )
+  })
+  // 1.7 Yandex Metrika
+  bot.action('smartprice.yandex_metrika', ({ reply }) => {
+    return reply(
+      'Choose anything:',
+      Markup.inlineKeyboard(
+        [
+          Markup.callbackButton(
+            'Наблюдения, особенности',
+            'smartprice.yandex_metrika.notes'
+          ),
+        ],
+        { columns: 1 }
+      ).extra()
+    )
+  })
+  bot.action('smartprice.yandex_metrika.notes', ({ replyWithMarkdown }) => {
+    return replyWithMarkdown(
+      '**[Notes](http://code-samples.space/notes/611bc6cebe6ef17d5ab1d879)**'
     )
   })
 }
