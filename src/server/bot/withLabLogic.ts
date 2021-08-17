@@ -92,6 +92,24 @@ export const withLabLogic = (bot) => {
     ))
   })
 
+  // bot.command('qr', (ctx) => {
+  //   return ctx.replyWithPhoto({ url: 'http://pravosleva.ru/static/img/covid-trash/fake-qr-pravosleva.gosuslugi.png' },
+  //     Extra.load({ caption: 'QR' })
+  //       .markdown()
+  //       .markup((m) =>
+  //         m.inlineKeyboard([
+  //           m.callbackButton('Gosuslugi', 'qr.gosuslugi')
+  //         ])
+  //       )
+  //   )
+  // })
+  // bot.action('qr.gosuslugi', async (ctx) => {
+  //   return ctx.replyWithPhoto({ url: 'http://pravosleva.ru/static/img/covid-trash/covid-trash-v3-Screenshot_2021-06-27-14-39-58-696_com.miui.gallery.jpg' },
+  //     Extra.load({ caption: 'QR' })
+  //       .markdown()
+  //   )
+  // })
+
   bot.command('caption', (ctx) => {
     return ctx.replyWithPhoto({ url: 'https://picsum.photos/200/300/?random' },
       Extra.load({ caption: 'Caption' })
@@ -119,9 +137,20 @@ export const withLabLogic = (bot) => {
     ])))
   })
 
-  bot.action(/.+/, (ctx) => {
-    return ctx.answerCbQuery(`Oh, ${ctx.match[0]}! Great choice`)
-  })
+  // bot.action(/.+/, (ctx) => {
+  //   return ctx.answerCbQuery(`Oh, ${ctx.match[0]}! Great choice`)
+  // })
 
-  bot.launch()
+  bot.command('sobes', ({ reply }) => {
+    return reply(
+      'Choose anything:',
+      Markup.inlineKeyboard([
+        Markup.callbackButton('JS', 'sobes.js'),
+      ])
+        .extra()
+    )
+  })
+  bot.action('sobes.js', ({ replyWithMarkdown }) => {
+    return replyWithMarkdown('[🎓 Собес по JS](http://code-samples.space/notes/5fcf87445c65457d8570630f)')
+  })
 }

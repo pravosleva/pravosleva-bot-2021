@@ -33,8 +33,12 @@ class App {
 
   private runBot() {
     const bot = new Telegraf(TG_BOT_TOKEN)
+
     withLabLogic(bot)
     withSmartpriceLogic(bot)
+    // Others...
+
+    bot.launch()
   }
 
   public start() {
