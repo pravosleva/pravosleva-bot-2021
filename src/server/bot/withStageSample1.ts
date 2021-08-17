@@ -72,7 +72,7 @@ step3Scene.leave((ctx) => ctx.replyWithMarkdown('_Step 3: Exit (its ok)_'))
 const stage = new Stage([step1Scene, step2Scene, step3Scene])
 stage.hears('exit', (ctx) => ctx.scene.leave())
 
-export const withStageSample = (bot: any) => {
+export const withStageSample1 = (bot: any) => {
   bot.use(session())
 
   bot.use(stage.middleware())
