@@ -94,7 +94,9 @@ export const withLabLogic = (bot) => {
       ]).extra()
     )
   })
-  bot.action('Dr Pepper', (ctx, next) => {
+  bot.action('Dr Pepper', async (ctx, next) => {
+    // NOTE: Метод answerCbQuery только для action
+    await ctx.answerCbQuery('Alert test', { show_alert: true })
     return ctx.reply('👍').then(() => next())
   })
 
@@ -141,7 +143,7 @@ export const withLabLogic = (bot) => {
     )
   })
   bot.action('plain', async (ctx) => {
-    // await ctx.answerCbQuery()
+    await ctx.answerCbQuery()
     await ctx.editMessageCaption(
       'Caption',
       Markup.inlineKeyboard([
@@ -151,7 +153,7 @@ export const withLabLogic = (bot) => {
     )
   })
   bot.action('italic', async (ctx) => {
-    // await ctx.answerCbQuery()
+    await ctx.answerCbQuery()
     await ctx.editMessageCaption(
       '_Caption_',
       Extra.markdown().markup(

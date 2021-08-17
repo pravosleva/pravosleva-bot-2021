@@ -51,10 +51,8 @@ step3Scene.enter((ctx) => {
       .extra()
   )
 })
-step3Scene.action('stage-sample-result', (ctx: any) => {
+step3Scene.action('stage-sample-result', async (ctx: any) => {
   ctx.session.company = ctx.scene.state.company
-
-  console.log('---')
 
   ctx.replyWithMarkdown(
     `Ok, this shit will be sent:\n\n\`\`\`\n${JSON.stringify(
@@ -64,6 +62,7 @@ step3Scene.action('stage-sample-result', (ctx: any) => {
     )}\n\`\`\``,
     removeKeyboard
   )
+  await ctx.answerCbQuery()
 
   return ctx.scene.leave()
 })

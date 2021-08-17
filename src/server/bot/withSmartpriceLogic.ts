@@ -6,6 +6,7 @@ export const withSmartpriceLogic = (bot: any) => {
   // 1. Menu:
   bot.command('smartprice', (ctx: any) => {
     const { reply } = ctx
+
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -29,7 +30,8 @@ export const withSmartpriceLogic = (bot: any) => {
     )
   })
   // 1.1 SSR:
-  bot.action('smartprice.ssr', ({ reply }) => {
+  bot.action('smartprice.ssr', async ({ reply, answerCbQuery }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -38,13 +40,18 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.ssr.local_dev', ({ replyWithMarkdown }) => {
-    return replyWithMarkdown(
-      '[Local dev envs](http://code-samples.space/notes/60bcd2e0a8f340671f9da000)'
-    )
-  })
+  bot.action(
+    'smartprice.ssr.local_dev',
+    async ({ replyWithMarkdown, answerCbQuery }) => {
+      await answerCbQuery()
+      return replyWithMarkdown(
+        '[Local dev envs](http://code-samples.space/notes/60bcd2e0a8f340671f9da000)'
+      )
+    }
+  )
   // 1.2 CRM:
-  bot.action('smartprice.crm', ({ reply }) => {
+  bot.action('smartprice.crm', async ({ answerCbQuery, reply }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -53,13 +60,18 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.crm.local_dev', ({ replyWithMarkdown }) => {
-    return replyWithMarkdown(
-      '[CRM Local dev sevrer](http://code-samples.space/notes/60224c3a0883d4603bb0e8b1)'
-    )
-  })
+  bot.action(
+    'smartprice.crm.local_dev',
+    async ({ answerCbQuery, replyWithMarkdown }) => {
+      await answerCbQuery()
+      return replyWithMarkdown(
+        '[CRM Local dev sevrer](http://code-samples.space/notes/60224c3a0883d4603bb0e8b1)'
+      )
+    }
+  )
   // 1.3 Offline Trade-In:
-  bot.action('smartprice.offline_tardein', ({ reply }) => {
+  bot.action('smartprice.offline_tardein', async ({ answerCbQuery, reply }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -73,11 +85,16 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.offline_tardein.local_dev', ({ reply }) => {
-    return reply('In progress...')
-  })
+  bot.action(
+    'smartprice.offline_tardein.local_dev',
+    async ({ answerCbQuery, reply }) => {
+      await answerCbQuery()
+      return reply('In progress...')
+    }
+  )
   // 1.4 Onlime Trade-In:
-  bot.action('smartprice.online_tardein', ({ reply }) => {
+  bot.action('smartprice.online_tardein', async ({ answerCbQuery, reply }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -99,12 +116,17 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.online_tardein.local_dev', ({ reply }) => {
-    return reply('In progress...')
-  })
+  bot.action(
+    'smartprice.online_tardein.local_dev',
+    async ({ answerCbQuery, reply }) => {
+      await answerCbQuery()
+      return reply('In progress...')
+    }
+  )
   bot.action(
     'smartprice.online_tardein.remote_ui_testing_link',
-    ({ replyWithMarkdown }) => {
+    async ({ answerCbQuery, replyWithMarkdown }) => {
+      await answerCbQuery()
       return replyWithMarkdown(
         '[Ссылка на CRM](https://smartprice-dev.ru/api/crm/ot/svyaznoy/eval)'
       )
@@ -112,14 +134,16 @@ export const withSmartpriceLogic = (bot: any) => {
   )
   bot.action(
     'smartprice.online_tardein.remote_ui_testing_instr',
-    ({ replyWithMarkdown }) => {
+    async ({ answerCbQuery, replyWithMarkdown }) => {
+      await answerCbQuery()
       return replyWithMarkdown(
         '[Как попасть в OT?](http://code-samples.space/notes/6041e2499e0d125bf8d0e82c)'
       )
     }
   )
   // 1.5 Ringeo:
-  bot.action('smartprice.ringeo', ({ reply }) => {
+  bot.action('smartprice.ringeo', async ({ answerCbQuery, reply }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -128,13 +152,18 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.ringeo.local_dev', ({ replyWithMarkdown }) => {
-    return replyWithMarkdown(
-      '[Sentry access](http://code-samples.space/notes/609a6467a2e87e69a6bfbcba)'
-    )
-  })
+  bot.action(
+    'smartprice.ringeo.local_dev',
+    async ({ answerCbQuery, replyWithMarkdown }) => {
+      await answerCbQuery()
+      return replyWithMarkdown(
+        '**[Ringeo local dev](http://code-samples.space/notes/609a6467a2e87e69a6bfbcba)**'
+      )
+    }
+  )
   // 1.6 Sentry
-  bot.action('smartprice.sentry', ({ reply }) => {
+  bot.action('smartprice.sentry', async ({ answerCbQuery, reply }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -143,13 +172,18 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.sentry.access', ({ replyWithMarkdown }) => {
-    return replyWithMarkdown(
-      '[Sentry access](http://code-samples.space/notes/60e6d2b95eed1167a96fea37)'
-    )
-  })
+  bot.action(
+    'smartprice.sentry.access',
+    async ({ answerCbQuery, replyWithMarkdown }) => {
+      await answerCbQuery()
+      return replyWithMarkdown(
+        '[Sentry access](http://code-samples.space/notes/60e6d2b95eed1167a96fea37)'
+      )
+    }
+  )
   // 1.7 Yandex Metrika
-  bot.action('smartprice.yandex_metrika', ({ reply }) => {
+  bot.action('smartprice.yandex_metrika', async ({ answerCbQuery, reply }) => {
+    await answerCbQuery()
     return reply(
       'Choose anything:',
       Markup.inlineKeyboard(
@@ -163,9 +197,13 @@ export const withSmartpriceLogic = (bot: any) => {
       ).extra()
     )
   })
-  bot.action('smartprice.yandex_metrika.notes', ({ replyWithMarkdown }) => {
-    return replyWithMarkdown(
-      '**[Notes](http://code-samples.space/notes/611bc6cebe6ef17d5ab1d879)**'
-    )
-  })
+  bot.action(
+    'smartprice.yandex_metrika.notes',
+    async ({ answerCbQuery, replyWithMarkdown }) => {
+      await answerCbQuery()
+      return replyWithMarkdown(
+        '**[Notes](http://code-samples.space/notes/611bc6cebe6ef17d5ab1d879)**'
+      )
+    }
+  )
 }
