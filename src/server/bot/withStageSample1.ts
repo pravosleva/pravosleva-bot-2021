@@ -82,14 +82,15 @@ type TState = {
   company: string
   position: string
   contact: TContact
-  docs: TDocument[]
+  docs?: TDocument[]
+  feedback?: string
 }
 const getFinalMsg = (ctx: {
   scene: { state: TState }
   session: { docsMap: Map<string, { document: TDocument; fileUrl: string }> }
 }) => {
   const {
-    state: { company, contact, position },
+    state: { company, contact, position, feedback },
   } = ctx.scene
   const {
     session: { docsMap },
@@ -97,6 +98,8 @@ const getFinalMsg = (ctx: {
   return `Проверьте Ваши данные.\n\n👤 ${getFullName(
     contact
   )}\n*Компания: ${company}*\n*Должность: ${position}*${
+    feedback ? `\n\n📨 _Текст заявки:\n---_\n${feedback}\n---` : ''
+  }${
     (docsMap?.size > 0 && `\n\n📤 _Загружено ${docsMap.size} файлов_`) ||
     '\n\n📤 _Можно приложить файлы_'
   }`
@@ -173,9 +176,42 @@ step2Scene.leave((ctx: any) => {
   if (isDev) ctx.replyWithMarkdown('_Step 2: Шаг пройден._')
 })
 
-// 3. User contact:
+// 3. Message from user:
 const step3Scene = new BaseScene('step3Scene')
-step3Scene.enter((ctx) => {
+step3Scene.enter((ctx) =>
+  ctx.replyWithMarkdown('_Введите текст заявки_', exitKeyboard)
+)
+step3Scene.on('text', (ctx: any) => {
+  const { text } = ctx.message
+  ctx.scene.state.feedback = text
+
+  if (text) {
+    console.log(text)
+    return ctx.scene.enter('step4Scene', {
+      company: ctx.scene.state.company,
+      position: ctx.scene.state.position,
+      feedback: ctx.scene.state.feedback,
+    })
+    // NOTE (Or this): return ctx.scene.enter('step4Scene', { ...ctx.scene.state })
+  }
+  return ctx.scene.leave()
+})
+step3Scene.on('document', async (ctx: any, next) => {
+  addFileToSession(ctx.message.document, ctx)
+
+  return next()
+})
+step3Scene.leave((ctx: any) => {
+  if (!ctx.scene.state.feedback) {
+    removeFilesFromSession(ctx)
+    ctx.replyWithMarkdown('🚫 _Step 3: Exit._')
+  }
+  if (isDev) ctx.replyWithMarkdown('_Step 3: Шаг пройден._')
+})
+
+// 4. User contact:
+const step4Scene = new BaseScene('step4Scene')
+step4Scene.enter((ctx) => {
   return ctx.replyWithMarkdown(
     '*Оставьте Ваш контакт* _(По кнопке)_',
     Extra.markup((markup) => {
@@ -189,7 +225,7 @@ step3Scene.enter((ctx) => {
     })
   )
 })
-step3Scene.on('contact', (ctx: any) => {
+step4Scene.on('contact', (ctx: any) => {
   const { contact, from } = ctx.message
 
   ctx.scene.state.contact = contact
@@ -197,19 +233,18 @@ step3Scene.on('contact', (ctx: any) => {
     const fullName = getFullName(contact || {})
     if (isDev)
       ctx.replyWithMarkdown(
-        `_Step 3: Спасибо${
+        `_Step 4: Спасибо${
           fullName ? `, ${fullName}` : ''
         }, бот получил Ваш контакт._`
       )
-    return ctx.scene.enter('step4Scene', {
-      company: ctx.scene.state.company,
-      position: ctx.scene.state.position,
+    return ctx.scene.enter('step5Scene', {
+      ...ctx.scene.state,
       contact: { ...ctx.scene.state.contact, fromUsername: from.username },
     })
   }
   return ctx.scene.leave()
 })
-step3Scene.on('text', (ctx) => {
+step4Scene.on('text', (ctx) => {
   // TODO: Refactoring!
   if (ctx.message.text === 'Выйти') {
     removeFilesFromSession(ctx)
@@ -221,38 +256,38 @@ step3Scene.on('text', (ctx) => {
   removeFilesFromSession(ctx)
   return ctx.scene.leave()
 })
-step3Scene.on('document', async (ctx: any, next) => {
+step4Scene.on('document', async (ctx: any, next) => {
   addFileToSession(ctx.message.document, ctx)
 
   return next()
 })
-// step3Scene.action('exit', (ctx) => ctx.scene.leave())
-step3Scene.leave((ctx: any) => {
+// step4Scene.action('exit', (ctx) => ctx.scene.leave())
+step4Scene.leave((ctx: any) => {
   if (!ctx.scene.state.contact) {
     removeFilesFromSession(ctx)
-    ctx.replyWithMarkdown(`🚫 _Step 3: Exit._`)
+    ctx.replyWithMarkdown(`🚫 _Step 4: Exit._`)
   }
-  if (isDev) ctx.replyWithMarkdown(`_Step 3: Шаг пройден._`)
+  if (isDev) ctx.replyWithMarkdown(`_Step 4: Шаг пройден._`)
 })
 
-// 4. Target btn
-const step4Scene = new BaseScene('step4Scene')
-step4Scene.enter((ctx: any) => {
+// 5. Target btn
+const step5Scene = new BaseScene('step5Scene')
+step5Scene.enter((ctx: any) => {
   getFinalBtns(ctx)
 })
-step4Scene.on('document', async (ctx: any, next) => {
+step5Scene.on('document', async (ctx: any, next) => {
   await addFileToSession(ctx.message.document, ctx)
   getFinalBtns(ctx)
 
   return next()
 })
-step4Scene.action('exit', async (ctx) => {
+step5Scene.action('exit', async (ctx) => {
   await ctx.answerCbQuery()
-  ctx.replyWithMarkdown('🚫 _Step 4: Вы вышли из заявки._')
+  ctx.replyWithMarkdown('🚫 _Step 5: Вы вышли из заявки._')
   removeFilesFromSession(ctx)
   return ctx.scene.leave()
 })
-step4Scene.action('send-entry', async (ctx: any) => {
+step5Scene.action('send-entry', async (ctx: any) => {
   // NOTE: Пока не увидел в этом смысла
   // ctx.session.company = ctx.scene.state.company
   // ctx.session.position = ctx.scene.state.position
@@ -266,14 +301,20 @@ step4Scene.action('send-entry', async (ctx: any) => {
     removeKeyboard
   )
   await ctx.answerCbQuery()
-  ctx.replyWithMarkdown('✅ _Step 4: Заявка отправлена_')
+  ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена_')
 
   return ctx.scene.leave()
 })
-step4Scene.leave((ctx) => ctx.replyWithMarkdown('_Done._'))
+step5Scene.leave((ctx) => ctx.replyWithMarkdown('_Done._'))
 
-// 5. Stage:
-const stage = new Stage([step1Scene, step2Scene, step3Scene, step4Scene])
+// 6. Final Stage:
+const stage = new Stage([
+  step1Scene,
+  step2Scene,
+  step3Scene,
+  step4Scene,
+  step5Scene,
+])
 stage.hears('exit', (ctx) => ctx.scene.leave())
 
 export const withStageSample1 = (bot: any) => {
