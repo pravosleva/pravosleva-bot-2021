@@ -20,7 +20,7 @@ const addFileToSession = async (document: TDocument, ctx: any) => {
     ...ctx.message.document,
     _pravosleva_service: {
       specialTGFileName: _specialTGFileName,
-      specialFileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-url/${_specialTGFileName}`,
+      specialFileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow/${_specialTGFileName}`,
     },
   })
   // NOTE: Update state json:
