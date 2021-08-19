@@ -11,6 +11,10 @@ export type TDocument = {
   file_id: string // "BQACAgIAAxkBAAIGD2EeHvWw2cSCpII5-Ny8l7hFO9nOAALVEAACqUPwSCiLmU4-xTaWIAQ",
   file_unique_id: string // "AgAD1RAAAqlD8Eg",
   file_size: number // 55712
+
+  // Special for additional service:
+  _specialTGFileName: string
+  _specialFileUrl: string
 }
 // export type TAudio = {
 //   duration: 270,

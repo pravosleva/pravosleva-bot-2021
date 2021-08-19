@@ -19,12 +19,13 @@ const addFileToSession = async (document: TDocument, ctx: any) => {
   ctx.session.docsMap.set(fileId, {
     ...ctx.message.document,
     _specialTGFileName,
+    _specialFileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-url/${_specialTGFileName}`,
   })
   // NOTE: Update state json:
   const docs = []
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ctx.session.docsMap.forEach((doc: TDocument, _fileIdAsKey: string) => {
-    docs.push(doc)
+  ctx.session.docsMap.forEach((docData: TDocument, _fileIdAsKey: string) => {
+    docs.push(docData)
   })
   ctx.scene.state.docs = docs
 
