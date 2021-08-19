@@ -322,6 +322,8 @@ const stage = new Stage([
 stage.hears('exit', (ctx) => ctx.scene.leave())
 
 export const withFeedback = (bot: any) => {
+  // await bot.telegram.deleteWebhook()
+
   bot.use(session())
   bot.use(stage.middleware())
 
