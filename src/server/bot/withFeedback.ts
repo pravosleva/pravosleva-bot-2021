@@ -130,7 +130,7 @@ step1Scene.on('text', (ctx: any) => {
   const { text } = ctx.message
   ctx.scene.state.company = ctx.message.text
   if (text) {
-    return ctx.scene.enter('step2Scene', { company: ctx.message.text })
+    return ctx.scene.enter('step2Scene', { ...ctx.scene.state })
   }
   return ctx.scene.leave()
 })
@@ -156,10 +156,7 @@ step2Scene.on('text', (ctx: any) => {
   const { text } = ctx.message
   ctx.scene.state.position = text
   if (text) {
-    return ctx.scene.enter('step3Scene', {
-      company: ctx.scene.state.company,
-      position: text,
-    })
+    return ctx.scene.enter('step3Scene', { ...ctx.scene.state })
   }
   return ctx.scene.leave()
 })
@@ -187,12 +184,7 @@ step3Scene.on('text', (ctx: any) => {
 
   if (text) {
     console.log(text)
-    return ctx.scene.enter('step4Scene', {
-      company: ctx.scene.state.company,
-      position: ctx.scene.state.position,
-      feedback: ctx.scene.state.feedback,
-    })
-    // NOTE (Or this): return ctx.scene.enter('step4Scene', { ...ctx.scene.state })
+    return ctx.scene.enter('step4Scene', { ...ctx.scene.state })
   }
   return ctx.scene.leave()
 })
