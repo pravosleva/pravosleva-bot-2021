@@ -1,7 +1,5 @@
-import { TDocument } from '../interfaces'
+import { TDocument, TUserId, TFileId } from '../interfaces'
 
-type TUserId = number
-type TFileId = string
 type TDocsMap = Map<TFileId, TDocument>[]
 
 /**

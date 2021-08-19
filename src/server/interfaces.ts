@@ -12,3 +12,20 @@ export type TDocument = {
   file_unique_id: string // "AgAD1RAAAqlD8Eg",
   file_size: number // 55712
 }
+// export type TAudio = {
+//   duration: 270,
+//   file_name: "limp-bizkit-pollution-demo_(tetamix.org).mp3",
+//   mime_type: "audio/mpeg",
+//   title: "Pollution \\(Demo\\)",
+//   performer: "Limp Bizkit",
+//   file_id: "CQACAgIAAxkBAAIGEmEeH5GGYajNh0EkP7NCCI4JKrIcAALYEAACqUPwSG-M50LoyaH3IAQ",
+//   file_unique_id: "AgAD2BAAAqlD8Eg",
+//   file_size: 3783697
+// }
+export type TContact = {
+  phone_number: string
+  first_name?: string
+  last_name?: string
+}
+export type TUserId = number
+export type TFileId = string
