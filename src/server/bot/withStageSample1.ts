@@ -28,7 +28,6 @@ step1Scene.leave((ctx: any) => {
 
 // 2. Scene 2:
 const step2Scene = new BaseScene('step2Scene')
-// @ts-ignore
 step2Scene.enter((ctx) =>
   ctx.replyWithMarkdown('*Ваша должность:*', exitKeyboard)
 )
@@ -82,11 +81,8 @@ const getFullName = (contact: TContact) => {
 }
 step3Scene.on('contact', (ctx: any) => {
   const { contact } = ctx.message
+
   ctx.scene.state.contact = contact
-  // ctx.replyWithMarkdown(
-  //   `New state has been set\n\n\`\`\`\n${JSON.stringify(ctx.scene.state, null, 2)}\n\`\`\``,
-  //   removeKeyboard
-  // )
   if (contact) {
     const fullName = getFullName(contact || {})
     ctx.replyWithMarkdown(
@@ -104,6 +100,7 @@ step3Scene.on('contact', (ctx: any) => {
 })
 step3Scene.on('text', (ctx) => {
   if (ctx.message.text === 'Выйти') return ctx.scene.leave()
+
   // return next()
   // NOTE: Текста на этом шаге быть не должно
   return ctx.scene.leave()
@@ -147,6 +144,7 @@ step4Scene.action('exit', async (ctx) => {
   return ctx.scene.leave()
 })
 step4Scene.action('send-entry', async (ctx: any) => {
+  // NOTE: Пока не увидел в этом смысла
   // ctx.session.company = ctx.scene.state.company
   // ctx.session.position = ctx.scene.state.position
 
@@ -163,9 +161,7 @@ step4Scene.action('send-entry', async (ctx: any) => {
 
   return ctx.scene.leave()
 })
-step4Scene.leave((ctx) => {
-  return ctx.replyWithMarkdown('_Done._')
-})
+step4Scene.leave((ctx) => ctx.replyWithMarkdown('_Done._'))
 
 // 5. Stage:
 const stage = new Stage([step1Scene, step2Scene, step3Scene, step4Scene])
@@ -173,12 +169,9 @@ stage.hears('exit', (ctx) => ctx.scene.leave())
 
 export const withStageSample1 = (bot: any) => {
   bot.use(session())
-
   bot.use(stage.middleware())
 
-  bot.command('stage_go', (ctx) => {
-    return ctx.scene.enter('step1Scene')
-  })
+  bot.command('stage_go', (ctx) => ctx.scene.enter('step1Scene'))
   bot.command('stage_state', (ctx) => {
     return ctx.replyWithMarkdown(
       `\`\`\`\n${JSON.stringify(ctx.scene.state, null, 2)}\n\`\`\``
