@@ -17,7 +17,7 @@ export type TDocument = {
   file_size: number // 55712
 
   // Special for additional pravosleva.ru service (основная задача - не палить TG_BOT_TOKEN):
-  _special: TSpecialService
+  _pravosleva_service: TSpecialService
 }
 // export type TAudio = {
 //   duration: 270,
