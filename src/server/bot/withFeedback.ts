@@ -317,12 +317,12 @@ const stage = new Stage([
 ])
 stage.hears('exit', (ctx) => ctx.scene.leave())
 
-export const withStageSample1 = (bot: any) => {
+export const withFeedback = (bot: any) => {
   bot.use(session())
   bot.use(stage.middleware())
 
-  bot.command('stage_go', (ctx) => ctx.scene.enter('step1Scene'))
-  bot.command('stage_state', (ctx) => {
+  bot.command('feedback', (ctx) => ctx.scene.enter('step1Scene'))
+  bot.command('feedback_state', (ctx) => {
     return ctx.replyWithMarkdown(
       `\`\`\`\n${JSON.stringify(ctx.scene.state, null, 2)}\n\`\`\``
     )
