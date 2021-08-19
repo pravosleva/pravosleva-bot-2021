@@ -15,7 +15,11 @@ const addFileToSession = async (document: TDocument, ctx: any) => {
   const _fileUrl = await ctx.telegram.getFileLink(document.file_id)
 
   if (!ctx.session.docsMap) ctx.session.docsMap = new Map()
-  ctx.session.docsMap.set(fileId, ctx.message.document)
+  const _specialTGFileName = _fileUrl.split('/').reverse()[0]
+  ctx.session.docsMap.set(fileId, {
+    ...ctx.message.document,
+    _specialTGFileName,
+  })
   // NOTE: Update state json:
   const docs = []
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
