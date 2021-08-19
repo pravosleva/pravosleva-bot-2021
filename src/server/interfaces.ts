@@ -1,3 +1,7 @@
+type TSpecialService = {
+  specialTGFileName: string
+  specialFileUrl: string
+}
 export type TDocument = {
   file_name: string // "cs_icon.png",
   mime_type: string // "image/png",
@@ -12,9 +16,8 @@ export type TDocument = {
   file_unique_id: string // "AgAD1RAAAqlD8Eg",
   file_size: number // 55712
 
-  // Special for additional service:
-  _specialTGFileName: string
-  _specialFileUrl: string
+  // Special for additional pravosleva.ru service (основная задача - не палить TG_BOT_TOKEN):
+  _special: TSpecialService
 }
 // export type TAudio = {
 //   duration: 270,

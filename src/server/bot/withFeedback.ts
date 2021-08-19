@@ -18,8 +18,10 @@ const addFileToSession = async (document: TDocument, ctx: any) => {
   const _specialTGFileName = _fileUrl.split('/').reverse()[0]
   ctx.session.docsMap.set(fileId, {
     ...ctx.message.document,
-    _specialTGFileName,
-    _specialFileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-url/${_specialTGFileName}`,
+    _pravosleva_service: {
+      specialTGFileName: _specialTGFileName,
+      specialFileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-url/${_specialTGFileName}`,
+    },
   })
   // NOTE: Update state json:
   const docs = []
