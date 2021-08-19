@@ -1,6 +1,6 @@
 import { TDocument, TUserId, TFileId } from '../interfaces'
 
-type TDocsMap = Map<TFileId, TDocument>[]
+type TDocsMap = Map<TFileId, TDocument>
 
 /**
  * Класс Одиночка предоставляет метод getInstance, который позволяет клиентам
@@ -46,7 +46,9 @@ export class Singleton {
     this.state.delete(userId)
     // TODO: На каждом изменении нужно обновлять информацию на физических данных (база, файлб и т.д.)
   }
-  public getStateAsJSON() {
+  public getStateAsJSON(): {
+    [key: string]: { docs: TDocument[] }
+  } {
     const state = {}
 
     this.state.forEach(({ docs }, userId) => {
