@@ -1,4 +1,5 @@
 import { Markup, session, BaseScene, Stage, Extra } from 'telegraf'
+import { globalStateMapInstance } from '../utils/globalStateMapInstance'
 
 // NOTE: https://github.com/LetItCode/telegraf
 
@@ -29,6 +30,9 @@ type TDocument = {
 //   file_size: 3783697
 // }
 // --- TOOLS:
+const refreshUserDataInGlobalState = ({ user_id, docsMap }) => {
+  globalStateMapInstance.updateUserDocsMap(user_id, docsMap)
+}
 const addFileToSession = async (document: TDocument, ctx: any) => {
   const fileId = document.file_unique_id
   const _fileUrl = await ctx.telegram.getFileLink(document.file_id)
@@ -44,11 +48,30 @@ const addFileToSession = async (document: TDocument, ctx: any) => {
   ctx.scene.state.docs = docs
 
   if (isDev) ctx.replyWithMarkdown(`[FILE URL](${_fileUrl})`)
+
+  // -- Global state
+  const fromUserId = ctx.message.from.id
+  if (fromUserId) {
+    const { docsMap } = ctx.session
+    refreshUserDataInGlobalState({
+      user_id: fromUserId,
+      docsMap: docsMap || new Map(),
+    })
+  }
+  // --
+
   return Promise.resolve()
 }
 const removeFilesFromSession = async (ctx: any) => {
   if (ctx.session.docsMap) ctx.session.docsMap.clear()
   ctx.scene.state.docs = []
+
+  try {
+    const fromUserId = ctx.update.callback_query.from
+    if (fromUserId) globalStateMapInstance.deleteStateForUserId(fromUserId)
+  } catch (err) {
+    console.log(err)
+  }
 }
 type TContact = {
   phone_number: string
@@ -87,7 +110,7 @@ type TState = {
 }
 const getFinalMsg = (ctx: {
   scene: { state: TState }
-  session: { docsMap: Map<string, { document: TDocument; fileUrl: string }> }
+  session: { docsMap: Map<string, TDocument> }
 }) => {
   const {
     state: { company, contact, position, feedback },
@@ -95,7 +118,7 @@ const getFinalMsg = (ctx: {
   const {
     session: { docsMap },
   } = ctx
-  return `Проверьте Ваши данные.\n\n👤 ${getFullName(
+  return `👉 *Проверьте Ваши данные*\n\n👤 ${getFullName(
     contact
   )}\n*Компания: ${company}*\n*Должность: ${position}*${
     feedback ? `\n\n📨 _Текст заявки:\n---_\n${feedback}\n---` : ''
@@ -106,7 +129,7 @@ const getFinalMsg = (ctx: {
 }
 const getFinalBtns = (ctx: any) =>
   ctx.replyWithMarkdown(
-    `${getFinalMsg(ctx)}\n\n*Подтвердите заявку*`,
+    `${getFinalMsg(ctx)}\n\n👉 *Подтвердите заявку*`,
     Markup.inlineKeyboard([
       Markup.callbackButton('📨 Отправить заявку', 'send-entry'),
       Markup.callbackButton('Выход', 'exit'),
@@ -124,7 +147,7 @@ const removeKeyboard = Markup.removeKeyboard()
 const step1Scene = new BaseScene('step1Scene')
 // @ts-ignore
 step1Scene.enter((ctx) =>
-  ctx.replyWithMarkdown('*Введите наименование компании*', exitKeyboard)
+  ctx.replyWithMarkdown('👉 *Введите наименование компании*', exitKeyboard)
 )
 step1Scene.on('text', (ctx: any) => {
   const { text } = ctx.message
@@ -150,7 +173,7 @@ step1Scene.leave((ctx: any) => {
 // 2. Scene 2:
 const step2Scene = new BaseScene('step2Scene')
 step2Scene.enter((ctx) =>
-  ctx.replyWithMarkdown('*Введите Вашу должность*', exitKeyboard)
+  ctx.replyWithMarkdown('👉 *Введите Вашу должность*', exitKeyboard)
 )
 step2Scene.on('text', (ctx: any) => {
   const { text } = ctx.message
@@ -176,7 +199,7 @@ step2Scene.leave((ctx: any) => {
 // 3. Message from user:
 const step3Scene = new BaseScene('step3Scene')
 step3Scene.enter((ctx) =>
-  ctx.replyWithMarkdown('_Введите текст заявки_', exitKeyboard)
+  ctx.replyWithMarkdown('👉 *Введите текст заявки*', exitKeyboard)
 )
 step3Scene.on('text', (ctx: any) => {
   const { text } = ctx.message
@@ -219,9 +242,18 @@ step4Scene.enter((ctx) => {
 })
 step4Scene.on('contact', (ctx: any) => {
   const { contact, from } = ctx.message
+  // const { user_id } = contact
+  const { user_id } = ctx.message.from.id
 
   ctx.scene.state.contact = contact
   if (contact) {
+    // -- Global state
+    if (user_id)
+      refreshUserDataInGlobalState({
+        user_id,
+        docsMap: ctx.session.docsMap || new Map(),
+      })
+    // --
     const fullName = getFullName(contact || {})
     if (isDev)
       ctx.replyWithMarkdown(
@@ -314,8 +346,17 @@ export const withFeedback = (bot: any) => {
   bot.use(stage.middleware())
 
   bot.command('feedback', (ctx) => ctx.scene.enter('step1Scene'))
-  bot.command('feedback_state', (ctx) => {
-    return ctx.replyWithMarkdown(
+  bot.command('global_state', (ctx) => {
+    ctx.replyWithMarkdown(
+      `\`\`\`\n${JSON.stringify(
+        globalStateMapInstance.getStateAsJSON(),
+        null,
+        2
+      )}\n\`\`\``
+    )
+    // SAMPLE: { "432590698": { "docs": [] } }
+
+    ctx.replyWithMarkdown(
       `\`\`\`\n${JSON.stringify(ctx.scene.state, null, 2)}\n\`\`\``
     )
   })
