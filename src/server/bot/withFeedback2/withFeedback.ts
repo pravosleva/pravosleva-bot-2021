@@ -281,16 +281,22 @@ step5Scene.action('exit', async (ctx) => {
 })
 step5Scene.action('send-entry', async (ctx: any) => {
   const state = gStateInstance.getUserState(ctx.from.id)
+  const links = Object.keys(state.files)
+  const hasLinks = links.length > 0
   ctx.replyWithMarkdown(
     `Ok, this shit will be sent:\n\n\`\`\`\n${JSON.stringify(
-      state,
+      state.entryData,
       null,
       2
-    )}\n\`\`\``,
+    )}\n\`\`\`\n\n${
+      hasLinks
+        ? links.map((link, i) => `💽 [File ${i + 1}](${link})`).join('\n')
+        : ''
+    }`,
     removeKeyboard
   )
   await ctx.answerCbQuery()
-  gStateInstance.deleteUserState(ctx.from.id)
+  gStateInstance.clearUserState(ctx)
   ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена, данные стерты_')
 
   return ctx.scene.leave()
