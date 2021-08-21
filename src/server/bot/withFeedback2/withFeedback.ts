@@ -274,13 +274,14 @@ step5Scene.on('photo', async (ctx: any, next) => {
 })
 step5Scene.action('exit', async (ctx) => {
   await ctx.answerCbQuery()
-  gStateInstance.clearUserState(ctx)
+  gStateInstance.deleteUserState(ctx.update.callback_query.from.id)
   ctx.replyWithMarkdown('🚫 _Step 5: Вы вышли из заявки._')
   // removeFilesFromSession(ctx)
   return ctx.scene.leave()
 })
 step5Scene.action('send-entry', async (ctx: any) => {
-  const state = gStateInstance.getUserState(ctx.from.id)
+  console.log(ctx)
+  const state = gStateInstance.getUserState(ctx.update.callback_query.from.id)
   const links = Object.keys(state.files)
   const hasLinks = links.length > 0
   ctx.replyWithMarkdown(
@@ -296,7 +297,7 @@ step5Scene.action('send-entry', async (ctx: any) => {
     removeKeyboard
   )
   await ctx.answerCbQuery()
-  gStateInstance.clearUserState(ctx)
+  gStateInstance.deleteUserState(ctx.update.callback_query.from.id)
   ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена, данные стерты_')
 
   return ctx.scene.leave()
