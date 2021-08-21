@@ -280,7 +280,6 @@ step5Scene.action('exit', async (ctx) => {
   return ctx.scene.leave()
 })
 step5Scene.action('send-entry', async (ctx: any) => {
-  console.log(ctx)
   const state = gStateInstance.getUserState(ctx.update.callback_query.from.id)
   const links = Object.keys(state.files)
   const hasLinks = links.length > 0
