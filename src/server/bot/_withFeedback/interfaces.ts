@@ -1,6 +1,6 @@
 type TSpecialService = {
-  specialTGFileName: string
-  specialFileUrl: string
+  // specialTGFileName: string
+  fileUrl: string
 }
 export type TDocument = {
   file_name: string // "cs_icon.png",
@@ -19,6 +19,14 @@ export type TDocument = {
   // Special for additional pravosleva.ru service (основная задача - не палить TG_BOT_TOKEN):
   _pravosleva_service: TSpecialService
 }
+export type TPhoto = {
+  file_id: string // "AgACAgIAAxkBAAILO2Eg0HeSyc4LrC_3N9lKcdsK9vMAAx-3MRviaAFJgtKcL2rc6e4BAAMCAANzAAMgBA",
+  file_unique_id: string // "AQADH7cxG-JoAUl4",
+  file_size: number // 1114,
+  width: number // 90,
+  height: number // 51
+}
+export type TPhotoData = TPhoto[]
 // export type TAudio = {
 //   duration: 270,
 //   file_name: "limp-bizkit-pollution-demo_(tetamix.org).mp3",

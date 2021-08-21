@@ -1,6 +1,6 @@
 import { Markup, session, BaseScene, Stage, Extra } from 'telegraf'
-import { globalStateMapInstance } from '../utils/globalStateMapInstance'
-import { TDocument, TContact } from '../interfaces'
+import { globalStateMapInstance } from './utils/globalStateMapInstance'
+import { TDocument, TContact } from './interfaces'
 
 // NOTE: https://github.com/LetItCode/telegraf
 
@@ -10,23 +10,43 @@ const isDev: boolean = process.env.NODE_ENV === 'development'
 const refreshUserDataInGlobalState = ({ user_id, docsMap }) => {
   globalStateMapInstance.updateUserDocsMap(user_id, docsMap)
 }
-const addFileToSession = async (document: TDocument, ctx: any) => {
+const addToSession = (ctx, fileId: string, obj: any) => {
+  if (!ctx.session.stateMap) ctx.session.stateMap = new Map()
+  ctx.session.stateMap.set(fileId, obj)
+}
+const addPhotoToSession = async (ctx: any) => {
+  console.log(ctx.message)
+  const { photo } = ctx.message
+  const fileId = photo[photo.length - 1].file_id
+  const _fileUrl = await ctx.telegram.getFileLink(fileId)
+  const _specialTGFileName = _fileUrl.split('/').reverse()[0]
+  // globalStateMapInstance.addUserPhoto(ctx.message.from.id, ctx.message.photo)
+
+  addToSession(ctx, fileId, {
+    _pravosleva_service: {
+      fileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow-photos/${_specialTGFileName}`,
+    },
+  })
+
+  // TODO
+
+  return Promise.resolve()
+}
+
+const addDocumentToSession = async (document: TDocument, ctx: any) => {
   const fileId = document.file_unique_id
   const _fileUrl = await ctx.telegram.getFileLink(document.file_id)
-
-  if (!ctx.session.docsMap) ctx.session.docsMap = new Map()
   const _specialTGFileName = _fileUrl.split('/').reverse()[0]
-  ctx.session.docsMap.set(fileId, {
+  addToSession(ctx, fileId, {
     ...ctx.message.document,
     _pravosleva_service: {
-      specialTGFileName: _specialTGFileName,
-      specialFileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow/${_specialTGFileName}`,
+      fileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow-documents/${_specialTGFileName}`,
     },
   })
   // NOTE: Update state json:
   const docs = []
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ctx.session.docsMap.forEach((docData: TDocument, _fileIdAsKey: string) => {
+  ctx.session.stateMap.forEach((docData: TDocument, _fileIdAsKey: string) => {
     docs.push(docData)
   })
   ctx.scene.state.docs = docs
@@ -47,7 +67,7 @@ const addFileToSession = async (document: TDocument, ctx: any) => {
   return Promise.resolve()
 }
 const removeFilesFromSession = async (ctx: any) => {
-  if (ctx.session.docsMap) ctx.session.docsMap.clear()
+  if (ctx.session.stateMap) ctx.session.stateMap.clear()
   ctx.scene.state.docs = []
 
   try {
@@ -138,7 +158,7 @@ step1Scene.on('text', (ctx: any) => {
   return ctx.scene.leave()
 })
 step1Scene.on('document', async (ctx: any, next) => {
-  addFileToSession(ctx.message.document, ctx)
+  addDocumentToSession(ctx.message.document, ctx)
 
   return next()
 })
@@ -164,7 +184,7 @@ step2Scene.on('text', (ctx: any) => {
   return ctx.scene.leave()
 })
 step2Scene.on('document', async (ctx: any, next) => {
-  addFileToSession(ctx.message.document, ctx)
+  addDocumentToSession(ctx.message.document, ctx)
 
   return next()
 })
@@ -192,7 +212,7 @@ step3Scene.on('text', (ctx: any) => {
   return ctx.scene.leave()
 })
 step3Scene.on('document', async (ctx: any, next) => {
-  addFileToSession(ctx.message.document, ctx)
+  addDocumentToSession(ctx.message.document, ctx)
 
   return next()
 })
@@ -231,7 +251,7 @@ step4Scene.on('contact', (ctx: any) => {
     if (user_id)
       refreshUserDataInGlobalState({
         user_id,
-        docsMap: ctx.session.docsMap || new Map(),
+        docsMap: ctx.session.stateMap || new Map(),
       })
     // --
     const fullName = getFullName(contact || {})
@@ -261,7 +281,7 @@ step4Scene.on('text', (ctx) => {
   return ctx.scene.leave()
 })
 step4Scene.on('document', async (ctx: any, next) => {
-  addFileToSession(ctx.message.document, ctx)
+  addDocumentToSession(ctx.message.document, ctx)
 
   return next()
 })
@@ -280,7 +300,13 @@ step5Scene.enter((ctx: any) => {
   getFinalBtns(ctx)
 })
 step5Scene.on('document', async (ctx: any, next) => {
-  await addFileToSession(ctx.message.document, ctx)
+  await addDocumentToSession(ctx.message.document, ctx)
+  getFinalBtns(ctx)
+
+  return next()
+})
+step5Scene.on('photo', async (ctx: any, next) => {
+  await addPhotoToSession(ctx)
   getFinalBtns(ctx)
 
   return next()
@@ -338,8 +364,12 @@ export const withFeedback = (bot: any) => {
     )
     // SAMPLE: { "432590698": { "docs": [] } }
 
+    // ctx.replyWithMarkdown(
+    //   `\`\`\`\n${JSON.stringify(ctx.scene.state, null, 2)}\n\`\`\``
+    // )
+
     ctx.replyWithMarkdown(
-      `\`\`\`\n${JSON.stringify(ctx.scene.state, null, 2)}\n\`\`\``
+      `\`\`\`\n${JSON.stringify(ctx.session.stateMap, null, 2)}\n\`\`\``
     )
   })
 }

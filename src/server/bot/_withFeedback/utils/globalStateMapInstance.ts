@@ -1,6 +1,7 @@
-import { TDocument, TUserId, TFileId } from '../interfaces'
+import { TDocument, TUserId, TFileId, TPhotoData } from '../interfaces'
 
 type TDocsMap = Map<TFileId, TDocument>
+type TPhotosData = TPhotoData[]
 
 /**
  * Класс Одиночка предоставляет метод getInstance, который позволяет клиентам
@@ -8,7 +9,7 @@ type TDocsMap = Map<TFileId, TDocument>
  */
 export class Singleton {
   private static instance: Singleton
-  state: Map<TUserId, { docs: TDocsMap }>
+  state: Map<TUserId, { docs?: TDocsMap; photos?: TPhotosData }>
 
   /**
    * Конструктор Одиночки всегда должен быть скрытым, чтобы предотвратить
@@ -36,7 +37,44 @@ export class Singleton {
    * может быть выполнена на его экземпляре.
    */
   public updateUserDocsMap(userId: TUserId, docsMap: TDocsMap) {
-    this.state.set(userId, { docs: docsMap })
+    const oldData = this.state.get(userId)
+    if (oldData) {
+      this.state.set(userId, { ...oldData, docs: docsMap })
+    } else {
+      this.state.set(userId, { docs: docsMap })
+    }
+
+    // TODO: На каждом изменении нужно обновлять информацию на физических данных (база, файлб и т.д.)
+  }
+  // public updateUserPhotos(userId: TUserId, photos: TPhotosData) {
+  //   const oldData = this.state.get(userId)
+  //   if (oldData) {
+  //     if (oldData.photos) {
+  //       this.state.set(userId, { ...oldData, photos })
+  //     } else {
+  //       this.state.set(userId, { ...oldData, photos })
+  //     }
+  //   } else {
+  //     this.state.set(userId, { photos })
+  //   }
+
+  //   // TODO: На каждом изменении нужно обновлять информацию на физических данных (база, файлб и т.д.)
+  // }
+  public addUserPhoto(userId: TUserId, photo: TPhotoData) {
+    const oldData = this.state.get(userId)
+    if (oldData) {
+      if (oldData.photos) {
+        this.state.set(userId, {
+          ...oldData,
+          photos: [...oldData.photos, [...photo]],
+        })
+      } else {
+        this.state.set(userId, { ...oldData, photos: [photo] })
+      }
+    } else {
+      this.state.set(userId, { photos: [photo] })
+    }
+
     // TODO: На каждом изменении нужно обновлять информацию на физических данных (база, файлб и т.д.)
   }
   public getDocsMapByUserId(userId: TUserId): TDocsMap | null {
@@ -51,14 +89,18 @@ export class Singleton {
   } {
     const state = {}
 
-    this.state.forEach(({ docs }, userId) => {
-      state[String(userId)] = {
-        docs: [],
+    this.state.forEach(({ docs, photos }, userId) => {
+      state[String(userId)] = {}
+      if (docs) {
+        state[String(userId)].docs = []
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        docs.forEach((document, _fileId) => {
+          state[String(userId)].docs.push(document)
+        })
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      docs.forEach((document, _fileId) => {
-        state[String(userId)].docs.push(document)
-      })
+      if (photos) {
+        state[String(userId)].photos = photos
+      }
     })
 
     return state
