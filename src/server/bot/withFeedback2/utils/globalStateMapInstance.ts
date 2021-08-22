@@ -188,7 +188,7 @@ export class Singleton {
     const myState = this.state.get(userId)
 
     if (myState) {
-      axios.post(API_FEEDBACK_TARGET, myState)
+      axios.post(API_FEEDBACK_TARGET, { userState: myState })
     }
   }
 }
