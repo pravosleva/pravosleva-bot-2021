@@ -4,7 +4,9 @@ import axios from 'axios'
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 import { IUserState, TUserId, TFile, TContact, TPhotoItem } from './interfaces'
 
-const { API_FEEDBACK_TARGET } = process.env
+const API_FEEDBACK_TARGET =
+  process.env.API_FEEDBACK_TARGET ||
+  'http://pravosleva.ru/express-helper/pravosleva-bot-2021/add-entry'
 
 const initialUserState: IUserState = {
   files: {},
