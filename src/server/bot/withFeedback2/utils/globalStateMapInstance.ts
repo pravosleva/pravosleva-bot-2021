@@ -1,7 +1,10 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-shadow */
+import axios from 'axios'
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 import { IUserState, TUserId, TFile, TContact, TPhotoItem } from './interfaces'
+
+const { API_FEEDBACK_TARGET } = process.env
 
 const initialUserState: IUserState = {
   files: {},
@@ -115,11 +118,18 @@ export class Singleton {
     const oldUserState: IUserState | undefined = this.state.get(userId)
     const newState = oldUserState
       ? { ...oldUserState, files: {} }
-      : initialUserState
+      : {
+          ...initialUserState,
+          entryData: { ...initialUserState.entryData, contact: null },
+        }
     switch (entryFieldCode) {
       case EEntryField.Company:
       case EEntryField.Position:
       case EEntryField.Feedback:
+        // @ts-ignore
+        newState.entryData[entryFieldCode] = value
+        newState.entryData.contact = null
+        break
       case EEntryField.Contact:
         // @ts-ignore
         newState.entryData[entryFieldCode] = value
@@ -171,6 +181,15 @@ export class Singleton {
     const userId: TUserId = ctx.message.from.id
 
     this.state.delete(userId)
+  }
+
+  public sendEntryByCallbackQuery(ctx: SceneContextMessageUpdate) {
+    const userId: TUserId = ctx.update.callback_query.from.id
+    const myState = this.state.get(userId)
+
+    if (myState) {
+      axios.post(API_FEEDBACK_TARGET, myState)
+    }
   }
 }
 
