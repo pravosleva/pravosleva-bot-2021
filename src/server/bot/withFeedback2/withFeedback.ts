@@ -2,7 +2,6 @@
 /* eslint-disable no-shadow */
 import { Markup, session, BaseScene, Stage, Extra } from 'telegraf'
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
-import axios from 'axios'
 import { globalStateMapInstance as gStateInstance } from './utils/globalStateMapInstance'
 import { TContact } from './utils/interfaces'
 

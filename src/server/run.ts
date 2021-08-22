@@ -3,7 +3,12 @@ import path from 'path'
 import express from 'express'
 import socketIO from 'socket.io'
 import { Telegraf } from 'telegraf'
-import { withLabLogic, withSmartpriceLogic, withFeedback } from './bot'
+import {
+  withLabLogic,
+  withSmartpriceLogic,
+  withFeedback,
+  withCianHelper,
+} from './bot'
 
 require('dotenv').config({ path: path.join(__dirname, '.env') })
 
@@ -38,6 +43,7 @@ class App {
     withLabLogic(bot)
     withSmartpriceLogic(bot)
     withFeedback(bot)
+    withCianHelper(bot)
     // Others...
 
     bot.launch()
