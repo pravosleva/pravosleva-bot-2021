@@ -92,7 +92,7 @@ const removeKeyboard = Markup.removeKeyboard()
 const step1Scene = new BaseScene('step1Scene')
 // @ts-ignore
 step1Scene.enter((ctx) =>
-  ctx.replyWithMarkdown('👉 *Введите наименование компании*', exitKeyboard)
+  ctx.replyWithMarkdown(`👉 *Введите наименование компании*`, exitKeyboard)
 )
 step1Scene.on('text', (ctx: SceneContextMessageUpdate) => {
   const { text } = ctx.message
@@ -237,6 +237,7 @@ step4Scene.on('text', (ctx, next) => {
   // TODO: Refactoring!
   if (text === 'Выйти') {
     // removeFilesFromSession(ctx)
+    gStateInstance.deleteUserState(ctx.message.from.id)
     return ctx.scene.leave()
   }
 
@@ -283,21 +284,22 @@ step5Scene.action('send-entry', async (ctx: any) => {
   const state = gStateInstance.getUserState(ctx.update.callback_query.from.id)
   const links = Object.keys(state.files)
   const hasLinks = links.length > 0
-  ctx.replyWithMarkdown(
-    `Ok, this shit will be sent:\n\n\`\`\`\n${JSON.stringify(
-      state.entryData,
-      null,
-      2
-    )}\n\`\`\`\n\n${
-      hasLinks
-        ? links.map((link, i) => `💽 [File ${i + 1}](${link})`).join('\n')
-        : ''
-    }`,
-    removeKeyboard
-  )
-  await ctx.answerCbQuery()
+  const msg = `Ok, this shit will be sent:\n\n\`\`\`\n${JSON.stringify(
+    state.entryData,
+    null,
+    2
+  )}\n\`\`\`\n\n${
+    hasLinks
+      ? links.map((link, i) => `💽 [File ${i + 1}](${link})`).join('\n')
+      : ''
+  }`
+  ctx.replyWithMarkdown(msg, removeKeyboard)
   gStateInstance.deleteUserState(ctx.update.callback_query.from.id)
-  ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена, данные стерты_')
+  await ctx.answerCbQuery()
+  ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена_')
+  if (!gStateInstance.getUserState(ctx.update.callback_query.from.id)) {
+    ctx.replyWithMarkdown(`_Данные стерты_`)
+  }
 
   return ctx.scene.leave()
 })
@@ -311,15 +313,24 @@ const stage = new Stage([
   step4Scene,
   step5Scene,
 ])
-stage.hears('exit', (ctx) => ctx.scene.leave())
+stage.hears('exit', (ctx) => {
+  gStateInstance.deleteUserState(ctx.message.from.id)
+  ctx.scene.leave()
+})
 
 export const withFeedback = (bot: any) => {
   bot.use(session())
   bot.use(stage.middleware())
 
   bot.command('feedback', (ctx) => ctx.scene.enter('step1Scene'))
-  bot.command('global_state', (ctx: SceneContextMessageUpdate) => {
-    const state = gStateInstance.getUserState(ctx.from.id)
+  bot.command('mystate', (ctx: SceneContextMessageUpdate) => {
+    // console.log(ctx.message.from.id)
+    const state = gStateInstance.getUserState(ctx.message.from.id)
+    ctx.reply(`Total keys: ${gStateInstance.size}`)
+    if (gStateInstance.size > 0) {
+      ctx.reply(gStateInstance.keys.join(', '))
+    }
+
     ctx.replyWithMarkdown(`\`\`\`\n${JSON.stringify(state, null, 2)}\n\`\`\``)
   })
 }

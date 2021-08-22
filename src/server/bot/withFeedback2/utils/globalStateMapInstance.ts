@@ -68,6 +68,12 @@ export class Singleton {
     return Singleton.instance
   }
 
+  public get size(): number {
+    return this.state.size
+  }
+  public get keys(): number[] {
+    return Array.from(this.state.keys())
+  }
   public getUserState(userId: TUserId): IUserState | undefined {
     return this.state.get(userId)
   }
@@ -81,9 +87,7 @@ export class Singleton {
   ): void {
     const userId: TUserId = ctx.message.from.id
     const oldUserState: IUserState | undefined = this.state.get(userId)
-    const newState = oldUserState
-      ? { ...oldUserState }
-      : { ...initialUserState }
+    const newState = oldUserState || initialUserState
 
     newState.files[normalizedObject.fileUrl] = normalizedObject
     this.state.set(userId, newState)
@@ -110,8 +114,8 @@ export class Singleton {
     const userId: TUserId = ctx.message.from.id
     const oldUserState: IUserState | undefined = this.state.get(userId)
     const newState = oldUserState
-      ? { ...oldUserState }
-      : { ...initialUserState }
+      ? { ...oldUserState, files: {} }
+      : initialUserState
     switch (entryFieldCode) {
       case EEntryField.Company:
       case EEntryField.Position:
