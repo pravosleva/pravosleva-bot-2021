@@ -75,7 +75,7 @@ class Singleton {
     return Promise.reject(this.getErrorMsg(result.res))
   }
 
-  async get1Room30K30K(): Promise<any> {
+  async getFlatrent1Room30K30K(): Promise<any> {
     const data = await this.getOriginal({
       jsonQuery: {
         _type: 'flatrent',
@@ -93,7 +93,7 @@ class Singleton {
     if (typeof data === 'string') return Promise.reject(data)
     return Promise.resolve(data)
   }
-  async get1Room30K35K(): Promise<any> {
+  async getFlatrent1Room30K35K(): Promise<any> {
     const data = await this.getOriginal({
       jsonQuery: {
         _type: 'flatrent',
