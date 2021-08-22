@@ -65,8 +65,6 @@ const tryNextPhrase = (ctx: SceneContextMessageUpdate) => {
     return
   }
 
-  // ctx.scene.leave()
-  // ctx.scene.enter('step5Scene')
   ctx.replyWithMarkdown(
     `${getFinalMsg(ctx)}\n\n👉 *Подтвердите заявку*`,
     Markup.inlineKeyboard([
@@ -231,15 +229,10 @@ step4Scene.on('contact', (ctx: any) => {
 step4Scene.on('text', (ctx, next) => {
   const { text } = ctx.message
   if ((text && text[0] === '/') || !gStateInstance.hasContact(ctx)) {
-    // gStateInstance.clearUserState(ctx)
-    return tryShowFinalBtns(ctx)
-  }
-
-  // TODO: Refactoring!
-  if (text === 'Выйти') {
-    // removeFilesFromSession(ctx)
-    gStateInstance.deleteUserState(ctx.message.from.id)
-    return ctx.scene.leave()
+    if (text === 'Выйти') {
+      gStateInstance.deleteUserState(ctx.message.from.id)
+      return ctx.scene.leave()
+    }
   }
 
   return tryShowFinalBtns(ctx)
@@ -330,7 +323,6 @@ export const withFeedback = (bot: any) => {
 
   bot.command('feedback', (ctx) => ctx.scene.enter('step1Scene'))
   bot.command('mystate', (ctx: SceneContextMessageUpdate) => {
-    // console.log(ctx.message.from.id)
     const state = gStateInstance.getUserState(ctx.message.from.id)
     ctx.reply(`Total keys: ${gStateInstance.size}`)
     if (gStateInstance.size > 0) {
