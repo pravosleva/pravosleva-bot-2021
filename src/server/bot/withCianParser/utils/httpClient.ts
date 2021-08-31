@@ -75,7 +75,7 @@ class Singleton {
     return Promise.reject(this.getErrorMsg(result.res))
   }
 
-  async getFlatrent1Room30K30K(): Promise<any> {
+  async getFlatrentChertanovo1Room30K30K(): Promise<any> {
     const data = await this.getOriginal({
       jsonQuery: {
         _type: 'flatrent',
@@ -85,6 +85,11 @@ class Singleton {
         currency: { type: 'term', value: 2 },
         region: { type: 'terms', value: [1] },
         for_day: { type: 'term', value: '!1' },
+        only_foot: { type: 'term', value: '2' },
+        foot_min: { type: 'range', value: { lte: 15 } },
+        geo: { type: 'geo', value: [{ type: 'underground', id: 147 }] },
+        has_fridge: { type: 'term', value: true },
+        has_washer: { type: 'term', value: true },
       },
     })
       .then((r) => r)
@@ -93,7 +98,7 @@ class Singleton {
     if (typeof data === 'string') return Promise.reject(data)
     return Promise.resolve(data)
   }
-  async getFlatrent1Room30K35K(): Promise<any> {
+  async getFlatrentChertanovo1Room30K35K(): Promise<any> {
     const data = await this.getOriginal({
       jsonQuery: {
         _type: 'flatrent',
@@ -103,6 +108,56 @@ class Singleton {
         currency: { type: 'term', value: 2 },
         region: { type: 'terms', value: [1] },
         for_day: { type: 'term', value: '!1' },
+        only_foot: { type: 'term', value: '2' },
+        foot_min: { type: 'range', value: { lte: 15 } },
+        geo: { type: 'geo', value: [{ type: 'underground', id: 147 }] },
+      },
+    })
+      .then((r) => r)
+      .catch((msg) => msg)
+
+    if (typeof data === 'string') return Promise.reject(data)
+    return Promise.resolve(data)
+  }
+
+  async getFlatrentTsaritsino1Room30K30K(): Promise<any> {
+    const data = await this.getOriginal({
+      jsonQuery: {
+        _type: 'flatrent',
+        room: { type: 'terms', value: [1] },
+        price: { type: 'range', value: { gte: 30000, lte: 30000 } },
+        engine_version: { type: 'term', value: 2 },
+        currency: { type: 'term', value: 2 },
+        region: { type: 'terms', value: [1] },
+        for_day: { type: 'term', value: '!1' },
+        only_foot: { type: 'term', value: '2' },
+        foot_min: { type: 'range', value: { lte: 15 } },
+        geo: { type: 'geo', value: [{ type: 'underground', id: 144 }] },
+        has_fridge: { type: 'term', value: true },
+        has_washer: { type: 'term', value: true },
+      },
+    })
+      .then((r) => r)
+      .catch((msg) => msg)
+
+    if (typeof data === 'string') return Promise.reject(data)
+    return Promise.resolve(data)
+  }
+  async getFlatrentTsaritsino1Room30K35K(): Promise<any> {
+    const data = await this.getOriginal({
+      jsonQuery: {
+        _type: 'flatrent',
+        room: { type: 'terms', value: [1] },
+        price: { type: 'range', value: { gte: 30000, lte: 35000 } },
+        engine_version: { type: 'term', value: 2 },
+        currency: { type: 'term', value: 2 },
+        region: { type: 'terms', value: [1] },
+        for_day: { type: 'term', value: '!1' },
+        only_foot: { type: 'term', value: '2' },
+        foot_min: { type: 'range', value: { lte: 15 } },
+        geo: { type: 'geo', value: [{ type: 'underground', id: 144 }] },
+        has_fridge: { type: 'term', value: true },
+        has_washer: { type: 'term', value: true },
       },
     })
       .then((r) => r)

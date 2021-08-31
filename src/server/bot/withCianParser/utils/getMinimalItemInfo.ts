@@ -1,4 +1,5 @@
 import { getPrettyPrice } from './getPrettyPrice'
+import { getDistanceInKM } from './getDistance'
 
 type TPhone = {
   number: string
@@ -6,6 +7,15 @@ type TPhone = {
 }
 export type TItem = {
   [key: string]: any
+  from?: {
+    lat: number
+    lng: number
+  }
+  to?: {
+    lat: number
+    lng: number
+  }
+
   id: number
   photos: {
     isLayout: boolean
@@ -70,11 +80,41 @@ const getPhoneNumber = ({ number, countryCode }: TPhone) => {
   const str = `+${countryCode}${number}`
   return `[${str}](tel:${str})`
 }
+const getGoogleWayLinkCar = ({ from, to }) => {
+  const { lat: lat1, lng: lng1 } = from
+  const { lat: lat2, lng: lng2 } = to
+  const base = 'https://www.google.com/maps/dir'
+  return `${base}/${lat1},${lng1}/${lat2},${lng2}/@55.6453986,37.6259161,8.96z/data=!4m5!4m4!1m1!4e1!1m0!3e0`
+}
+const getGoogleWayLinkHuman = ({ from, to }) => {
+  const { lat: lat1, lng: lng1 } = from
+  const { lat: lat2, lng: lng2 } = to
+  const base = 'https://www.google.com/maps/dir'
+  return `${base}/${lat1},${lng1}/${lat2},${lng2}/@55.6453986,37.6259161,8.96z/data=!3m1!4b1!4m2!4m1!3e2`
+}
+const getGoogleMapLinks = ({ from, to }: any): string => {
+  return `[👣 Маршрут пешком](${getGoogleWayLinkHuman({
+    from,
+    to,
+  })})\n[🚘 Маршрут на машине](${getGoogleWayLinkCar({ from, to })})`
+}
 export const getMinimalItemInfo = (item: TItem): string => {
-  const { bargainTerms, geo, user, phones, fullUrl } = item
+  const { bargainTerms, geo, user, phones, fullUrl, from } = item
+  const to = { lat: geo.coordinates.lat, lng: geo.coordinates.lng }
+
   return `${geo.userInput}\n${user.agencyName}${
     phones.length > 0 ? `, ${phones.map(getPhoneNumber).join(', ')}` : ''
   }\n${getPrettyPrice(
     bargainTerms.priceRur
-  )} ${bargainTerms.currency.toUpperCase()}\n${fullUrl}`
+  )} ${bargainTerms.currency.toUpperCase()}\n${fullUrl}${
+    !!from && !!to
+      ? `\n*${getDistanceInKM({
+          from,
+          to,
+        })} км от Вас*\n${getGoogleMapLinks({
+          from,
+          to,
+        })}`
+      : ''
+  }`
 }

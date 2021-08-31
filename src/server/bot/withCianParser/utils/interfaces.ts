@@ -28,5 +28,30 @@ export type TConfig = {
       type: string // 'term'
       value: string // '!1'
     }
+    only_foot?: {
+      type: string // 'term'
+      value: string // '2'
+    }
+    foot_min?: {
+      type: string // 'range'
+      value: {
+        lte: number // 15
+      }
+    }
+    geo?: {
+      type: string // 'geo'
+      value: {
+        type: string // 'underground'
+        id: number // 147
+      }[]
+    }
+    has_fridge?: {
+      type: string // 'term'
+      value: boolean // true
+    }
+    has_washer?: {
+      type: string // 'term'
+      value: boolean // true
+    }
   }
 }

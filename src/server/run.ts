@@ -2,7 +2,7 @@ import http from 'http'
 import path from 'path'
 import express from 'express'
 import socketIO from 'socket.io'
-import { Telegraf } from 'telegraf'
+import { Telegraf, session } from 'telegraf'
 import {
   withLabLogic,
   withSmartpriceLogic,
@@ -39,6 +39,8 @@ class App {
 
   private runBot() {
     const bot = new Telegraf(TG_BOT_TOKEN)
+
+    bot.use(session())
 
     withLabLogic(bot)
     withSmartpriceLogic(bot)

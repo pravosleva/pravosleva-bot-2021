@@ -1,3 +1,4 @@
+export * from './getDistance'
 export * from './getMinimalItemInfo'
 export * from './getPrettyPrice'
 export * from './interfaces'

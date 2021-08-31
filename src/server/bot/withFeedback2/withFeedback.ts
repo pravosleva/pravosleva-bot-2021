@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-shadow */
-import { Markup, session, BaseScene, Stage, Extra } from 'telegraf'
+import { Markup, BaseScene, Stage, Extra } from 'telegraf'
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 import { globalStateMapInstance as gStateInstance } from './utils/globalStateMapInstance'
 import { TContact } from './utils/interfaces'
@@ -317,7 +317,6 @@ stage.hears('exit', (ctx) => {
 })
 
 export const withFeedback = (bot: any) => {
-  bot.use(session())
   bot.use(stage.middleware())
 
   bot.command('feedback', (ctx) => ctx.scene.enter('step1Scene'))
