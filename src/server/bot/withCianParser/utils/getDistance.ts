@@ -24,3 +24,32 @@ const getDistanceBetween2PointsOnSphere = (
 export const getDistanceInKM = ({ from, to }: any): number => {
   return Number(getDistanceBetween2PointsOnSphere(from, to).toFixed(2))
 }
+
+type TOriginalOffer = {
+  [key: string]: any
+  geo: {
+    coordinates: {
+      lat: number
+      lng: number
+    }
+  }
+  from?: {
+    lat: number
+    lng: number
+  }
+}
+
+export const sortByDistanceDESC = (e1, e2) => e1.distance - e2.distance // По убыванию
+// export const sortByDistanceASC = (e1, e2) => e2.distance - e1.distance // По возрастанию
+export const withDistance = (item: TOriginalOffer) => {
+  const { from, geo } = item
+
+  let to = null
+  let distance = 0
+  if (!!from && !!geo?.coordinates?.lat && !!geo?.coordinates?.lng) {
+    to = { lat: geo.coordinates.lat, lng: geo.coordinates.lng }
+    distance = getDistanceInKM({ from, to })
+  }
+
+  return { ...item, to, distance }
+}

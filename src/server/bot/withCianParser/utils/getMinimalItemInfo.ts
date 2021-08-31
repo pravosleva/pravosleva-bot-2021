@@ -1,5 +1,5 @@
 import { getPrettyPrice } from './getPrettyPrice'
-import { getDistanceInKM } from './getDistance'
+// import { getDistanceInKM } from './getDistance'
 
 type TPhone = {
   number: string
@@ -99,8 +99,7 @@ const getGoogleMapLinks = ({ from, to }: any): string => {
   })})\n[🚘 Маршрут на машине](${getGoogleWayLinkCar({ from, to })})`
 }
 export const getMinimalItemInfo = (item: TItem): string => {
-  const { bargainTerms, geo, user, phones, fullUrl, from } = item
-  const to = { lat: geo.coordinates.lat, lng: geo.coordinates.lng }
+  const { bargainTerms, geo, user, phones, fullUrl, from, to, distance } = item
 
   return `${geo.userInput}\n${user.agencyName}${
     phones.length > 0 ? `, ${phones.map(getPhoneNumber).join(', ')}` : ''
@@ -108,10 +107,7 @@ export const getMinimalItemInfo = (item: TItem): string => {
     bargainTerms.priceRur
   )} ${bargainTerms.currency.toUpperCase()}\n${fullUrl}${
     !!from && !!to
-      ? `\n*${getDistanceInKM({
-          from,
-          to,
-        })} км от Вас*\n${getGoogleMapLinks({
+      ? `\n*${distance} км от Вас*\n${getGoogleMapLinks({
           from,
           to,
         })}`

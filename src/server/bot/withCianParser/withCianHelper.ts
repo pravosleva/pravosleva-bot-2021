@@ -1,11 +1,22 @@
+/* eslint-disable no-shadow */
 import { Markup, Stage, BaseScene, Extra } from 'telegraf'
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
-import { httpClient, getMinimalItemInfo } from './utils'
+import {
+  httpClient,
+  getMinimalItemInfo,
+  withDistance,
+  sortByDistanceDESC,
+} from './utils'
+
+enum STAGES {
+  STEP1 = 'cian.step1',
+  STEP2 = 'cial.step2',
+}
 
 // const exitKeyboard = Markup.keyboard(['exit']).oneTime().resize().extra()
 
 // 1. Step 1:
-const step1Scene = new BaseScene('step11Scene')
+const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
 step1Scene.enter((ctx) => {
   return ctx.replyWithMarkdown(
@@ -14,40 +25,41 @@ step1Scene.enter((ctx) => {
       return markup
         .keyboard([
           markup.locationRequestButton('Send location'),
-          markup.callbackButton('Exit', 'exit'),
+          markup.callbackButton('Без локации'),
         ])
         .oneTime()
         .resize()
     })
   )
 })
-step1Scene.on('location', (ctx: any) => {
-  ctx.session.coords = {
-    lat: ctx.message.location.latitude,
-    lng: ctx.message.location.longitude,
-  }
-  return ctx.scene.enter('step21Scene', {
-    coords: {
+step1Scene.on(
+  'location',
+  (ctx: SceneContextMessageUpdate & { session: any }) => {
+    const coords = {
       lat: ctx.message.location.latitude,
       lng: ctx.message.location.longitude,
-    },
-  })
+    }
+    ctx.session.coords = coords
+    return ctx.scene.enter(STAGES.STEP2, { coords })
+  }
+)
+step1Scene.on('text', (ctx: any) => {
+  // console.log(ctx.message.text)
+  // ctx.scene.leave()
+  ctx.session.coords = null
+  return ctx.scene.enter(STAGES.STEP2)
 })
-step1Scene.on('text', (ctx) => {
-  console.log(ctx.message.text)
-  ctx.scene.leave()
-})
-const step2Scene = new BaseScene('step21Scene')
+const step2Scene = new BaseScene(STAGES.STEP2)
 step2Scene.enter((ctx) => {
-  return ctx.reply(
-    'Cian special settings',
+  return ctx.replyWithMarkdown(
+    '_Выберите метро в близи которого искать:_',
     Markup.inlineKeyboard(
       [
         Markup.callbackButton('Чертаново', 'cian.flatrent.chertanovo'),
         Markup.callbackButton('Царицыно', 'cian.flatrent.tsaritsino'),
       ],
       {
-        columns: 1,
+        columns: 2,
       }
     )
       .oneTime()
@@ -64,7 +76,7 @@ export const withCianHelper = (bot) => {
   bot.use(stage.middleware())
 
   bot.command('cian', async (ctx: SceneContextMessageUpdate) => {
-    ctx.scene.enter('step11Scene')
+    ctx.scene.enter(STAGES.STEP1)
   })
   bot.action(
     'cian.flatrent.chertanovo',
@@ -72,7 +84,15 @@ export const withCianHelper = (bot) => {
       await ctx.answerCbQuery()
 
       return ctx.replyWithMarkdown(
-        '🗺️ *Чертаново*: Аренда\nНастройки фильтров: 15 мин пешком от метро, холодильник, стиралка',
+        `🗺️ Аренда в *Чертаново*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
+          ctx.session.coords
+            ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
+                ctx.session.coords,
+                null,
+                2
+              )}\``
+            : ''
+        }`,
         Markup.inlineKeyboard(
           [
             Markup.callbackButton(
@@ -106,15 +126,17 @@ export const withCianHelper = (bot) => {
 
       if (response.offersSerialized) {
         const normalizedItems = response.offersSerialized
-          .map((e) =>
-            getMinimalItemInfo({ ...e, from: ctx.session?.coords || null })
+          .map((e: any) =>
+            withDistance({ ...e, from: ctx.session?.coords || null })
           )
+          .sort(sortByDistanceDESC)
+          .map(getMinimalItemInfo)
           .join('\n\n')
 
         // console.log(normalizedItems)
 
         ctx.replyWithMarkdown(
-          `RECEIVED: ${response.offersSerialized.length}\n\n${normalizedItems}`
+          `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
         )
       } else {
         ctx.reply('ERR:', response)
@@ -133,12 +155,14 @@ export const withCianHelper = (bot) => {
 
       if (response.offersSerialized) {
         const normalizedItems = response.offersSerialized
-          .map((e) =>
-            getMinimalItemInfo({ ...e, from: ctx.session?.coords || null })
+          .map((e: any) =>
+            withDistance({ ...e, from: ctx.session?.coords || null })
           )
+          .sort(sortByDistanceDESC)
+          .map(getMinimalItemInfo)
           .join('\n\n')
         ctx.replyWithMarkdown(
-          `RECEIVED: ${response.offersSerialized.length}\n\n${normalizedItems}`
+          `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
         )
       } else {
         ctx.reply('ERR:', response)
@@ -152,7 +176,15 @@ export const withCianHelper = (bot) => {
       await ctx.answerCbQuery()
 
       return ctx.replyWithMarkdown(
-        '🗺️ *Царьки*: Аренда\nНастройки фильтров: 15 мин пешком от метро, холодильник, стиралка',
+        `🗺️ Аренда в *Царьках*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
+          ctx.session.coords
+            ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
+                ctx.session.coords,
+                null,
+                2
+              )}\``
+            : ''
+        }`,
         Markup.inlineKeyboard(
           [
             Markup.callbackButton(
@@ -186,12 +218,14 @@ export const withCianHelper = (bot) => {
 
       if (response.offersSerialized) {
         const normalizedItems = response.offersSerialized
-          .map((e) =>
-            getMinimalItemInfo({ ...e, from: ctx.session?.coords || null })
+          .map((e: any) =>
+            withDistance({ ...e, from: ctx.session?.coords || null })
           )
+          .sort(sortByDistanceDESC)
+          .map(getMinimalItemInfo)
           .join('\n\n')
         ctx.replyWithMarkdown(
-          `RECEIVED: ${response.offersSerialized.length}\n\n${normalizedItems}`
+          `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
         )
       } else {
         ctx.reply('ERR:', response)
@@ -210,12 +244,14 @@ export const withCianHelper = (bot) => {
 
       if (response.offersSerialized) {
         const normalizedItems = response.offersSerialized
-          .map((e) =>
-            getMinimalItemInfo({ ...e, from: ctx.session?.coords || null })
+          .map((e: any) =>
+            withDistance({ ...e, from: ctx.session?.coords || null })
           )
+          .sort(sortByDistanceDESC)
+          .map(getMinimalItemInfo)
           .join('\n\n')
         ctx.replyWithMarkdown(
-          `RECEIVED: ${response.offersSerialized.length}\n\n${normalizedItems}`
+          `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
         )
       } else {
         ctx.reply('ERR:', response)
