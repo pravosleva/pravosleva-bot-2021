@@ -7,7 +7,12 @@
     "resolveJsonModule": true,
     "module": "commonjs",
     "outDir": "../../server-dist",
-    "baseUrl": "../",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@cianHttpClient": ["./bot/withCianHelper/utils/httpClient"]
+    },
     "sourceMap": true,
     "esModuleInterop": true,
     "types": [

@@ -39,9 +39,14 @@ type TOriginalOffer = {
   }
 }
 
-export const sortByDistanceDESC = (e1, e2) => e1.distance - e2.distance // По убыванию
+type TEnhancedItem = TOriginalOffer & {
+  to: any
+  distance: number
+}
+export const sortByDistanceDESC = (e1: TEnhancedItem, e2: TEnhancedItem) =>
+  e1.distance - e2.distance // По убыванию
 // export const sortByDistanceASC = (e1, e2) => e2.distance - e1.distance // По возрастанию
-export const withDistance = (item: TOriginalOffer) => {
+export const withDistance = (item: TOriginalOffer): TEnhancedItem => {
   const { from, geo } = item
 
   let to = null

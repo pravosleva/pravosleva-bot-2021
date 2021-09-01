@@ -1,8 +1,10 @@
 /* eslint-disable no-shadow */
 import { Markup, Stage, BaseScene, Extra } from 'telegraf'
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
+// import { httpClient } from '~/bot/withCianHelper/utils/httpClient'
+import { httpClient } from '@cianHttpClient'
 import {
-  httpClient,
+  // httpClient,
   getMinimalItemInfo,
   withDistance,
   sortByDistanceDESC,
@@ -10,7 +12,7 @@ import {
 
 enum STAGES {
   STEP1 = 'cian.step1',
-  STEP2 = 'cial.step2',
+  STEP2 = 'cian.step2',
 }
 
 // const exitKeyboard = Markup.keyboard(['exit']).oneTime().resize().extra()

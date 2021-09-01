@@ -1,14 +1,19 @@
+/* eslint-disable node/no-missing-require */
 import http from 'http'
-import path from 'path'
-import express from 'express'
-import socketIO from 'socket.io'
-import { Telegraf, session } from 'telegraf'
-import {
+
+const moduleAlias = require('module-alias')
+const path = require('path')
+
+moduleAlias(path.join(__dirname, '../', 'package.json'))
+const express = require('express')
+const socketIO = require('socket.io')
+const { Telegraf, session } = require('telegraf')
+const {
   withLabLogic,
   withSmartpriceLogic,
   withFeedback,
   withCianHelper,
-} from './bot'
+} = require('./bot')
 
 require('dotenv').config({ path: path.join(__dirname, '.env') })
 

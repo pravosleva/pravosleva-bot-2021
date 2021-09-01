@@ -5,6 +5,13 @@ import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 import { globalStateMapInstance as gStateInstance } from './utils/globalStateMapInstance'
 import { TContact } from './utils/interfaces'
 
+enum STAGES {
+  STEP1 = 'feedback.step1',
+  STEP2 = 'feedback.step2',
+  STEP3 = 'feedback.step3',
+  STEP4 = 'feedback.step4',
+}
+
 const getFullName = (contact: TContact) => {
   const possibleFields = ['first_name', 'last_name', 'phone_number']
   const result = []
@@ -39,28 +46,28 @@ const tryNextPhrase = (ctx: SceneContextMessageUpdate) => {
   const hasCompany = gStateInstance.hasCompany(ctx)
   if (!hasCompany) {
     ctx.scene.leave()
-    ctx.scene.enter('step1Scene')
+    ctx.scene.enter(STAGES.STEP1)
     return
   }
 
   const hasPosition = gStateInstance.hasPosition(ctx)
   if (!hasPosition) {
     ctx.scene.leave()
-    ctx.scene.enter('step2Scene')
+    ctx.scene.enter(STAGES.STEP2)
     return
   }
 
   const hasFeedback = gStateInstance.hasFeedback(ctx)
   if (!hasFeedback) {
     ctx.scene.leave()
-    ctx.scene.enter('step3Scene')
+    ctx.scene.enter(STAGES.STEP3)
     return
   }
 
   const hasContact = gStateInstance.hasContact(ctx)
   if (!hasContact) {
     ctx.scene.leave()
-    ctx.scene.enter('step4Scene')
+    ctx.scene.enter(STAGES.STEP4)
     return
   }
 
@@ -87,7 +94,7 @@ const exitKeyboard = Markup.keyboard(['exit']).oneTime().resize().extra()
 const removeKeyboard = Markup.removeKeyboard()
 
 // 1. Step 1:
-const step1Scene = new BaseScene('step1Scene')
+const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
 step1Scene.enter((ctx) =>
   ctx.replyWithMarkdown(`👉 *Введите наименование компании*`, exitKeyboard)
@@ -102,7 +109,7 @@ step1Scene.on('text', (ctx: SceneContextMessageUpdate) => {
 
   if (text) {
     gStateInstance.setCompany(ctx, text)
-    return ctx.scene.enter('step2Scene', {})
+    return ctx.scene.enter(STAGES.STEP2, {})
   }
   return ctx.scene.leave()
 })
@@ -123,7 +130,7 @@ step1Scene.on('photo', async (ctx: SceneContextMessageUpdate, next) => {
 // })
 
 // 2. Step 2:
-const step2Scene = new BaseScene('step2Scene')
+const step2Scene = new BaseScene(STAGES.STEP2)
 step2Scene.enter((ctx: SceneContextMessageUpdate) =>
   ctx.replyWithMarkdown('👉 *Введите Вашу должность*', exitKeyboard)
 )
@@ -137,7 +144,7 @@ step2Scene.on('text', (ctx: SceneContextMessageUpdate) => {
 
   if (text) {
     gStateInstance.setPosition(ctx, text)
-    return ctx.scene.enter('step3Scene', {})
+    return ctx.scene.enter(STAGES.STEP3, {})
   }
   return ctx.scene.leave()
 })
@@ -158,7 +165,7 @@ step2Scene.on('photo', async (ctx: SceneContextMessageUpdate) => {
 // })
 
 // 3. Step 3:
-const step3Scene = new BaseScene('step3Scene')
+const step3Scene = new BaseScene(STAGES.STEP3)
 step3Scene.enter((ctx) =>
   ctx.replyWithMarkdown('👉 *Введите текст заявки*', exitKeyboard)
 )
@@ -173,7 +180,7 @@ step3Scene.on('text', (ctx: any) => {
 
   if (text) {
     gStateInstance.setFeedback(ctx, text)
-    return ctx.scene.enter('step4Scene', {})
+    return ctx.scene.enter(STAGES.STEP4, {})
   }
   return ctx.scene.leave()
 })
@@ -194,7 +201,7 @@ step3Scene.on('photo', async (ctx: SceneContextMessageUpdate, next) => {
 // })
 
 // 4. Step 4: User contact:
-const step4Scene = new BaseScene('step4Scene')
+const step4Scene = new BaseScene(STAGES.STEP4)
 step4Scene.enter((ctx) => {
   return ctx.replyWithMarkdown(
     '*Оставьте Ваш контакт* _(По кнопке)_',
@@ -319,7 +326,7 @@ stage.hears('exit', (ctx) => {
 export const withFeedback = (bot: any) => {
   bot.use(stage.middleware())
 
-  bot.command('feedback', (ctx) => ctx.scene.enter('step1Scene'))
+  bot.command('feedback', (ctx) => ctx.scene.enter(STAGES.STEP1))
   bot.command('mystate', (ctx: SceneContextMessageUpdate) => {
     const state = gStateInstance.getUserState(ctx.message.from.id)
     ctx.reply(`Total keys: ${gStateInstance.size}`)
