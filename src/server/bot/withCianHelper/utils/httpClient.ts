@@ -3,6 +3,11 @@ import { TConfig } from './interfaces'
 
 const createCancelTokenSource = () => axios.CancelToken.source()
 
+enum EMetro {
+  Chertanovo = 147,
+  Tsaritsino = 144,
+}
+
 class Singleton {
   private static instance: Singleton
   cancelTokenSource1: any
@@ -66,13 +71,11 @@ class Singleton {
         return { isOk: false, message: err.message || 'No err.message' }
       })
 
-    // console.log(result.res.data)
-
     this.cancelTokenSource1 = null
     if (result.isOk) {
       return Promise.resolve(result.res.data)
     }
-    return Promise.reject(this.getErrorMsg(result.res))
+    return Promise.reject(this.getErrorMsg(result))
   }
 
   async getFlatrentChertanovo1Room30K30K(): Promise<any> {
@@ -87,7 +90,10 @@ class Singleton {
         for_day: { type: 'term', value: '!1' },
         only_foot: { type: 'term', value: '2' },
         foot_min: { type: 'range', value: { lte: 15 } },
-        geo: { type: 'geo', value: [{ type: 'underground', id: 147 }] },
+        geo: {
+          type: 'geo',
+          value: [{ type: 'underground', id: EMetro.Chertanovo }],
+        },
         has_fridge: { type: 'term', value: true },
         has_washer: { type: 'term', value: true },
       },
@@ -110,7 +116,10 @@ class Singleton {
         for_day: { type: 'term', value: '!1' },
         only_foot: { type: 'term', value: '2' },
         foot_min: { type: 'range', value: { lte: 15 } },
-        geo: { type: 'geo', value: [{ type: 'underground', id: 147 }] },
+        geo: {
+          type: 'geo',
+          value: [{ type: 'underground', id: EMetro.Chertanovo }],
+        },
       },
     })
       .then((r) => r)
@@ -132,7 +141,10 @@ class Singleton {
         for_day: { type: 'term', value: '!1' },
         only_foot: { type: 'term', value: '2' },
         foot_min: { type: 'range', value: { lte: 15 } },
-        geo: { type: 'geo', value: [{ type: 'underground', id: 144 }] },
+        geo: {
+          type: 'geo',
+          value: [{ type: 'underground', id: EMetro.Tsaritsino }],
+        },
         has_fridge: { type: 'term', value: true },
         has_washer: { type: 'term', value: true },
       },
@@ -155,7 +167,10 @@ class Singleton {
         for_day: { type: 'term', value: '!1' },
         only_foot: { type: 'term', value: '2' },
         foot_min: { type: 'range', value: { lte: 15 } },
-        geo: { type: 'geo', value: [{ type: 'underground', id: 144 }] },
+        geo: {
+          type: 'geo',
+          value: [{ type: 'underground', id: EMetro.Tsaritsino }],
+        },
         has_fridge: { type: 'term', value: true },
         has_washer: { type: 'term', value: true },
       },

@@ -7,6 +7,8 @@ import { IUserState, TUserId, TFile, TContact, TPhotoItem } from './interfaces'
 const API_FEEDBACK_TARGET =
   process.env.API_FEEDBACK_TARGET ||
   'http://pravosleva.ru/express-helper/pravosleva-bot-2021/add-entry'
+const TELEGRAM_DOCS_SHADOW_API =
+  process.env.TELEGRAM_DOCS_SHADOW_API || 'http://pravosleva.ru/tg-bot-2021'
 
 const initialUserState: IUserState = {
   files: {},
@@ -30,15 +32,12 @@ const getNormalizedObj = async (
   const result: any = {}
   let photo
   let originalPhoto: TPhotoItem
-  let tgFileUrl
-  let fileName
 
   switch (fileCode) {
     case EFileCode.Document:
       if (ctx.message.document) {
-        tgFileUrl = await ctx.telegram.getFileLink(ctx.message.document.file_id)
-        fileName = tgFileUrl.split('/').reverse()[0]
-        result.fileUrl = `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow-documents/${fileName}`
+        result.fileUrl = `${TELEGRAM_DOCS_SHADOW_API}/get-shadow/document/${ctx.message.document.file_id}`
+        // result.file_id = ctx.message.document.file_id
       }
 
       break
@@ -47,9 +46,8 @@ const getNormalizedObj = async (
       // eslint-disable-next-line prefer-destructuring
       originalPhoto = photo.reverse()[0]
       if (originalPhoto) {
-        tgFileUrl = await ctx.telegram.getFileLink(originalPhoto.file_id)
-        fileName = tgFileUrl.split('/').reverse()[0]
-        result.fileUrl = `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow-photos/${fileName}`
+        result.fileUrl = `${TELEGRAM_DOCS_SHADOW_API}/get-shadow/document/${originalPhoto.file_id}`
+        // result.file_id = originalPhoto.file_id
       }
       break
     default:

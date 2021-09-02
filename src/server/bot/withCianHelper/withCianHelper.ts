@@ -1,6 +1,5 @@
 /* eslint-disable no-shadow */
 import { Markup, Stage, BaseScene, Extra } from 'telegraf'
-import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 // import { httpClient } from '~/bot/withCianHelper/utils/httpClient'
 import { httpClient } from '@cianHttpClient'
 import {
@@ -9,46 +8,41 @@ import {
   withDistance,
   sortByDistanceDESC,
 } from './utils'
-
-enum STAGES {
-  STEP1 = 'cian.step1',
-  STEP2 = 'cian.step2',
-}
+import { STAGES, ICustomSceneContextMessageUpdate } from './interfaces'
 
 // const exitKeyboard = Markup.keyboard(['exit']).oneTime().resize().extra()
+const noLocationText = 'Без локации'
 
 // 1. Step 1:
 const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
 step1Scene.enter((ctx) => {
   return ctx.replyWithMarkdown(
-    'Нужны координаты для оценки расстояния от устройства _(По кнопке)_',
+    'Нужны координаты для оценки расстояния от устройства\n👉 _(По кнопке)_',
     Extra.markup((markup) => {
       return markup
         .keyboard([
-          markup.locationRequestButton('Send location'),
-          markup.callbackButton('Без локации'),
+          markup.locationRequestButton('✅ Сообщить координаты'),
+          markup.callbackButton(noLocationText),
         ])
         .oneTime()
         .resize()
     })
   )
 })
-step1Scene.on(
-  'location',
-  (ctx: SceneContextMessageUpdate & { session: any }) => {
-    const coords = {
-      lat: ctx.message.location.latitude,
-      lng: ctx.message.location.longitude,
-    }
-    ctx.session.coords = coords
-    return ctx.scene.enter(STAGES.STEP2, { coords })
-  }
-)
-step1Scene.on('text', (ctx: any) => {
-  // console.log(ctx.message.text)
-  // ctx.scene.leave()
-  ctx.session.coords = null
+step1Scene.on('location', (ctx: ICustomSceneContextMessageUpdate) => {
+  const {
+    message: {
+      location: { latitude: lat, longitude: lng },
+    },
+  } = ctx
+  const coords = { lat, lng }
+  ctx.session.coords = coords
+  return ctx.scene.enter(STAGES.STEP2, { coords })
+})
+step1Scene.on('text', (ctx: ICustomSceneContextMessageUpdate) => {
+  const { text } = ctx.message
+  if (text === noLocationText) ctx.session.coords = null
   return ctx.scene.enter(STAGES.STEP2)
 })
 const step2Scene = new BaseScene(STAGES.STEP2)
@@ -77,12 +71,12 @@ stage.hears('exit', (ctx) => {
 export const withCianHelper = (bot) => {
   bot.use(stage.middleware())
 
-  bot.command('cian', async (ctx: SceneContextMessageUpdate) => {
+  bot.command('cian', async (ctx: ICustomSceneContextMessageUpdate) => {
     ctx.scene.enter(STAGES.STEP1)
   })
   bot.action(
     'cian.flatrent.chertanovo',
-    async (ctx: SceneContextMessageUpdate & { session: any }) => {
+    async (ctx: ICustomSceneContextMessageUpdate) => {
       await ctx.answerCbQuery()
 
       return ctx.replyWithMarkdown(
@@ -118,7 +112,7 @@ export const withCianHelper = (bot) => {
   )
   bot.action(
     'cian.flatrent.chertanovo.1-room-30-30',
-    async (ctx: SceneContextMessageUpdate & { session: any }) => {
+    async (ctx: ICustomSceneContextMessageUpdate) => {
       await ctx.answerCbQuery()
 
       const response = await httpClient
@@ -135,8 +129,6 @@ export const withCianHelper = (bot) => {
           .map(getMinimalItemInfo)
           .join('\n\n')
 
-        // console.log(normalizedItems)
-
         ctx.replyWithMarkdown(
           `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
         )
@@ -147,7 +139,7 @@ export const withCianHelper = (bot) => {
   )
   bot.action(
     'cian.flatrent.chertanovo.1-room-30-35',
-    async (ctx: SceneContextMessageUpdate & { session: any }) => {
+    async (ctx: ICustomSceneContextMessageUpdate) => {
       await ctx.answerCbQuery()
 
       const response = await httpClient
@@ -174,7 +166,7 @@ export const withCianHelper = (bot) => {
 
   bot.action(
     'cian.flatrent.tsaritsino',
-    async (ctx: SceneContextMessageUpdate & { session: any }) => {
+    async (ctx: ICustomSceneContextMessageUpdate) => {
       await ctx.answerCbQuery()
 
       return ctx.replyWithMarkdown(
@@ -210,7 +202,7 @@ export const withCianHelper = (bot) => {
   )
   bot.action(
     'cian.flatrent.tsaritsino.1-room-30-30',
-    async (ctx: SceneContextMessageUpdate & { session: any }) => {
+    async (ctx: ICustomSceneContextMessageUpdate) => {
       await ctx.answerCbQuery()
 
       const response = await httpClient
@@ -236,7 +228,7 @@ export const withCianHelper = (bot) => {
   )
   bot.action(
     'cian.flatrent.tsaritsino.1-room-30-35',
-    async (ctx: SceneContextMessageUpdate & { session: any }) => {
+    async (ctx: ICustomSceneContextMessageUpdate) => {
       await ctx.answerCbQuery()
 
       const response = await httpClient

@@ -101,13 +101,15 @@ const getGoogleMapLinks = ({ from, to }: any): string => {
 export const getMinimalItemInfo = (item: TItem): string => {
   const { bargainTerms, geo, user, phones, fullUrl, from, to, distance } = item
 
-  return `${geo.userInput}\n${user.agencyName}${
+  return `${distance ? `*${distance} км от Вас*\n` : ''}${geo.userInput}\n${
+    user.agencyName
+  }${
     phones.length > 0 ? `, ${phones.map(getPhoneNumber).join(', ')}` : ''
   }\n${getPrettyPrice(
     bargainTerms.priceRur
   )} ${bargainTerms.currency.toUpperCase()}\n${fullUrl}${
     !!from && !!to
-      ? `\n*${distance} км от Вас*\n${getGoogleMapLinks({
+      ? `\n${getGoogleMapLinks({
           from,
           to,
         })}`

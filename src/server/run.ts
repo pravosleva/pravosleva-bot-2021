@@ -1,11 +1,18 @@
 /* eslint-disable node/no-missing-require */
 import http from 'http'
+import express, {
+  Request as IRequest,
+  Response as IResponse,
+  NextFunction as INextFunction,
+} from 'express'
 
 const moduleAlias = require('module-alias')
 const path = require('path')
 
+require('dotenv').config({ path: path.join(__dirname, '.env') })
+
 moduleAlias(path.join(__dirname, '../', 'package.json'))
-const express = require('express')
+
 const socketIO = require('socket.io')
 const { Telegraf, session } = require('telegraf')
 const {
@@ -14,8 +21,7 @@ const {
   withFeedback,
   withCianHelper,
 } = require('./bot')
-
-require('dotenv').config({ path: path.join(__dirname, '.env') })
+const { router } = require('./express-routers')
 
 const isDev: boolean = process.env.NODE_ENV === 'development'
 const PORT: number = process.env.PORT ? Number(process.env.PORT) : 3000
@@ -27,23 +33,33 @@ if (!TG_BOT_TOKEN)
 class App {
   private server: http.Server
   private port: number
+  private bot: typeof Telegraf
 
   constructor(port: number) {
     this.port = port
+    this.bot = new Telegraf(TG_BOT_TOKEN)
     const app = express()
 
-    app.get('/', function (_req, res) {
-      res.status(200).json({ success: true })
-    })
     // app.use(express.static(path.join(__dirname, '../client')))
     // app.use('/build/three.module.js', express.static(path.join(__dirname, '../../node_modules/three/build/three.module.js')))
+    app.use(
+      (
+        req: IRequest & { bot: typeof Telegraf },
+        _res: IResponse,
+        next: INextFunction
+      ) => {
+        req.bot = this.bot
+        next()
+      }
+    )
+    app.use('/', router)
 
     this.server = new http.Server(app)
     if (isDev) new socketIO.Server(this.server)
   }
 
   private runBot() {
-    const bot = new Telegraf(TG_BOT_TOKEN)
+    const { bot } = this
 
     bot.use(session())
 

@@ -7,6 +7,7 @@ export type TUserId = number
 export type TFileId = string
 export type TFile = {
   fileUrl: string
+  // file_id: string
   caption?: string
 }
 export interface IUserState {
