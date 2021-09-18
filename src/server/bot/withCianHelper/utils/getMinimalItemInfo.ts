@@ -102,7 +102,7 @@ export const getMinimalItemInfo = (item: TItem): string => {
   const { bargainTerms, geo, user, phones, fullUrl, from, to, distance } = item
 
   return `${distance ? `*${distance} км от Вас*\n` : ''}${geo.userInput}\n${
-    user.agencyName
+    user?.agencyName || `\`ERR: user.agencyName is ${typeof user?.agencyName}\``
   }${
     phones.length > 0 ? `, ${phones.map(getPhoneNumber).join(', ')}` : ''
   }\n${getPrettyPrice(
