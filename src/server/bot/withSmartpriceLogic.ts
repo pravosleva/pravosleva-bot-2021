@@ -104,8 +104,8 @@ export const withSmartpriceLogic = (bot: any) => {
             'smartprice.online_tardein.local_dev'
           ),
           Markup.callbackButton(
-            '🔥 Lets test OT (Remote dev)',
-            'smartprice.online_tardein.remote_ui_testing_link'
+            '⚙️ 🔥 Test on smartprice-dev.ru 🔥',
+            'smartprice.online_tardein.test_on_dev'
           ),
           Markup.callbackButton(
             'ℹ️ Как попасть в OT?',
@@ -124,11 +124,11 @@ export const withSmartpriceLogic = (bot: any) => {
     }
   )
   bot.action(
-    'smartprice.online_tardein.remote_ui_testing_link',
+    'smartprice.online_tardein.test_on_dev',
     async ({ answerCbQuery, replyWithMarkdown }) => {
       await answerCbQuery()
       return replyWithMarkdown(
-        '[Ссылка на CRM](https://smartprice-dev.ru/api/crm/ot/svyaznoy/eval)'
+        'Ссылка на получение токена с перенаправлением на Online Trade-In\n\n[Боевое тестирование на smartprice-dev.ru](https://smartprice-dev.ru/api/crm/ot/svyaznoy/eval)'
       )
     }
   )
