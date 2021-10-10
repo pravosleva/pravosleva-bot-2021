@@ -30,8 +30,11 @@ const getNormalizedObj = async (
   fileCode: EFileCode
 ): Promise<TFile> => {
   const result: any = {}
-  let photo
+  let photo: any
   let originalPhoto: TPhotoItem
+  // let tgFileUrl: string
+  // let fileName: string
+  // let ext: string
 
   switch (fileCode) {
     case EFileCode.Document:
@@ -45,9 +48,19 @@ const getNormalizedObj = async (
       photo = ctx.message.photo
       // eslint-disable-next-line prefer-destructuring
       originalPhoto = photo.reverse()[0]
+
       if (originalPhoto) {
+        // tgFileUrl = await ctx.telegram.getFileLink(originalPhoto.file_id)
+        // fileName = tgFileUrl.split('/').reverse()[0]
+        // ext = fileName.split('.').reverse()[0]
+
         result.fileUrl = `${TELEGRAM_DOCS_SHADOW_API}/get-shadow/document/${originalPhoto.file_id}`
         // result.file_id = originalPhoto.file_id
+
+        // if (ext) {
+        //   result.ext = ext
+        //   result.fileUrl += `?ext=${ext}`
+        // }
       }
       break
     default:
@@ -84,6 +97,7 @@ export class Singleton {
     this.state.delete(userId)
     // TODO: На каждом изменении нужно обновлять информацию на физических данных (база, файл и т.д.)
   }
+  // https://t.me/botoid/645541
   private addFile(
     ctx: SceneContextMessageUpdate,
     normalizedObject: TFile

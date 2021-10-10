@@ -20,6 +20,17 @@ export const docsShadow = async function (
   try {
     const tgFileUrl = await req.bot.telegram.getFileLink(file_id)
 
+    // if (req.params.ext) {
+    //   switch (req.params.ext) {
+    //     case 'jpg':
+    //     case 'png':
+    //       res.setHeader('content-type', `image/${req.params.ext}`)
+    //       break
+    //     default:
+    //       break
+    //   }
+    // }
+
     if (tgFileUrl) return request(tgFileUrl).pipe(res)
 
     return res.status(500).json({

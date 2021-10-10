@@ -96,9 +96,12 @@ const removeKeyboard = Markup.removeKeyboard()
 // 1. Step 1:
 const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
-step1Scene.enter((ctx) =>
-  ctx.replyWithMarkdown(`👉 *Введите наименование компании*`, exitKeyboard)
-)
+step1Scene.enter((ctx) => {
+  return ctx.replyWithMarkdown(
+    `👉 *Введите наименование компании*`,
+    exitKeyboard
+  )
+})
 step1Scene.on('text', (ctx: SceneContextMessageUpdate) => {
   const { text } = ctx.message
 
@@ -109,6 +112,7 @@ step1Scene.on('text', (ctx: SceneContextMessageUpdate) => {
 
   if (text) {
     gStateInstance.setCompany(ctx, text)
+    // ctx.deleteMessage()
     return ctx.scene.enter(STAGES.STEP2, {})
   }
   return ctx.scene.leave()
@@ -131,9 +135,10 @@ step1Scene.on('photo', async (ctx: SceneContextMessageUpdate, next) => {
 
 // 2. Step 2:
 const step2Scene = new BaseScene(STAGES.STEP2)
-step2Scene.enter((ctx: SceneContextMessageUpdate) =>
-  ctx.replyWithMarkdown('👉 *Введите Вашу должность*', exitKeyboard)
-)
+step2Scene.enter((ctx: SceneContextMessageUpdate) => {
+  // ctx.deleteMessage()
+  return ctx.replyWithMarkdown('👉 *Введите Вашу должность*', exitKeyboard)
+})
 step2Scene.on('text', (ctx: SceneContextMessageUpdate) => {
   const { text } = ctx.message
 
@@ -144,6 +149,7 @@ step2Scene.on('text', (ctx: SceneContextMessageUpdate) => {
 
   if (text) {
     gStateInstance.setPosition(ctx, text)
+    // ctx.deleteMessage()
     return ctx.scene.enter(STAGES.STEP3, {})
   }
   return ctx.scene.leave()
@@ -166,9 +172,9 @@ step2Scene.on('photo', async (ctx: SceneContextMessageUpdate) => {
 
 // 3. Step 3:
 const step3Scene = new BaseScene(STAGES.STEP3)
-step3Scene.enter((ctx) =>
-  ctx.replyWithMarkdown('👉 *Введите текст заявки*', exitKeyboard)
-)
+step3Scene.enter((ctx) => {
+  return ctx.replyWithMarkdown('👉 *Введите текст заявки*', exitKeyboard)
+})
 step3Scene.on('text', (ctx: any) => {
   const { text } = ctx.message
 
@@ -276,6 +282,7 @@ step5Scene.on('photo', async (ctx: any, next) => {
 step5Scene.action('exit', async (ctx) => {
   await ctx.answerCbQuery()
   gStateInstance.deleteUserState(ctx.update.callback_query.from.id)
+  // ctx.deleteMessage()
   ctx.replyWithMarkdown('🚫 _Step 5: Вы вышли из заявки._')
   // removeFilesFromSession(ctx)
   return ctx.scene.leave()
@@ -293,6 +300,7 @@ step5Scene.action('send-entry', async (ctx: any) => {
       ? links.map((link, i) => `💽 [File ${i + 1}](${link})`).join('\n')
       : ''
   }`
+
   ctx.replyWithMarkdown(msg, removeKeyboard)
 
   // --- NOTE: Target action!
@@ -301,6 +309,7 @@ step5Scene.action('send-entry', async (ctx: any) => {
 
   gStateInstance.deleteUserState(ctx.update.callback_query.from.id)
   await ctx.answerCbQuery()
+  ctx.deleteMessage()
   ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена_')
   if (!gStateInstance.getUserState(ctx.update.callback_query.from.id)) {
     ctx.replyWithMarkdown(`_Данные стерты_`)

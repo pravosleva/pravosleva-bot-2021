@@ -17,18 +17,24 @@ const noLocationText = 'Без локации'
 const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
 step1Scene.enter((ctx) => {
-  return ctx.replyWithMarkdown(
-    'Нужны координаты для оценки расстояния от устройства\n👉 _(По кнопке)_',
-    Extra.markup((markup) => {
-      return markup
-        .keyboard([
-          markup.locationRequestButton('✅ Сообщить координаты'),
-          markup.callbackButton(noLocationText),
-        ])
-        .oneTime()
-        .resize()
-    })
-  )
+  try {
+    ctx.deleteMessage()
+    return ctx.replyWithMarkdown(
+      'Нужны координаты для оценки расстояния от устройства\n👉 _(По кнопке)_',
+      Extra.markup((markup) => {
+        return markup
+          .keyboard([
+            markup.locationRequestButton('✅ Сообщить координаты'),
+            markup.callbackButton(noLocationText),
+          ])
+          .oneTime()
+          .resize()
+      })
+    )
+  } catch (err) {
+    ctx.deleteMessage()
+    return ctx.reply('ERR')
+  }
 })
 step1Scene.on('location', (ctx: ICustomSceneContextMessageUpdate) => {
   const {
@@ -47,24 +53,30 @@ step1Scene.on('text', (ctx: ICustomSceneContextMessageUpdate) => {
 })
 const step2Scene = new BaseScene(STAGES.STEP2)
 step2Scene.enter((ctx) => {
-  return ctx.replyWithMarkdown(
-    '_Выберите метро в близи которого искать:_',
-    Markup.inlineKeyboard(
-      [
-        Markup.callbackButton('Чертаново', 'cian.flatrent.chertanovo'),
-        Markup.callbackButton('Царицыно', 'cian.flatrent.tsaritsino'),
-      ],
-      {
-        columns: 2,
-      }
+  try {
+    return ctx.replyWithMarkdown(
+      '_Выберите метро в близи которого искать:_',
+      Markup.inlineKeyboard(
+        [
+          Markup.callbackButton('Чертаново', 'cian.flatrent.chertanovo'),
+          Markup.callbackButton('Царицыно', 'cian.flatrent.tsaritsino'),
+        ],
+        {
+          columns: 2,
+        }
+      )
+        .oneTime()
+        .resize()
+        .extra()
     )
-      .oneTime()
-      .resize()
-      .extra()
-  )
+  } catch (err) {
+    ctx.deleteMessage()
+    return ctx.reply('ERR')
+  }
 })
 const stage = new Stage([step1Scene, step2Scene])
 stage.hears('exit', (ctx) => {
+  ctx.deleteMessage()
   ctx.scene.leave()
 })
 
@@ -72,94 +84,108 @@ export const withCianHelper = (bot) => {
   bot.use(stage.middleware())
 
   bot.command('cian', async (ctx: ICustomSceneContextMessageUpdate) => {
+    ctx.deleteMessage()
     ctx.scene.enter(STAGES.STEP1)
   })
   bot.action(
     'cian.flatrent.chertanovo',
     async (ctx: ICustomSceneContextMessageUpdate) => {
-      await ctx.answerCbQuery()
-
-      return ctx.replyWithMarkdown(
-        `🗺️ Аренда в *Чертаново*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
-          ctx.session.coords
-            ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
-                ctx.session.coords,
-                null,
-                2
-              )}\``
-            : ''
-        }`,
-        Markup.inlineKeyboard(
-          [
-            Markup.callbackButton(
-              '1-комн кв 30K',
-              'cian.flatrent.chertanovo.1-room-30-30'
-            ),
-            Markup.callbackButton(
-              '1-комн кв 30-35K',
-              'cian.flatrent.chertanovo.1-room-30-35'
-            ),
-          ],
-          {
-            columns: 1,
-          }
+      try {
+        await ctx.answerCbQuery()
+        ctx.deleteMessage()
+        return ctx.replyWithMarkdown(
+          `🗺️ Аренда в *Чертаново*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
+            ctx.session.coords
+              ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
+                  ctx.session.coords,
+                  null,
+                  2
+                )}\``
+              : ''
+          }`,
+          Markup.inlineKeyboard(
+            [
+              Markup.callbackButton(
+                '1-комн кв 30K',
+                'cian.flatrent.chertanovo.1-room-30-30'
+              ),
+              Markup.callbackButton(
+                '1-комн кв 30-35K',
+                'cian.flatrent.chertanovo.1-room-30-35'
+              ),
+            ],
+            {
+              columns: 1,
+            }
+          )
+            .oneTime()
+            .resize()
+            .extra()
         )
-          .oneTime()
-          .resize()
-          .extra()
-      )
+      } catch (err) {
+        ctx.deleteMessage()
+        return ctx.reply('ERR')
+      }
     }
   )
   bot.action(
     'cian.flatrent.chertanovo.1-room-30-30',
     async (ctx: ICustomSceneContextMessageUpdate) => {
-      await ctx.answerCbQuery()
+      try {
+        await ctx.answerCbQuery()
+        ctx.deleteMessage()
+        const response = await httpClient
+          .getFlatrentChertanovo1Room30K30K()
+          .then((data) => data)
+          .catch((msg) => msg)
 
-      const response = await httpClient
-        .getFlatrentChertanovo1Room30K30K()
-        .then((data) => data)
-        .catch((msg) => msg)
+        if (response.offersSerialized) {
+          const normalizedItems = response.offersSerialized
+            .map((e: any) =>
+              withDistance({ ...e, from: ctx.session?.coords || null })
+            )
+            .sort(sortByDistanceDESC)
+            .map(getMinimalItemInfo)
+            .join('\n\n')
 
-      if (response.offersSerialized) {
-        const normalizedItems = response.offersSerialized
-          .map((e: any) =>
-            withDistance({ ...e, from: ctx.session?.coords || null })
+          return ctx.replyWithMarkdown(
+            `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
-          .sort(sortByDistanceDESC)
-          .map(getMinimalItemInfo)
-          .join('\n\n')
-
-        ctx.replyWithMarkdown(
-          `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
-        )
-      } else {
-        ctx.reply('ERR:', response)
+        }
+        return ctx.reply('ERR:', response)
+      } catch (err) {
+        ctx.deleteMessage()
+        return ctx.reply('ERR')
       }
     }
   )
   bot.action(
     'cian.flatrent.chertanovo.1-room-30-35',
     async (ctx: ICustomSceneContextMessageUpdate) => {
-      await ctx.answerCbQuery()
+      try {
+        await ctx.answerCbQuery()
+        ctx.deleteMessage()
+        const response = await httpClient
+          .getFlatrentChertanovo1Room30K35K()
+          .then((data) => data)
+          .catch((msg) => msg)
 
-      const response = await httpClient
-        .getFlatrentChertanovo1Room30K35K()
-        .then((data) => data)
-        .catch((msg) => msg)
-
-      if (response.offersSerialized) {
-        const normalizedItems = response.offersSerialized
-          .map((e: any) =>
-            withDistance({ ...e, from: ctx.session?.coords || null })
+        if (response.offersSerialized) {
+          const normalizedItems = response.offersSerialized
+            .map((e: any) =>
+              withDistance({ ...e, from: ctx.session?.coords || null })
+            )
+            .sort(sortByDistanceDESC)
+            .map(getMinimalItemInfo)
+            .join('\n\n')
+          return ctx.replyWithMarkdown(
+            `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
-          .sort(sortByDistanceDESC)
-          .map(getMinimalItemInfo)
-          .join('\n\n')
-        ctx.replyWithMarkdown(
-          `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
-        )
-      } else {
-        ctx.reply('ERR:', response)
+        }
+        return ctx.reply('ERR:', response)
+      } catch (err) {
+        ctx.deleteMessage()
+        return ctx.reply('ERR')
       }
     }
   )
@@ -167,88 +193,101 @@ export const withCianHelper = (bot) => {
   bot.action(
     'cian.flatrent.tsaritsino',
     async (ctx: ICustomSceneContextMessageUpdate) => {
-      await ctx.answerCbQuery()
-
-      return ctx.replyWithMarkdown(
-        `🗺️ Аренда в *Царьках*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
-          ctx.session.coords
-            ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
-                ctx.session.coords,
-                null,
-                2
-              )}\``
-            : ''
-        }`,
-        Markup.inlineKeyboard(
-          [
-            Markup.callbackButton(
-              '1-комн кв 30K',
-              'cian.flatrent.tsaritsino.1-room-30-30'
-            ),
-            Markup.callbackButton(
-              '1-комн кв 30-35K',
-              'cian.flatrent.tsaritsino.1-room-30-35'
-            ),
-          ],
-          {
-            columns: 1,
-          }
+      try {
+        await ctx.answerCbQuery()
+        ctx.deleteMessage()
+        return ctx.replyWithMarkdown(
+          `🗺️ Аренда в *Царьках*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
+            ctx.session.coords
+              ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
+                  ctx.session.coords,
+                  null,
+                  2
+                )}\``
+              : ''
+          }`,
+          Markup.inlineKeyboard(
+            [
+              Markup.callbackButton(
+                '1-комн кв 30K',
+                'cian.flatrent.tsaritsino.1-room-30-30'
+              ),
+              Markup.callbackButton(
+                '1-комн кв 30-35K',
+                'cian.flatrent.tsaritsino.1-room-30-35'
+              ),
+            ],
+            {
+              columns: 1,
+            }
+          )
+            .oneTime()
+            .resize()
+            .extra()
         )
-          .oneTime()
-          .resize()
-          .extra()
-      )
+      } catch (err) {
+        ctx.deleteMessage()
+        return ctx.reply('ERR')
+      }
     }
   )
   bot.action(
     'cian.flatrent.tsaritsino.1-room-30-30',
     async (ctx: ICustomSceneContextMessageUpdate) => {
-      await ctx.answerCbQuery()
+      try {
+        await ctx.answerCbQuery()
+        ctx.deleteMessage()
+        const response = await httpClient
+          .getFlatrentTsaritsino1Room30K30K()
+          .then((data) => data)
+          .catch((msg) => msg)
 
-      const response = await httpClient
-        .getFlatrentTsaritsino1Room30K30K()
-        .then((data) => data)
-        .catch((msg) => msg)
-
-      if (response.offersSerialized) {
-        const normalizedItems = response.offersSerialized
-          .map((e: any) =>
-            withDistance({ ...e, from: ctx.session?.coords || null })
+        if (response.offersSerialized) {
+          const normalizedItems = response.offersSerialized
+            .map((e: any) =>
+              withDistance({ ...e, from: ctx.session?.coords || null })
+            )
+            .sort(sortByDistanceDESC)
+            .map(getMinimalItemInfo)
+            .join('\n\n')
+          return ctx.replyWithMarkdown(
+            `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
-          .sort(sortByDistanceDESC)
-          .map(getMinimalItemInfo)
-          .join('\n\n')
-        ctx.replyWithMarkdown(
-          `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
-        )
-      } else {
-        ctx.reply('ERR:', response)
+        }
+        return ctx.reply('ERR:', response)
+      } catch (err) {
+        ctx.deleteMessage()
+        return ctx.reply('ERR')
       }
     }
   )
   bot.action(
     'cian.flatrent.tsaritsino.1-room-30-35',
     async (ctx: ICustomSceneContextMessageUpdate) => {
-      await ctx.answerCbQuery()
+      try {
+        await ctx.answerCbQuery()
+        ctx.deleteMessage()
+        const response = await httpClient
+          .getFlatrentTsaritsino1Room30K35K()
+          .then((data) => data)
+          .catch((msg) => msg)
 
-      const response = await httpClient
-        .getFlatrentTsaritsino1Room30K35K()
-        .then((data) => data)
-        .catch((msg) => msg)
-
-      if (response.offersSerialized) {
-        const normalizedItems = response.offersSerialized
-          .map((e: any) =>
-            withDistance({ ...e, from: ctx.session?.coords || null })
+        if (response.offersSerialized) {
+          const normalizedItems = response.offersSerialized
+            .map((e: any) =>
+              withDistance({ ...e, from: ctx.session?.coords || null })
+            )
+            .sort(sortByDistanceDESC)
+            .map(getMinimalItemInfo)
+            .join('\n\n')
+          return ctx.replyWithMarkdown(
+            `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
-          .sort(sortByDistanceDESC)
-          .map(getMinimalItemInfo)
-          .join('\n\n')
-        ctx.replyWithMarkdown(
-          `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
-        )
-      } else {
-        ctx.reply('ERR:', response)
+        }
+        return ctx.reply('ERR:', response)
+      } catch (err) {
+        ctx.deleteMessage()
+        return ctx.reply('ERR')
       }
     }
   )
