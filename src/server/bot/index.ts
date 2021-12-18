@@ -1,4 +1,6 @@
 export * from './withCianHelper'
+export * from './withExpressChatHelper'
 export * from './withLabLogic'
 export * from './withSmartpriceLogic'
+export * from './withStartLogic/withStartLogic'
 export * from './withFeedback2'

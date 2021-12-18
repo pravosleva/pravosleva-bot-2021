@@ -16,10 +16,12 @@ moduleAlias(path.join(__dirname, '../', 'package.json'))
 const socketIO = require('socket.io')
 const { Telegraf, session } = require('telegraf')
 const {
-  withLabLogic,
+  withStartLogic,
+  // withLabLogic,
   withSmartpriceLogic,
   withFeedback,
   withCianHelper,
+  withExpressChatHelper,
 } = require('./bot')
 const { router } = require('./express-routers')
 
@@ -63,10 +65,12 @@ class App {
 
     bot.use(session())
 
-    withLabLogic(bot)
+    withStartLogic(bot)
+    // withLabLogic(bot)
     withSmartpriceLogic(bot)
     withFeedback(bot)
     withCianHelper(bot)
+    withExpressChatHelper(bot)
     // Others...
 
     bot.launch()
