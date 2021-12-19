@@ -1,20 +1,25 @@
+/* eslint-disable no-case-declarations */
 import { Markup } from 'telegraf'
-
+// import { Context } from 'telegraf/typings'
 import { stateInstance } from './utils/stateInstance'
 import { httpClient } from './utils/httpClient'
 import { localStateInstance } from '~/bot/withStartLogic/utils'
 import { getTargetData } from './utils/targetMapping'
 import { EAPICode } from './utils/types'
+import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 
 // const isDev: boolean = process.env.NODE_ENV === 'development'
 
 export const withExpressChatHelper = (bot: any) => {
   bot.command('invite', async (ctx: any) => {
-    const { reply, replyWithMarkdown } = ctx
+    const delaySeconds = 30
+    const { reply, replyWithMarkdown, deleteMessage } = ctx
 
     if (!ctx.message?.from?.username) {
       return reply('⛔ Необходимо завести username')
     }
+
+    deleteMessage()
 
     const { username, id } = ctx.update.message.from
 
@@ -30,41 +35,69 @@ export const withExpressChatHelper = (bot: any) => {
       })
       .catch((msg) => msg)
 
-    console.log(data)
-
     switch (data.code) {
       case EAPICode.IncorrectUserName:
-        // 1.1: Пользователь менял ник (предлагаем кнопку Пересоздать с новым ником)
-        return reply(
-          `Мы знали Вас ранее как ${data.oldUsername || 'ERR3'}:`,
-          Markup.inlineKeyboard([
-            Markup.callbackButton(
-              `Пересоздать профиль ${username}`,
-              'express-chat-helper.signup'
-            ),
-            // Markup.callbackButton('Забыл пароль', 'express-chat-helper.forgot-password'),
-            Markup.callbackButton('Забыл пароль', 'express-chat-helper.signup'),
-          ])
-            .oneTime()
-            .resize()
-            .extra()
-        )
+        try {
+          // 1.1: Пользователь менял ник (предлагаем кнопку Пересоздать с новым ником)
+          const newData = await reply(
+            `Мы знали Вас ранее как ${data.oldUsername || 'ERR3'}:`,
+            Markup.inlineKeyboard([
+              Markup.callbackButton(
+                `Пересоздать профиль ${username}`,
+                'express-chat-helper.signup'
+              ),
+              // Markup.callbackButton('Забыл пароль', 'express-chat-helper.forgot-password'),
+              Markup.callbackButton(
+                'Забыл пароль',
+                'express-chat-helper.signup'
+              ),
+            ])
+              .oneTime()
+              .resize()
+              .extra()
+          )
+          const descrData = await ctx.replyWithMarkdown(
+            `_Кнопка доступна ${delaySeconds} сек..._`
+          )
+
+          return makeDisappearingDelay(() => {
+            ctx.deleteMessage(newData.message_id)
+            ctx.deleteMessage(descrData.message_id)
+          }, delaySeconds * 1000)
+        } catch (err) {
+          return reply(`ERR: ${err.messate || 'No err msg #1'}`)
+        }
       case EAPICode.UserExists:
-        // 1.2: Пользователь не менял ник (предлагаем кнопку Сбросить пароль)
-        return replyWithMarkdown(
-          `Пользователь ${username} существует`,
-          Markup.inlineKeyboard([
-            Markup.callbackButton('Забыл пароль', 'express-chat-helper.signup'),
-          ])
-            .oneTime()
-            .resize()
-            .extra()
-        )
+        try {
+          // 1.2: Пользователь не менял ник (предлагаем кнопку Сбросить пароль)
+          const newData = await replyWithMarkdown(
+            `Пользователь ${username} был зарегистрирован ранее`,
+            Markup.inlineKeyboard([
+              Markup.callbackButton(
+                'Забыл пароль',
+                'express-chat-helper.signup'
+              ),
+            ])
+              .oneTime()
+              .resize()
+              .extra()
+          )
+          const descrData = await ctx.replyWithMarkdown(
+            `_Кнопка доступна ${delaySeconds} сек..._`
+          )
+
+          return makeDisappearingDelay(() => {
+            ctx.deleteMessage(newData.message_id)
+            ctx.deleteMessage(descrData.message_id)
+          }, delaySeconds * 1000)
+        } catch (err) {
+          return reply(`ERR: ${err.messate || 'No err msg #2'}`)
+        }
       case EAPICode.NotFound:
       default:
         // 2. NO: Предлагаем создать
         try {
-          return reply(
+          const newData = await reply(
             'Вы - новый пользователь',
             Markup.inlineKeyboard([
               Markup.callbackButton(
@@ -76,8 +109,16 @@ export const withExpressChatHelper = (bot: any) => {
               .resize()
               .extra()
           )
+          const descrData = await ctx.replyWithMarkdown(
+            `_Кнопка доступна ${delaySeconds} сек..._`
+          )
+
+          return makeDisappearingDelay(() => {
+            ctx.deleteMessage(newData.message_id)
+            ctx.deleteMessage(descrData.message_id)
+          }, delaySeconds * 1000)
         } catch (err) {
-          return reply(`ERR: ${err.messate || 'No err msg #1'}`)
+          return reply(`ERR: ${err.messate || 'No err msg #3'}`)
         }
     }
     // --

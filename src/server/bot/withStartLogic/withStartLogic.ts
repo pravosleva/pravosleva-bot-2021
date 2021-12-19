@@ -1,4 +1,5 @@
 // import { Telegraf, Markup, Extra } from 'telegraf'
+import { Context } from 'telegraf/typings'
 import { localStateInstance, EScopeParams, ETargetParams } from './utils'
 
 const { NODE_ENV } = process.env
@@ -7,8 +8,26 @@ const isDev = NODE_ENV === 'development'
 // NOTE: https://github.com/LetItCode/telegraf
 
 export const withStartLogic = (bot) => {
+  bot.command('help', (ctx: Context) => {
+    const { replyWithMarkdown, deleteMessage } = ctx
+
+    deleteMessage()
+
+    const messages = [
+      '*Список команд:*',
+      '',
+      '💬 Зарегистрироваться в чате - /invite',
+      '',
+      '🏠 Найти съемное жилье, используя Циан API - /cian',
+    ]
+
+    replyWithMarkdown(messages.join('\n'))
+  })
+
   bot.command('start', (ctx) => {
-    const { reply } = ctx
+    const { reply, deleteMessage } = ctx
+
+    deleteMessage()
 
     // -- NOTE base64
     // Encoder: https://base64.alanreed.org/
@@ -31,7 +50,11 @@ export const withStartLogic = (bot) => {
     // [ '/start', 'chat-invite_sp' ] -> scopeParam_targetParam
     // [ '/start' ]
 
-    const messages = ['Started']
+    const messages = [
+      'Доброго времени суток!',
+      '',
+      'ℹ️ Для справки выполните /help',
+    ]
 
     if (parsedEntry[1]) {
       const parsedParam = parsedEntry[1].split('_')

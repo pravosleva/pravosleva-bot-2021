@@ -1,4 +1,6 @@
 import { Telegraf, Markup, Extra } from 'telegraf'
+import { Context } from 'telegraf/typings'
+import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 
 const { NODE_ENV } = process.env
 const isDev = NODE_ENV === 'development'
@@ -8,12 +10,12 @@ const isDev = NODE_ENV === 'development'
 export const withLabLogic = (bot) => {
   if (isDev) bot.use(Telegraf.log())
 
-  bot.command('start', ({ reply }) =>
-    reply(
-      'One time keyboard',
-      Markup.keyboard(['/onetime']).oneTime().resize().extra()
-    )
-  )
+  // bot.command('start', ({ reply }) =>
+  //   reply(
+  //     'One time keyboard',
+  //     Markup.keyboard(['/onetime']).oneTime().resize().extra()
+  //   )
+  // )
 
   bot.command('onetime', ({ reply }) =>
     reply(
@@ -53,7 +55,34 @@ export const withLabLogic = (bot) => {
     )
   })
 
-  bot.command('custom', ({ reply }) => {
+  bot.command('del_message_by_delay', async (ctx: Context) => {
+    const { reply } = ctx
+    const newData = await reply(
+      'Custom buttons keyboard',
+      Markup.keyboard([
+        ['🔍 Search', '😎 Popular'], // Row1 with 2 buttons
+        ['☸ Setting', '📞 Feedback'], // Row2 with 2 buttons
+        ['📢 Ads', '⭐️ Rate us', '👥 Share'], // Row3 with 3 buttons
+      ])
+        .oneTime()
+        .resize()
+        .extra()
+    )
+
+    const delaySeconds = 5
+    const descrData = await ctx.replyWithMarkdown(
+      `_${delaySeconds} sec for disappear..._`
+    )
+
+    return makeDisappearingDelay(() => {
+      ctx.deleteMessage(newData.message_id) // editMessageM(chatId, message_id, undefined, 'EDITED')
+      ctx.deleteMessage(descrData.message_id)
+    }, delaySeconds * 1000)
+  })
+
+  bot.command('custom', async (ctx: Context) => {
+    const { reply } = ctx
+
     return reply(
       'Custom buttons keyboard',
       Markup.keyboard([
