@@ -6,7 +6,7 @@
   "scripts": {
     "deploy:prod:restart-bot": "yarn build:prod && deploy-app -d prod:restart-bot",
     "deploy:prod:copy-only": "yarn build:prod && deploy-app -d prod:copy-only",
-    "start:pm2": "pm2 start npm --name bot-2021 -- run start:prod",
+    "start:pm2": "pm2 start npm --name bot-2021 -- run start:prod --unhandled-rejections=strict",
     "start:pm2:dev": "pm2 start npm --name bot-2021 -- run dev --unhandled-rejections=strict",
     "dev": "yarn build:dev && NODE_ENV=development node --max-old-space-size=1024 server-dist/run.js",
     "start:prod": "NODE_ENV=production node --max-old-space-size=1024 server-dist/run.js",
