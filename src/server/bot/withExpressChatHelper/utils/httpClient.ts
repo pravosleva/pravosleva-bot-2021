@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { EAPICode } from './types'
 
+const isDev = process.env.NODE_ENV === 'development'
+
 const createCancelTokenSource = () => axios.CancelToken.source()
 
 class Singleton {
@@ -11,7 +13,9 @@ class Singleton {
   private constructor() {
     this.cancelTokenSource1 = null
     this.axiosInstance = axios.create({
-      baseURL: 'http://pravosleva.ru/express-helper/chat',
+      baseURL: isDev
+        ? 'http://localhost:5000/chat'
+        : 'http://pravosleva.ru/express-helper/chat',
       // timeout: 1000,
       // headers: { 'X-Custom-Header': 'foobar' },
     })
