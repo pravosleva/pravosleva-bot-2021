@@ -17,7 +17,7 @@ const socketIO = require('socket.io')
 const { Telegraf, session } = require('telegraf')
 const {
   withStartLogic,
-  withLabLogic,
+  // withLabLogic,
   withSmartpriceLogic,
   withFeedback,
   withCianHelper,
@@ -66,7 +66,7 @@ class App {
     bot.use(session())
 
     withStartLogic(bot)
-    withLabLogic(bot)
+    // withLabLogic(bot)
     withSmartpriceLogic(bot)
     withFeedback(bot)
     withCianHelper(bot)

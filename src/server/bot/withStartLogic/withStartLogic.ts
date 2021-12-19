@@ -10,8 +10,11 @@ const isDev = NODE_ENV === 'development'
 export const withStartLogic = (bot) => {
   bot.command('help', (ctx: Context) => {
     const { replyWithMarkdown, deleteMessage } = ctx
-
-    deleteMessage()
+    try {
+      deleteMessage()
+    } catch (err) {
+      console.log(err)
+    }
 
     const messages = [
       '*Список команд:*',
@@ -26,8 +29,11 @@ export const withStartLogic = (bot) => {
 
   bot.command('start', (ctx) => {
     const { reply, deleteMessage } = ctx
-
-    deleteMessage()
+    try {
+      deleteMessage()
+    } catch (err) {
+      console.log(err)
+    }
 
     // -- NOTE base64
     // Encoder: https://base64.alanreed.org/

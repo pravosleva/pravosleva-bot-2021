@@ -37,7 +37,6 @@ export const withSmartpriceLogic = (bot: any) => {
           .extra()
       )
     } catch (err) {
-      deleteMessage()
       return reply('ERR')
     }
   })
@@ -62,7 +61,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return reply('ERR')
       }
     }
@@ -77,7 +75,6 @@ export const withSmartpriceLogic = (bot: any) => {
           'Для локальной разработки нужно:\n\n1) runtime_data [Как копировать RD](http://code-samples.space/notes/615eaf85844868774d5396b1)\n\n2) Переменные среды [Local dev envs](http://code-samples.space/notes/60bcd2e0a8f340671f9da000)'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -92,7 +89,6 @@ export const withSmartpriceLogic = (bot: any) => {
           'Перед заливкой в мастер следует сначала раскатить тестовый инстанс и получить фидбек от бизнеса\n\n[NEW WORKFLOW](http://code-samples.space/notes/60d07b5d00cc4a1dc3edbee5)'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -112,7 +108,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -127,7 +122,6 @@ export const withSmartpriceLogic = (bot: any) => {
           '[CRM Local dev sevrer](http://code-samples.space/notes/60224c3a0883d4603bb0e8b1)'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -152,7 +146,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -165,7 +158,6 @@ export const withSmartpriceLogic = (bot: any) => {
         deleteMessage()
         return reply('In progress...')
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -198,7 +190,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -211,7 +202,6 @@ export const withSmartpriceLogic = (bot: any) => {
         deleteMessage()
         return reply('In progress...')
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -226,7 +216,6 @@ export const withSmartpriceLogic = (bot: any) => {
           'Ссылка на получение токена с перенаправлением на Online Trade-In\n\n[Боевое тестирование на smartprice-dev.ru](https://smartprice-dev.ru/api/crm/ot/svyaznoy/eval)'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -241,7 +230,6 @@ export const withSmartpriceLogic = (bot: any) => {
           '[Как попасть в OT?](http://code-samples.space/notes/6041e2499e0d125bf8d0e82c)'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -266,7 +254,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -281,7 +268,6 @@ export const withSmartpriceLogic = (bot: any) => {
           '**[Ringeo local dev](http://code-samples.space/notes/609a6467a2e87e69a6bfbcba)**'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -301,7 +287,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -316,7 +301,6 @@ export const withSmartpriceLogic = (bot: any) => {
           '[Sentry access](http://code-samples.space/notes/60e6d2b95eed1167a96fea37)'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -341,7 +325,6 @@ export const withSmartpriceLogic = (bot: any) => {
           ).extra()
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }
@@ -356,7 +339,6 @@ export const withSmartpriceLogic = (bot: any) => {
           '**[Notes](http://code-samples.space/notes/611bc6cebe6ef17d5ab1d879)**'
         )
       } catch (err) {
-        deleteMessage()
         return replyWithMarkdown('ERR')
       }
     }

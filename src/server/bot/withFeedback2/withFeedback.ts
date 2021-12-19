@@ -308,11 +308,16 @@ step5Scene.action('send-entry', async (ctx: any) => {
   // ---
 
   gStateInstance.deleteUserState(ctx.update.callback_query.from.id)
-  await ctx.answerCbQuery()
-  ctx.deleteMessage()
-  ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена_')
-  if (!gStateInstance.getUserState(ctx.update.callback_query.from.id)) {
-    ctx.replyWithMarkdown(`_Данные стерты_`)
+  try {
+    await ctx.answerCbQuery()
+    ctx.deleteMessage()
+    ctx.replyWithMarkdown('✅ _Step 5: Заявка отправлена_')
+    if (!gStateInstance.getUserState(ctx.update.callback_query.from.id)) {
+      ctx.replyWithMarkdown(`_Данные стерты_`)
+    }
+  } catch (err) {
+    console.log(err)
+    ctx.replyWithMarkdown('#ERR001')
   }
 
   return ctx.scene.leave()

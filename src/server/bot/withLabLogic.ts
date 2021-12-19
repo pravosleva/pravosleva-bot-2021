@@ -75,8 +75,12 @@ export const withLabLogic = (bot) => {
     )
 
     return makeDisappearingDelay(() => {
-      ctx.deleteMessage(newData.message_id) // editMessageM(chatId, message_id, undefined, 'EDITED')
-      ctx.deleteMessage(descrData.message_id)
+      try {
+        ctx.deleteMessage(newData.message_id)
+        ctx.deleteMessage(descrData.message_id)
+      } catch (err) {
+        console.log(err)
+      }
     }, delaySeconds * 1000)
   })
 

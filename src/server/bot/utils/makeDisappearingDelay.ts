@@ -1,3 +1,9 @@
 export const makeDisappearingDelay = (cb: () => void, ms = 30000) => {
-  return setTimeout(cb, ms)
+  return setTimeout(() => {
+    try {
+      cb()
+    } catch (err) {
+      console.log(err)
+    }
+  }, ms)
 }

@@ -32,7 +32,6 @@ step1Scene.enter((ctx) => {
       })
     )
   } catch (err) {
-    ctx.deleteMessage()
     return ctx.reply('ERR')
   }
 })
@@ -54,6 +53,7 @@ step1Scene.on('text', (ctx: ICustomSceneContextMessageUpdate) => {
 const step2Scene = new BaseScene(STAGES.STEP2)
 step2Scene.enter((ctx) => {
   try {
+    ctx.deleteMessage()
     return ctx.replyWithMarkdown(
       '_Выберите метро в близи которого искать:_',
       Markup.inlineKeyboard(
@@ -70,13 +70,16 @@ step2Scene.enter((ctx) => {
         .extra()
     )
   } catch (err) {
-    ctx.deleteMessage()
     return ctx.reply('ERR')
   }
 })
 const stage = new Stage([step1Scene, step2Scene])
 stage.hears('exit', (ctx) => {
-  ctx.deleteMessage()
+  try {
+    ctx.deleteMessage()
+  } catch (err) {
+    console.log(err)
+  }
   ctx.scene.leave()
 })
 
@@ -84,7 +87,11 @@ export const withCianHelper = (bot) => {
   bot.use(stage.middleware())
 
   bot.command('cian', async (ctx: ICustomSceneContextMessageUpdate) => {
-    ctx.deleteMessage()
+    try {
+      ctx.deleteMessage()
+    } catch (err) {
+      console.log(err)
+    }
     ctx.scene.enter(STAGES.STEP1)
   })
   bot.action(
@@ -123,7 +130,6 @@ export const withCianHelper = (bot) => {
             .extra()
         )
       } catch (err) {
-        ctx.deleteMessage()
         return ctx.reply('ERR')
       }
     }
@@ -154,7 +160,6 @@ export const withCianHelper = (bot) => {
         }
         return ctx.reply('ERR:', response)
       } catch (err) {
-        ctx.deleteMessage()
         return ctx.reply('ERR')
       }
     }
@@ -184,7 +189,6 @@ export const withCianHelper = (bot) => {
         }
         return ctx.reply('ERR:', response)
       } catch (err) {
-        ctx.deleteMessage()
         return ctx.reply('ERR')
       }
     }
@@ -226,7 +230,6 @@ export const withCianHelper = (bot) => {
             .extra()
         )
       } catch (err) {
-        ctx.deleteMessage()
         return ctx.reply('ERR')
       }
     }
@@ -256,7 +259,6 @@ export const withCianHelper = (bot) => {
         }
         return ctx.reply('ERR:', response)
       } catch (err) {
-        ctx.deleteMessage()
         return ctx.reply('ERR')
       }
     }
@@ -286,7 +288,6 @@ export const withCianHelper = (bot) => {
         }
         return ctx.reply('ERR:', response)
       } catch (err) {
-        ctx.deleteMessage()
         return ctx.reply('ERR')
       }
     }

@@ -19,7 +19,11 @@ export const withExpressChatHelper = (bot: any) => {
       return reply('⛔ Необходимо завести username')
     }
 
-    deleteMessage()
+    try {
+      deleteMessage()
+    } catch (err) {
+      console.log(err)
+    }
 
     const { username, id } = ctx.update.message.from
 
@@ -137,7 +141,11 @@ export const withExpressChatHelper = (bot: any) => {
       await answerCbQuery()
 
       stateInstance.setUserName({ chatId: id, username })
-      deleteMessage()
+      try {
+        deleteMessage()
+      } catch (err) {
+        console.log(err)
+      }
 
       const data = await httpClient
         .createUser({
@@ -192,7 +200,6 @@ export const withExpressChatHelper = (bot: any) => {
 
       return replyWithMarkdown(md)
     } catch (err) {
-      deleteMessage()
       return reply(`ERR: ${err.message || 'Fuckup'}`)
     }
   })
