@@ -19,9 +19,10 @@ const {
   withStartLogic,
   // withLabLogic,
   withSmartpriceLogic,
-  withFeedback,
+  // withFeedback,
   withCianHelper,
   withExpressChatHelper,
+  withBlackList,
 } = require('./bot')
 const { router } = require('./express-routers')
 
@@ -64,11 +65,12 @@ class App {
     const { bot } = this
 
     bot.use(session())
+    bot.use(withBlackList)
 
     withStartLogic(bot)
     // withLabLogic(bot)
     withSmartpriceLogic(bot)
-    withFeedback(bot)
+    // withFeedback(bot)
     withCianHelper(bot)
     withExpressChatHelper(bot)
     // Others...

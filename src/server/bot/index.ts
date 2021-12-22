@@ -1,3 +1,4 @@
+export * from './withBlackList'
 export * from './withCianHelper'
 export * from './withExpressChatHelper'
 export * from './withLabLogic'

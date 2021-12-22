@@ -5,7 +5,7 @@ import { stateInstance } from './utils/stateInstance'
 import { httpClient } from './utils/httpClient'
 import { localStateInstance } from '~/bot/withStartLogic/utils'
 import { getTargetData } from './utils/targetMapping'
-import { EAPICode } from './utils/types'
+import { EAPIUserCode } from './utils/types'
 import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 
 // const isDev: boolean = process.env.NODE_ENV === 'development'
@@ -40,7 +40,7 @@ export const withExpressChatHelper = (bot: any) => {
       .catch((msg) => msg)
 
     switch (data.code) {
-      case EAPICode.IncorrectUserName:
+      case EAPIUserCode.IncorrectUserName:
         try {
           // 1.1: Пользователь менял ник (предлагаем кнопку Пересоздать с новым ником)
           const newData = await reply(
@@ -71,7 +71,7 @@ export const withExpressChatHelper = (bot: any) => {
         } catch (err) {
           return reply(`ERR: ${err.messate || 'No err msg #1'}`)
         }
-      case EAPICode.UserExists:
+      case EAPIUserCode.UserExists:
         try {
           // 1.2: Пользователь не менял ник (предлагаем кнопку Сбросить пароль)
           const newData = await replyWithMarkdown(
@@ -97,7 +97,7 @@ export const withExpressChatHelper = (bot: any) => {
         } catch (err) {
           return reply(`ERR: ${err.messate || 'No err msg #2'}`)
         }
-      case EAPICode.NotFound:
+      case EAPIUserCode.NotFound:
       default:
         // 2. NO: Предлагаем создать
         try {
@@ -122,7 +122,8 @@ export const withExpressChatHelper = (bot: any) => {
             ctx.deleteMessage(descrData.message_id)
           }, delaySeconds * 1000)
         } catch (err) {
-          return reply(`ERR: ${err.messate || 'No err msg #3'}`)
+          // return reply(`ERR: ${err.messate || 'No err msg #3'}`)
+          return console.log(err)
         }
     }
     // --
@@ -133,9 +134,15 @@ export const withExpressChatHelper = (bot: any) => {
     const { username, id } = ctx.update.callback_query.from
 
     // -- NOTE: На случай, если пользователь зашел с параметром
-    const targetParam = localStateInstance.get(id)
+    const myState = localStateInstance.get(id)
+    const targetParam = myState?.targetParam
     // --
-    const targetData = getTargetData(targetParam || undefined)
+    const targetData = myState?.link
+      ? {
+          link: myState?.link,
+          uiName: targetParam ? targetParam.toUpperCase() : 'CHAT',
+        }
+      : getTargetData(targetParam || undefined)
 
     try {
       await answerCbQuery()
@@ -192,7 +199,7 @@ export const withExpressChatHelper = (bot: any) => {
       let md = messages.join('\n')
 
       switch (data.code) {
-        // case EAPICode.UserExists:
+        // case EAPIUserCode.UserExists:
         default:
           md += `\n\n[${targetData.uiName}](${targetData.link})`
           break

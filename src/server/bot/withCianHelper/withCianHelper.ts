@@ -9,6 +9,7 @@ import {
   sortByDistanceDESC,
 } from './utils'
 import { STAGES, ICustomSceneContextMessageUpdate } from './interfaces'
+import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 
 // const exitKeyboard = Markup.keyboard(['exit']).oneTime().resize().extra()
 const noLocationText = 'Без локации'
@@ -16,10 +17,10 @@ const noLocationText = 'Без локации'
 // 1. Step 1:
 const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
-step1Scene.enter((ctx) => {
+step1Scene.enter(async (ctx) => {
   try {
     ctx.deleteMessage()
-    return ctx.replyWithMarkdown(
+    const btns = await ctx.replyWithMarkdown(
       'Нужны координаты для оценки расстояния от устройства\n👉 _(По кнопке)_',
       Extra.markup((markup) => {
         return markup
@@ -31,6 +32,15 @@ step1Scene.enter((ctx) => {
           .resize()
       })
     )
+    const delaySeconds = 10
+    const descrData = await ctx.replyWithMarkdown(
+      `_Кнопки доступны ${delaySeconds} сек..._`
+    )
+
+    return makeDisappearingDelay(() => {
+      ctx.deleteMessage(btns.message_id)
+      ctx.deleteMessage(descrData.message_id)
+    }, delaySeconds * 1000)
   } catch (err) {
     return ctx.reply('ERR')
   }
@@ -51,10 +61,10 @@ step1Scene.on('text', (ctx: ICustomSceneContextMessageUpdate) => {
   return ctx.scene.enter(STAGES.STEP2)
 })
 const step2Scene = new BaseScene(STAGES.STEP2)
-step2Scene.enter((ctx) => {
+step2Scene.enter(async (ctx) => {
   try {
-    ctx.deleteMessage()
-    return ctx.replyWithMarkdown(
+    // ctx.deleteMessage()
+    const btns = await ctx.replyWithMarkdown(
       '_Выберите метро в близи которого искать:_',
       Markup.inlineKeyboard(
         [
@@ -69,6 +79,15 @@ step2Scene.enter((ctx) => {
         .resize()
         .extra()
     )
+    const delaySeconds = 10
+    const descrData = await ctx.replyWithMarkdown(
+      `_Кнопки доступны ${delaySeconds} сек..._`
+    )
+
+    return makeDisappearingDelay(() => {
+      ctx.deleteMessage(btns.message_id)
+      ctx.deleteMessage(descrData.message_id)
+    }, delaySeconds * 1000)
   } catch (err) {
     return ctx.reply('ERR')
   }
@@ -100,7 +119,7 @@ export const withCianHelper = (bot) => {
       try {
         await ctx.answerCbQuery()
         ctx.deleteMessage()
-        return ctx.replyWithMarkdown(
+        const btns = await ctx.replyWithMarkdown(
           `🗺️ Аренда в *Чертаново*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
             ctx.session.coords
               ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
@@ -129,6 +148,15 @@ export const withCianHelper = (bot) => {
             .resize()
             .extra()
         )
+        const delaySeconds = 20
+        const descrData = await ctx.replyWithMarkdown(
+          `_Кнопки доступны ${delaySeconds} сек..._`
+        )
+
+        return makeDisappearingDelay(() => {
+          ctx.deleteMessage(btns.message_id)
+          ctx.deleteMessage(descrData.message_id)
+        }, delaySeconds * 1000)
       } catch (err) {
         return ctx.reply('ERR')
       }
@@ -200,7 +228,7 @@ export const withCianHelper = (bot) => {
       try {
         await ctx.answerCbQuery()
         ctx.deleteMessage()
-        return ctx.replyWithMarkdown(
+        const btns = await ctx.replyWithMarkdown(
           `🗺️ Аренда в *Царьках*\n\n_Настройки фильтров:_\n15 мин пешком от метро, холодильник, стиралка${
             ctx.session.coords
               ? `\n\n_Ваши координаты:_\n\`${JSON.stringify(
@@ -229,6 +257,15 @@ export const withCianHelper = (bot) => {
             .resize()
             .extra()
         )
+        const delaySeconds = 20
+        const descrData = await ctx.replyWithMarkdown(
+          `_Кнопки доступны ${delaySeconds} сек..._`
+        )
+
+        return makeDisappearingDelay(() => {
+          ctx.deleteMessage(btns.message_id)
+          ctx.deleteMessage(descrData.message_id)
+        }, delaySeconds * 1000)
       } catch (err) {
         return ctx.reply('ERR')
       }

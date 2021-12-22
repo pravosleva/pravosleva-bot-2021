@@ -96,11 +96,18 @@ const removeKeyboard = Markup.removeKeyboard()
 // 1. Step 1:
 const step1Scene = new BaseScene(STAGES.STEP1)
 // @ts-ignore
-step1Scene.enter((ctx) => {
-  return ctx.replyWithMarkdown(
-    `👉 *Введите наименование компании*`,
-    exitKeyboard
-  )
+step1Scene.enter(async (ctx) => {
+  const chat = await ctx.getChat() // 130640667 130640667
+  console.log(chat)
+  try {
+    return ctx.replyWithMarkdown(
+      `👉 *Введите наименование компании*`,
+      exitKeyboard
+    )
+  } catch (err) {
+    console.log(err)
+  }
+  return ctx.scene.leave()
 })
 step1Scene.on('text', (ctx: SceneContextMessageUpdate) => {
   const { text } = ctx.message
@@ -137,7 +144,12 @@ step1Scene.on('photo', async (ctx: SceneContextMessageUpdate, next) => {
 const step2Scene = new BaseScene(STAGES.STEP2)
 step2Scene.enter((ctx: SceneContextMessageUpdate) => {
   // ctx.deleteMessage()
-  return ctx.replyWithMarkdown('👉 *Введите Вашу должность*', exitKeyboard)
+  try {
+    return ctx.replyWithMarkdown('👉 *Введите Вашу должность*', exitKeyboard)
+  } catch (err) {
+    console.log(err)
+  }
+  return ctx.scene.leave()
 })
 step2Scene.on('text', (ctx: SceneContextMessageUpdate) => {
   const { text } = ctx.message
@@ -209,18 +221,23 @@ step3Scene.on('photo', async (ctx: SceneContextMessageUpdate, next) => {
 // 4. Step 4: User contact:
 const step4Scene = new BaseScene(STAGES.STEP4)
 step4Scene.enter((ctx) => {
-  return ctx.replyWithMarkdown(
-    '*Оставьте Ваш контакт* _(По кнопке)_',
-    Extra.markup((markup) => {
-      return markup
-        .keyboard([
-          markup.contactRequestButton('☎️ Оставить контакт ✅'),
-          markup.callbackButton('Выйти'),
-        ])
-        .oneTime()
-        .resize()
-    })
-  )
+  try {
+    return ctx.replyWithMarkdown(
+      '*Оставьте Ваш контакт* _(По кнопке)_',
+      Extra.markup((markup) => {
+        return markup
+          .keyboard([
+            markup.contactRequestButton('☎️ Оставить контакт ✅'),
+            markup.callbackButton('Выйти'),
+          ])
+          .oneTime()
+          .resize()
+      })
+    )
+  } catch (err) {
+    console.log(err)
+  }
+  return ctx.scene.leave()
 })
 step4Scene.on('contact', (ctx: any) => {
   const { contact } = ctx.message
@@ -228,12 +245,17 @@ step4Scene.on('contact', (ctx: any) => {
   if (contact) {
     gStateInstance.setContact(ctx, contact)
     const fullName = getFullName(contact || {})
-    if (isDev)
-      ctx.replyWithMarkdown(
-        `_Step 4: Спасибо${
-          fullName ? `, ${fullName}` : ''
-        }, бот получил Ваш контакт._`
-      )
+
+    try {
+      if (isDev)
+        ctx.replyWithMarkdown(
+          `_Step 4: Спасибо${
+            fullName ? `, ${fullName}` : ''
+          }, бот получил Ваш контакт._`
+        )
+    } catch (err) {
+      console.log(err)
+    }
     return ctx.scene.enter('step5Scene', {})
   }
   return ctx.scene.leave()

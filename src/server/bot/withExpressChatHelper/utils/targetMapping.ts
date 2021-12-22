@@ -11,6 +11,10 @@ const targetMapping: {
     link: 'http://pravosleva.ru/express-helper/chat/#/?room=ux-test',
     uiName: '🔗 UX-TEST CHAT',
   },
+  [ETargetParams.MFES]: {
+    link: 'http://pravosleva.ru/express-helper/chat/#/?room=microfrontends',
+    uiName: '🔗 MICROFRONTENDS CHAT',
+  },
 }
 
 const defaultItem: { link: string; uiName: string } = {
@@ -21,7 +25,9 @@ const defaultItem: { link: string; uiName: string } = {
 export const getTargetData = (
   targetParam?: string
 ): { link: string; uiName: string } | null => {
-  return !!targetParam && !!targetMapping[targetParam]
-    ? targetMapping[targetParam]
-    : defaultItem
+  let result = defaultItem
+
+  if (targetMapping[targetParam]) result = targetMapping[targetParam]
+
+  return result
 }

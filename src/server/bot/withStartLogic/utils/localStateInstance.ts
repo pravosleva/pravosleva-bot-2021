@@ -3,10 +3,11 @@
 // import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 
 type TChatId = number
+type TData = { targetParam: string; link?: string }
 
 export class Singleton {
   private static instance: Singleton
-  state: Map<TChatId, string>
+  state: Map<TChatId, TData>
 
   private constructor() {
     this.state = new Map()
@@ -21,7 +22,7 @@ export class Singleton {
   public keys() {
     return this.state.keys()
   }
-  public set(key: number, value: string) {
+  public set(key: number, value: TData) {
     this.state.set(key, value)
   }
   public get(key: number) {
@@ -37,7 +38,7 @@ export class Singleton {
   public get size(): number {
     return this.state.size
   }
-  public getChatIdState(chatId: TChatId): string | undefined {
+  public getChatIdState(chatId: TChatId): TData | undefined {
     return this.state.get(chatId)
   }
   public deleteChatIdState(chatId: TChatId): void {

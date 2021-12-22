@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { EAPICode } from './types'
+import { EAPIUserCode, EAPIRoomCode } from './types'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -93,7 +93,7 @@ class Singleton {
         password: string
         ok: boolean
         message?: string
-        code: EAPICode
+        code: EAPIUserCode
       }
     | string
   > {
@@ -119,7 +119,7 @@ class Singleton {
         password: string
         ok: boolean
         message?: string
-        code: EAPICode
+        code: EAPIUserCode
         oldUsername?: string
       }
     | string
@@ -127,6 +127,26 @@ class Singleton {
     const data = await this.api({
       url: '/check-user',
       data: { username, chatId },
+    })
+      .then((r) => r)
+      .catch((msg) => msg)
+
+    if (typeof data === 'string') return Promise.reject(data)
+    return Promise.resolve(data)
+  }
+
+  async checkRoom({ room_id }: { room_id: string }): Promise<
+    | {
+        ok: boolean
+        message?: string
+        link?: string
+        code: EAPIRoomCode
+      }
+    | string
+  > {
+    const data = await this.api({
+      url: '/check-room',
+      data: { room_id },
     })
       .then((r) => r)
       .catch((msg) => msg)
