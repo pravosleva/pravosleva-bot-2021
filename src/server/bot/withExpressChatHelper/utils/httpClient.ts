@@ -4,6 +4,10 @@ import { EAPIUserCode, EAPIRoomCode } from './types'
 const isDev = process.env.NODE_ENV === 'development'
 
 const createCancelTokenSource = () => axios.CancelToken.source()
+const promisifyData = (data: any) => {
+  if (typeof data === 'string') return Promise.reject(data)
+  return Promise.resolve(data)
+}
 
 class Singleton {
   private static instance: Singleton
@@ -114,8 +118,7 @@ class Singleton {
       .then((r) => r)
       .catch((msg) => msg)
 
-    if (typeof data === 'string') return Promise.reject(data)
-    return Promise.resolve(data)
+    return promisifyData(data)
   }
 
   async checkUser({
@@ -141,8 +144,7 @@ class Singleton {
       .then((r) => r)
       .catch((msg) => msg)
 
-    if (typeof data === 'string') return Promise.reject(data)
-    return Promise.resolve(data)
+    return promisifyData(data)
   }
 
   async checkRoom({ room_id }: { room_id: string }): Promise<
@@ -161,8 +163,7 @@ class Singleton {
       .then((r) => r)
       .catch((msg) => msg)
 
-    if (typeof data === 'string') return Promise.reject(data)
-    return Promise.resolve(data)
+    return promisifyData(data)
   }
 
   async getBackupState(): Promise<
@@ -180,8 +181,7 @@ class Singleton {
       .then((r) => r)
       .catch((msg) => msg)
 
-    if (typeof data === 'string') return Promise.reject(data)
-    return Promise.resolve(data)
+    return promisifyData(data)
   }
 }
 
