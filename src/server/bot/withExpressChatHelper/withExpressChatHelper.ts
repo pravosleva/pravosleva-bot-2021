@@ -7,6 +7,7 @@ import { localStateInstance } from '~/bot/withStartLogic/utils'
 import { getTargetData } from './utils/targetMapping'
 import { EAPIUserCode } from './utils/types'
 import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
+import { getReportMarkdown } from '~/bot/utils/getReportMarkdown'
 
 // const isDev: boolean = process.env.NODE_ENV === 'development'
 
@@ -209,5 +210,88 @@ export const withExpressChatHelper = (bot: any) => {
     } catch (err) {
       return reply(`ERR: ${err.message || 'Fuckup'}`)
     }
+  })
+
+  bot.command('chat_admin', async (ctx: any) => {
+    const { reply, replyWithMarkdown, deleteMessage } = ctx
+    const delaySeconds = 30
+
+    if (!ctx.message?.from?.username)
+      return reply('⛔ Необходимо завести username')
+
+    try {
+      deleteMessage()
+    } catch (err) {
+      console.log(err)
+    }
+
+    const { username, id } = ctx.update.message.from
+
+    if (username !== 'pravosleva') {
+      return reply('⛔ Доступ закрыт')
+    }
+
+    try {
+      const newData = await reply(
+        `Welcome, ${username}, u're admin`,
+        Markup.inlineKeyboard([
+          Markup.callbackButton(
+            'Chat backup state',
+            'express-chat-helper.backup-state'
+          ),
+        ])
+          .oneTime()
+          .resize()
+          .extra()
+      )
+      const descrData = await ctx.replyWithMarkdown(
+        `_Кнопка доступна ${delaySeconds} сек..._`
+      )
+
+      return makeDisappearingDelay(() => {
+        ctx.deleteMessage(newData.message_id)
+        ctx.deleteMessage(descrData.message_id)
+      }, delaySeconds * 1000)
+    } catch (err) {
+      // return reply(`ERR: ${err.messate || 'No err msg #3'}`)
+      return console.log(err)
+    }
+  })
+
+  bot.action('express-chat-helper.backup-state', async (ctx: any) => {
+    const { reply, replyWithMarkdown, deleteMessage, answerCbQuery } = ctx
+
+    // try { deleteMessage() }
+    // catch (err) { console.log(err) }
+
+    // -- NOTE: Get data & setd to user
+    const data = await httpClient
+      .getBackupState()
+      .then((data) => {
+        // console.log(data)
+        return data
+      })
+      .catch((msg) => msg)
+
+    try {
+      await answerCbQuery()
+
+      if (data.ok) {
+        const md = getReportMarkdown({
+          cfg: {
+            state: '*State*',
+            latest: '*Latest backup*',
+            extraInfo: '*Extra info*',
+          },
+          res: data,
+        })
+        return replyWithMarkdown(md)
+      }
+
+      return reply(`${data?.message || 'ERR: No data.message'}`)
+    } catch (err) {
+      return reply(`${err?.message || 'ERR: No err.message'}`)
+    }
+    // --
   })
 }

@@ -43,20 +43,30 @@ class Singleton {
     return data?.message ? data?.message : 'Извините, что-то пошло не так'
   }
 
-  async api({ url, data }: { url: string; data: any }): Promise<any> {
+  async api({
+    url,
+    data,
+    method,
+  }: {
+    url: string
+    data?: any
+    method?: 'GET' | 'POST'
+  }): Promise<any> {
     if (this.cancelTokenSource1)
       this.cancelTokenSource1.cancel('axios request cancelled')
 
     const source = createCancelTokenSource()
     this.cancelTokenSource1 = source
-
-    const result = await this.axiosInstance({
-      method: 'POST',
+    const opts: any = {
       url: `/api${url}`,
-      data,
+      method: method || 'POST',
       // mode: 'cors',
       cancelToken: this.cancelTokenSource1.token,
-    })
+    }
+
+    if (data) opts.data = data
+
+    const result = await this.axiosInstance(opts)
       // .then((res: any) => res)
       .then(
         this.universalAxiosResponseHandler(({ data }) => {
@@ -147,6 +157,25 @@ class Singleton {
     const data = await this.api({
       url: '/check-room',
       data: { room_id },
+    })
+      .then((r) => r)
+      .catch((msg) => msg)
+
+    if (typeof data === 'string') return Promise.reject(data)
+    return Promise.resolve(data)
+  }
+
+  async getBackupState(): Promise<
+    | {
+        ok: boolean
+        state?: { [key: string]: any }
+        message?: string
+      }
+    | string
+  > {
+    const data = await this.api({
+      url: '/get-backup-state',
+      method: 'GET',
     })
       .then((r) => r)
       .catch((msg) => msg)

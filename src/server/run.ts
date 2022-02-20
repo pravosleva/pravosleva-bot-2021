@@ -67,13 +67,14 @@ class App {
     bot.use(session())
     bot.use(withBlackList)
 
+    // --- TODO: Refactoring. Make as middlewares:
     withStartLogic(bot)
     // withLabLogic(bot)
     withSmartpriceLogic(bot)
     // withFeedback(bot)
     withCianHelper(bot)
     withExpressChatHelper(bot)
-    // Others...
+    // ---
 
     bot.launch()
   }
