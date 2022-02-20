@@ -5,13 +5,13 @@ const blacklist = [
 const hasAccess = (from: any) => !blacklist.includes(from.id)
 
 export const withBlackList = async (ctx, next) => {
-  const update = ctx.update.message || ctx.update.callback_query
-  if (hasAccess(update.from)) {
-    next()
-    return
-  }
-
   try {
+    const update = ctx.update.message || ctx.update.callback_query
+    if (hasAccess(update.from)) {
+      next()
+      return
+    }
+
     await ctx.reply("You don't have access. Go away.")
   } catch (err) {
     console.log(err)
