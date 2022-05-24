@@ -11,7 +11,8 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],
-      "@cianHttpClient": ["./bot/withCianHelper/utils/httpClient"]
+      "@cianHttpClient": ["./bot/withCianHelper/utils/httpClient"],
+      "@autoruHttpClient": ["./bot/withAutoruHelper/utils/httpClient"]
     },
     "sourceMap": true,
     "esModuleInterop": true,

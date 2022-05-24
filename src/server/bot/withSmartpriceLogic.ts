@@ -178,8 +178,12 @@ export const withSmartpriceLogic = (bot: any) => {
                 'smartprice.online_tardein.local_dev'
               ),
               Markup.callbackButton(
-                '🔥 Test on smartprice-dev.ru 🔥',
+                'Test on smartprice-dev.ru',
                 'smartprice.online_tardein.test_on_dev'
+              ),
+              Markup.urlButton(
+                '🔥 Go OT on test.ringeo.ru',
+                'https://test.ringeo.ru/api/crm/ot/samsung_kz/eval'
               ),
               Markup.callbackButton(
                 'ℹ️ Как попасть в OT?',

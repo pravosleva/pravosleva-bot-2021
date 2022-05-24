@@ -53,3 +53,9 @@ _See `.env.example`_
   "staging": {}
 }
 ```
+
+## Yarn autoclean
+```bash
+yarn autoclean --init
+yarn autoclean --force
+```

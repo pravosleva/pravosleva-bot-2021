@@ -33,4 +33,6 @@ rules:
     'camelcase': 0,
     'no-underscore-dangle': 0,
     'no-shadow': 0,
+    'no-restricted-syntax': 0,
+    'guard-for-in': 0,
   }

@@ -23,7 +23,8 @@
   },
   "_moduleAliases": {
     "~": "./server-dist",
-    "@cianHttpClient": "./server-dist/bot/withCianHelper/utils/httpClient.js"
+    "@cianHttpClient": "./server-dist/bot/withCianHelper/utils/httpClient.js",
+    "@autoruHttpClient": "./server-dist/bot/withAutoruHelper/utils/httpClient.js"
   },
   "keywords": [],
   "author": "",

@@ -7,7 +7,9 @@ const hasAccess = (from: any) => !blacklist.includes(from.id)
 export const withBlackList = async (ctx, next) => {
   try {
     const update = ctx.update.message || ctx.update.callback_query
-    if (hasAccess(update.from)) {
+
+    // console.log(update)
+    if (!!update?.from && hasAccess(update.from)) {
       next()
       return
     }
