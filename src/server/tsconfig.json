@@ -11,6 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],
+      "@cianHelperUtils": ["./bot/withCianHelper/utils"],
       "@cianHttpClient": ["./bot/withCianHelper/utils/httpClient"],
       "@autoruHttpClient": ["./bot/withAutoruHelper/utils/httpClient"]
     },

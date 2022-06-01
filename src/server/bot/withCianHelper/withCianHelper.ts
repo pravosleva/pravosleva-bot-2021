@@ -173,6 +173,10 @@ export const withCianHelper = (bot) => {
           .then((data) => data)
           .catch((msg) => msg)
 
+        if (typeof response === 'string')
+          return ctx.reply(
+            `ERR: ${response || `response is ${typeof response}`}`
+          )
         if (response.offersSerialized) {
           const normalizedItems = response.offersSerialized
             .map((e: any) =>
@@ -186,7 +190,7 @@ export const withCianHelper = (bot) => {
             `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
         }
-        return ctx.reply('ERR:', response)
+        return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
         return ctx.reply('ERR')
       }
@@ -215,7 +219,7 @@ export const withCianHelper = (bot) => {
             `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
         }
-        return ctx.reply('ERR:', response)
+        return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
         return ctx.reply('ERR')
       }
@@ -294,7 +298,7 @@ export const withCianHelper = (bot) => {
             `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
         }
-        return ctx.reply('ERR:', response)
+        return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
         return ctx.reply('ERR')
       }
@@ -323,7 +327,7 @@ export const withCianHelper = (bot) => {
             `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
           )
         }
-        return ctx.reply('ERR:', response)
+        return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
         return ctx.reply('ERR')
       }

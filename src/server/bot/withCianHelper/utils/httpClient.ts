@@ -51,11 +51,47 @@ class Singleton {
     const source = createCancelTokenSource()
     this.cancelTokenSource1 = source
 
+    const cookies = {
+      __cf_bm:
+        'rn3fKnrdgEQ_vBQ0pebvtcOSNkK.o8NclQ5u6zou_ak-1654121042-0-Aax+wbfELcW10JxWYkxNFSicOZ3js38st851DIlOKt+7MOwX/BCTwf0Hm8ZfHgdQ91XdTB8VQHMgI5e0uZURhwo=',
+      _CIAN_GK: '316a20b3-3f62-46d1-92d2-6f56c4483e75',
+      adb: '1',
+      cf_clearance:
+        'liDoP.7sTzaV89HB7TnbUUqYLvkDNi2vDEPFFJEsXbM-1652197357-0-150',
+      cookie_agreement_accepted: '1',
+      login_mro_popup: '1',
+      serp_registration_trigger_popup: '1',
+      session_main_town_region_id: '1',
+      session_region_id: '1',
+      sopr_session: '508f3fd646f54ffd',
+      sopr_utm: '{"utm_source":+"google",+"utm_medium":+"organic"}',
+    }
+    // let cookiesAsString = ''
+    // for (const key in cookies) cookiesAsString += `${key}=${cookies[key]}; `
+    // const cookiesAsString = Object.keys(cookies).reduce((acc, key) => {
+    //   // Do anything...
+    //   return acc
+    // }, '')
+    const headers = {
+      'User-Agent':
+        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0',
+      Referer: 'https://www.cian.ru/',
+      Pragma: 'no-cache',
+      Origin: 'https://www.cian.ru',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-site',
+      Host: 'api.cian.ru',
+      'Alt-Used': 'api.cian.ru',
+      'Cache-Control': 'no-cache',
+    }
     const result = await this.axiosInstance({
       method: 'POST',
       url: '/search-offers/v2/search-offers-desktop/',
       data: config,
       // mode: 'cors',
+      cookies,
+      headers,
       cancelToken: this.cancelTokenSource1.token,
     })
       // .then((res: any) => res)
