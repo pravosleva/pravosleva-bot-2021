@@ -1,4 +1,4 @@
-// import { Telegraf, Markup, Extra } from 'telegraf'
+// import { Markup, Telegraf, Extra } from 'telegraf'
 import { Context } from 'telegraf/typings'
 import { localStateInstance, EScopeParams, ETargetParams } from './utils'
 import { httpClient as expressHttpClient } from '~/bot/withExpressChatHelper/utils/httpClient'
@@ -35,11 +35,7 @@ export const withStartLogic = (bot) => {
   })
 
   bot.command('start', async (ctx) => {
-    const {
-      reply,
-      deleteMessage,
-      // eplyWithMarkdown,
-    } = ctx
+    const { reply, deleteMessage } = ctx
 
     // -- NOTE base64
     // Encoder: https://base64.alanreed.org/
@@ -56,9 +52,46 @@ export const withStartLogic = (bot) => {
     const messages = ['Доброго времени суток!', '', 'ℹ️ Опции бота 👉 /help 👈']
     try {
       const parsedEntry = text.split(' ')
-      // SAMPLES:
-      // [ '/start', 'chat-invite_sp' ] -> scopeParam_targetParam
-      // [ '/start' ]
+
+      console.log('--')
+      console.log({ text, parsedEntry }) // NOTE: Sample for ?start-autopark: { text: '/start autopark', parsedEntry: [ '/start', 'autopark' ] }
+      console.log('--')
+
+      // -- NOTE: Autopark tool
+      if (parsedEntry.length === 2) {
+        switch (parsedEntry[1]) {
+          case ETargetParams.AutoPark: {
+            const cmd = '/autopark'
+            const update = {
+              message: {
+                ...ctx.update.message,
+                text: cmd,
+                entities: [
+                  {
+                    offset: 0,
+                    length: cmd.length,
+                    type: 'bot_command',
+                  },
+                ],
+              },
+            }
+            // await ctx.reply('Вы зашли в Автопарк')
+            // messages.push(`\n🏎️ Вы зашли в Автопарк...`)
+            bot.handleUpdate(update)
+            return
+            // return replyWithMarkdown(
+            //   Markup.urlButton(
+            //     'Перейти к проектам',
+            //     `http://pravosleva.ru/autopark-2022/${chatId}`
+            //   ),
+            // )
+            // break
+          }
+          default:
+            break
+        }
+      }
+      // --
 
       if (parsedEntry[1]) {
         const parsedParam = parsedEntry[1].split('_')
@@ -69,26 +102,6 @@ export const withStartLogic = (bot) => {
           case EScopeParams.InviteChat:
             if (targetParam) {
               switch (targetParam) {
-                case ETargetParams.AutoPark: {
-                  const cmd = '/autopark'
-                  const update = {
-                    message: {
-                      ...ctx.update.message,
-                      text: cmd,
-                      entities: [
-                        {
-                          offset: 0,
-                          length: cmd.length,
-                          type: 'bot_command',
-                        },
-                      ],
-                    },
-                  }
-                  await ctx.reply('Вы зашли в Автопарк')
-                  bot.handleUpdate(update)
-                  // return replyWithMarkdown(`http://pravosleva.ru/autopark-2022/${chatId}`)
-                  break
-                }
                 case ETargetParams.SP:
                 case ETargetParams.UXTest:
                 case ETargetParams.MFES:
