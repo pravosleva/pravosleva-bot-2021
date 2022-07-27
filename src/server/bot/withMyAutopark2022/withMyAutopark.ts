@@ -1,6 +1,9 @@
-import { Markup, BaseScene, Stage, Extra } from 'telegraf'
-import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
-import { exitKeyboard } from '~/bot/utils/exitKeyboard'
+import {
+  Markup,
+  // BaseScene, Stage, Extra,
+} from 'telegraf'
+// import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
+// import { exitKeyboard } from '~/bot/utils/exitKeyboard'
 import { httpClient } from './utils/httpClient'
 import { EAPIUserCode } from '~/bot/withExpressChatHelper/utils/types'
 import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
@@ -21,7 +24,11 @@ export const withMyAutopark = (bot: any) => {
     // console.log(data)
     if (typeof data === 'string') return ctx.replyWithMarkdown(`ERR: ${data}`)
 
-    const { reply, replyWithMarkdown, deleteMessage } = ctx
+    const {
+      reply,
+      replyWithMarkdown,
+      // deleteMessage,
+    } = ctx
     const delaySeconds = 15
 
     switch (data?.code) {
@@ -102,7 +109,7 @@ export const withMyAutopark = (bot: any) => {
   // })
 
   bot.action('autopark-2022.add-user', async (ctx: any) => {
-    const { reply, replyWithMarkdown, deleteMessage, answerCbQuery } = ctx
+    const { reply, replyWithMarkdown, answerCbQuery } = ctx
 
     // console.log(ctx.update)
 
@@ -122,7 +129,16 @@ export const withMyAutopark = (bot: any) => {
         switch (data.code) {
           case EAPIUserCode.Created:
             return replyWithMarkdown(
-              `✅ Пользователь создан успешно\nОдноразовый пароль: \`${data.password}\``
+              `✅ Пользователь создан успешно\nОдноразовый пароль: \`${data.password}\``,
+              Markup.inlineKeyboard([
+                Markup.urlButton(
+                  'Перейти к проектам',
+                  `${AUTOPARK_2022_BASE_URL}/${ctx.update.callback_query.from.id}`
+                ),
+              ])
+                .oneTime()
+                .resize()
+                .extra()
             )
           default:
             return replyWithMarkdown(
@@ -143,7 +159,7 @@ export const withMyAutopark = (bot: any) => {
   })
 
   bot.action('autopark-2022.get-report', async (ctx: any) => {
-    const { reply, replyWithMarkdown, deleteMessage, answerCbQuery } = ctx
+    const { reply, replyWithMarkdown, answerCbQuery } = ctx
 
     const data = await httpClient
       .getUserProjects({ chat_id: ctx.update.callback_query.from.id })

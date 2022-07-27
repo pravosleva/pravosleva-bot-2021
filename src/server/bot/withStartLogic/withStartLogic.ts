@@ -35,7 +35,11 @@ export const withStartLogic = (bot) => {
   })
 
   bot.command('start', async (ctx) => {
-    const { reply, deleteMessage, replyWithMarkdown } = ctx
+    const {
+      reply,
+      deleteMessage,
+      // eplyWithMarkdown,
+    } = ctx
 
     // -- NOTE base64
     // Encoder: https://base64.alanreed.org/
