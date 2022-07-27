@@ -1,6 +1,5 @@
 // import { Telegraf, Markup, Extra } from 'telegraf'
 import { Context } from 'telegraf/typings'
-import e from 'express'
 import { localStateInstance, EScopeParams, ETargetParams } from './utils'
 import { httpClient as expressHttpClient } from '~/bot/withExpressChatHelper/utils/httpClient'
 import {
@@ -25,7 +24,9 @@ export const withStartLogic = (bot) => {
     const messages = [
       '*Список команд:*',
       '',
-      '💬 Зарегистрироваться в чате - /invite',
+      '🏎️ AutoPark 2022 - /autopark',
+      '',
+      '💬 KanBan chat 2021 - /invite',
       '',
       '🏠 Найти съемное жилье, используя Циан API - /cian',
     ]
@@ -48,11 +49,7 @@ export const withStartLogic = (bot) => {
     // '/start chat-invite_sp'
     // chat-invite_sp
 
-    const messages = [
-      'Доброго времени суток!',
-      '',
-      'ℹ️ Для справки выполните /help',
-    ]
+    const messages = ['Доброго времени суток!', '', 'ℹ️ Опции бота 👉 /help 👈']
     try {
       const parsedEntry = text.split(' ')
       // SAMPLES:
@@ -68,6 +65,26 @@ export const withStartLogic = (bot) => {
           case EScopeParams.InviteChat:
             if (targetParam) {
               switch (targetParam) {
+                case ETargetParams.AutoPark: {
+                  const cmd = '/autopark'
+                  const update = {
+                    message: {
+                      ...ctx.update.message,
+                      text: cmd,
+                      entities: [
+                        {
+                          offset: 0,
+                          length: cmd.length,
+                          type: 'bot_command',
+                        },
+                      ],
+                    },
+                  }
+                  await ctx.reply('Вы зашли в Автопарк')
+                  bot.handleUpdate(update)
+                  // return replyWithMarkdown(`http://pravosleva.ru/autopark-2022/${chatId}`)
+                  break
+                }
                 case ETargetParams.SP:
                 case ETargetParams.UXTest:
                 case ETargetParams.MFES:
@@ -179,9 +196,9 @@ export const withStartLogic = (bot) => {
             break
           default:
             if (isDev) messages.push('Unknown scopeParam')
-            messages.push(
-              'Для регистрации в чате или сброса пароля выполните /invite'
-            )
+            // messages.push(
+            //   'Для регистрации в чате или сброса пароля выполните /invite'
+            // )
             break
         }
       }

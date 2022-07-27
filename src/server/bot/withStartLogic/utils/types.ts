@@ -6,4 +6,5 @@ export enum ETargetParams {
   SP = 'sp',
   UXTest = 'uxTest',
   MFES = 'mfes',
+  AutoPark = 'autopark',
 }

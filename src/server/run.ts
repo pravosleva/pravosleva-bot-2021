@@ -24,6 +24,7 @@ const {
   withExpressChatHelper,
   withBlackList,
   withAutoruHelper,
+  withMyAutopark,
 } = require('./bot')
 const { router } = require('./express-routers')
 
@@ -76,6 +77,7 @@ class App {
     withCianHelper(bot)
     withExpressChatHelper(bot)
     withAutoruHelper(bot)
+    withMyAutopark(bot)
     // ---
 
     bot.launch()
