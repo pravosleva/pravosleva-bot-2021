@@ -37,7 +37,9 @@ export const withMyAutopark = (bot: any) => {
       case EAPIUserCode.UserExists:
         try {
           const newData = await replyWithMarkdown(
-            `Пользователь существует\nОдноразовый пароль: \`${data.password}\``,
+            `Пользователь существует\nОдноразовый пароль: \`${
+              data.password || 'Не получен'
+            }\``,
             Markup.inlineKeyboard([
               Markup.urlButton(
                 'Настроить проекты',
