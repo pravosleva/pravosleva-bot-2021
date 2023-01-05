@@ -13,7 +13,7 @@ export const withSmartpriceLogic = (bot: any) => {
         'Choose anything:',
         Markup.inlineKeyboard(
           [
-            Markup.callbackButton('SSR, OT', 'smartprice.ssr'),
+            Markup.callbackButton('SSR', 'smartprice.ssr'),
             Markup.callbackButton('CRM', 'smartprice.crm'),
             Markup.callbackButton(
               'Offline Trade-In',
@@ -141,8 +141,12 @@ export const withSmartpriceLogic = (bot: any) => {
                 '⚙️ Local dev',
                 'smartprice.offline_tardein.local_dev'
               ),
+              Markup.urlButton(
+                '🔥 test.smartprice.ru/tradein',
+                'https://test.smartprice.ru/tradein/'
+              ),
             ],
-            { columns: 2 }
+            { columns: 1 }
           ).extra()
         )
       } catch (err) {
@@ -182,7 +186,7 @@ export const withSmartpriceLogic = (bot: any) => {
                 'smartprice.online_tardein.test_on_dev'
               ),
               Markup.urlButton(
-                '🔥 Go OT on test.ringeo.ru',
+                '🔥 test.ringeo.ru',
                 'https://test.ringeo.ru/api/crm/ot/samsung_kz/eval'
               ),
               Markup.callbackButton(
