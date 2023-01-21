@@ -24,7 +24,8 @@
   "_moduleAliases": {
     "~": "./server-dist",
     "@cianHttpClient": "./server-dist/bot/withCianHelper/utils/httpClient.js",
-    "@autoruHttpClient": "./server-dist/bot/withAutoruHelper/utils/httpClient.js"
+    "@autoruHttpClient": "./server-dist/bot/withAutoruHelper/utils/httpClient.js",
+    "@utils": "./server-dist/bot/utils"
   },
   "keywords": [],
   "author": "",

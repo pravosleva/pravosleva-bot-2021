@@ -178,17 +178,21 @@ export const withCianHelper = (bot) => {
             `ERR: ${response || `response is ${typeof response}`}`
           )
         if (response.offersSerialized) {
-          const normalizedItems = response.offersSerialized
+          const items = response.offersSerialized
             .map((e: any) =>
               withDistance({ ...e, from: ctx.session?.coords || null })
             )
             .sort(sortByDistanceDESC)
-            .map(getMinimalItemInfo)
-            .join('\n\n')
 
-          return ctx.replyWithMarkdown(
-            `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
+          ctx.replyWithMarkdown(
+            `---\n*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n---`
           )
+
+          for (let i = 0, max = items.length; i < max; i++) {
+            setTimeout(function timer() {
+              ctx.replyWithMarkdown(getMinimalItemInfo(items[i]))
+            }, i * 500)
+          }
         }
         return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
@@ -208,16 +212,19 @@ export const withCianHelper = (bot) => {
           .catch((msg) => msg)
 
         if (response.offersSerialized) {
-          const normalizedItems = response.offersSerialized
+          const items = response.offersSerialized
             .map((e: any) =>
               withDistance({ ...e, from: ctx.session?.coords || null })
             )
             .sort(sortByDistanceDESC)
-            .map(getMinimalItemInfo)
-            .join('\n\n')
-          return ctx.replyWithMarkdown(
-            `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
+          ctx.replyWithMarkdown(
+            `---\n*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n---`
           )
+          for (let i = 0, max = items.length; i < max; i++) {
+            setTimeout(function timer() {
+              ctx.replyWithMarkdown(getMinimalItemInfo(items[i]))
+            }, i * 500)
+          }
         }
         return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
@@ -287,16 +294,19 @@ export const withCianHelper = (bot) => {
           .catch((msg) => msg)
 
         if (response.offersSerialized) {
-          const normalizedItems = response.offersSerialized
+          const items = response.offersSerialized
             .map((e: any) =>
               withDistance({ ...e, from: ctx.session?.coords || null })
             )
             .sort(sortByDistanceDESC)
-            .map(getMinimalItemInfo)
-            .join('\n\n')
-          return ctx.replyWithMarkdown(
-            `*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
+          ctx.replyWithMarkdown(
+            `---\n*1-комн кв 30K: Нашлось ${response.offersSerialized.length}*\n---`
           )
+          for (let i = 0, max = items.length; i < max; i++) {
+            setTimeout(function timer() {
+              ctx.replyWithMarkdown(getMinimalItemInfo(items[i]))
+            }, i * 500)
+          }
         }
         return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
@@ -316,16 +326,19 @@ export const withCianHelper = (bot) => {
           .catch((msg) => msg)
 
         if (response.offersSerialized) {
-          const normalizedItems = response.offersSerialized
+          const items = response.offersSerialized
             .map((e: any) =>
               withDistance({ ...e, from: ctx.session?.coords || null })
             )
             .sort(sortByDistanceDESC)
-            .map(getMinimalItemInfo)
-            .join('\n\n')
-          return ctx.replyWithMarkdown(
-            `*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n\n${normalizedItems}`
+          ctx.replyWithMarkdown(
+            `---\n*1-комн кв 30-35K: Нашлось ${response.offersSerialized.length}*\n---`
           )
+          for (let i = 0, max = items.length; i < max; i++) {
+            setTimeout(function timer() {
+              ctx.replyWithMarkdown(getMinimalItemInfo(items[i]))
+            }, i * 500)
+          }
         }
         return ctx.reply(`ERR: ${response || `response is ${typeof response}`}`)
       } catch (err) {
