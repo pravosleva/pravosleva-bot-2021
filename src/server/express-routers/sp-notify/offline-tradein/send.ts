@@ -5,11 +5,10 @@
 // import { httpClient } from '~/bot/withMyAutopark2022/utils/httpClient'
 import { wasSentInTime } from '~/bot/utils/wasSentInTime'
 import { FreeDispatcher } from '~/bot/utils/FreeDispatcher'
+import { THelp } from '~/bot/utils/interfaces'
 
 // NOTE: Менеджер частоты доставки (x сообщений будут доставлены, независимо от временной задержки)
 const freeDispatcher = new FreeDispatcher({ defaultOddFree: 5 })
-
-// const { TG_BOT_TOKEN } = process.env
 
 type TTimersMap = Map<number, { ts: number }>
 const timersMap: TTimersMap = new Map()
@@ -137,28 +136,6 @@ class Utils {
     if (contragentsArr.length > 0) header += ` | ${contragentsArr.join(', ')}`
 
     return `*${header}*\n\n${res}\n\n[Full SmartPrice report](https://docs.google.com/spreadsheets/d/1NBXuyGlCznS0SJjJJX52vR3ZzqPAPM8LQPM_GX8T_Wc/edit#gid=36671662)`
-  }
-}
-
-export type THelp = {
-  params: {
-    body?: {
-      [key: string]: {
-        type: string
-        descr: string
-        required: boolean
-      }
-    }
-    query?: {
-      [key: string]: {
-        type: string
-        descr: string
-        required: boolean
-      }
-    }
-  }
-  res?: {
-    [key: string]: any
   }
 }
 
