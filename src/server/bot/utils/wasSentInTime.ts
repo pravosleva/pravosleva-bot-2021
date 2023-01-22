@@ -2,19 +2,22 @@
 import { getTimeAgo } from '~/bot/utils/getTimeAgo'
 import { convertMillisToMinutesAndSeconds } from '~/bot/utils/convertMillisToMinutesAndSeconds'
 
+export type TWasSentInTimeArgs = {
+  key: number
+  jsMap: Map<any, any>
+  delayMs: number
+}
+export type TWasSentInTimeResponse = {
+  isOk: boolean
+  message?: string
+}
+
 // NOTE: Derty function!
 export const wasSentInTime = ({
   key,
   jsMap,
   delayMs,
-}: {
-  key: number
-  jsMap: Map<any, any>
-  delayMs: number
-}): Promise<{
-  isOk: boolean
-  message?: string
-}> => {
+}: TWasSentInTimeArgs): Promise<TWasSentInTimeResponse> => {
   if (jsMap.has(key)) {
     const data = jsMap.get(key)
     if (!!data.ts && typeof data.ts === 'number') {
