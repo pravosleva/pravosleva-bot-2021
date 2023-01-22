@@ -1,7 +1,7 @@
 import cors from 'cors'
 import { getShadow } from './get-shadow'
 import { sendCode } from './autopark-2022/send-code'
-import { sendNotify } from './sp-notify/offline-tradein/send'
+import { spNotifyRouter } from './sp-notify'
 
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const bodyParser = require('body-parser')
@@ -17,6 +17,6 @@ router.use(bodyParser.json())
 
 router.use('/get-shadow', getShadow)
 router.use('/autopark-2022/send-code', sendCode)
-router.post('/sp-notify/offline-tradein/send', sendNotify)
+router.use('/sp-notify', spNotifyRouter)
 
 export { router }

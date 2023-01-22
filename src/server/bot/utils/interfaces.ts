@@ -1,3 +1,8 @@
+import { Request as IRequest } from 'express'
+// import { Telegraf } from 'telegraf'
+
+export type TModifiedRequest = IRequest & { bot: any }
+
 export type THelp = {
   params: {
     body?: {

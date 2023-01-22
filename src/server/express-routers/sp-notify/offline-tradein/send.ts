@@ -1,6 +1,8 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-promise-reject-errors */
+import { Response as IResponse } from 'express'
+import { TModifiedRequest } from '~/bot/utils/interfaces'
 import { FreeDispatcher } from '~/bot/utils/notify-tools/FreeDispatcher'
 import {
   Utils,
@@ -8,19 +10,22 @@ import {
   QueueDisparcher,
 } from '~/bot/utils/notify-tools/offline-tradein'
 
+// NOTE: x сообщений будут доставлены, независимо от временной задержки
+const unlimitedFreeMessagesNumber = 5
+
+// NOTE: Персональные очререди для пользователей
 const queueDispatcher = new QueueDisparcher({
   defaultDelay: 1000 * 60 * 1, // -> 10 min
-  differenceMessagesPackLimit: 3,
+  differenceMessagesPackLimit: unlimitedFreeMessagesNumber,
 })
 
-// NOTE: Менеджер частоты доставки (x сообщений будут доставлены, независимо от временной задержки)
-const freeDispatcher = new FreeDispatcher({ defaultOddFree: 3 })
+// NOTE: Менеджер частоты доставки
+const freeDispatcher = new FreeDispatcher({
+  defaultOddFree: unlimitedFreeMessagesNumber,
+})
 
-export const sendNotify = async (req, res) => {
-  // console.log(req.body)
+export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   const { chat_id, delay } = req.body
-  // const delayLimit =
-  // const _modifiedDelay = !!delay && isNumber(delay) ? delay
 
   // -- NOTE: Errs handler (TODO: Make as middleware)
   const errs: string[] = []
@@ -60,7 +65,6 @@ export const sendNotify = async (req, res) => {
     return res.status(200).send({ ok: false, message: 'Unnecessary case' })
 
   const { rowValues, resultId } = req.body
-  // const initialState = { msgs: [], rows: [], ids: [] }
 
   switch (true) {
     // NOTE: 3. SEND NOW?
@@ -68,13 +72,10 @@ export const sendNotify = async (req, res) => {
       // -- SEND LOGIC
       const hasChat = queueDispatcher.hasChat({ chat_id })
       if (hasChat) {
-        // console.log('3.1')
-        // NOTE: 3.1. Get queue -> reset timer & reset queue
+        // NOTE: 3.1. Get queue -> reset timer & reset queue & send current queue state
         const queueNow = queueDispatcher.getChatData({ chat_id }) // queueMap.get(chat_id)
         if (Array.isArray(queueNow.msgs) && queueNow.msgs.length > 0) {
-          // queueMap.set(chat_id, { ...initialState, delay: 1 })
           queueDispatcher.resetChat({ chat_id })
-
           queueNow.msgs.push(md)
           queueNow.rows.push(rowValues)
           queueNow.ids.push(resultId)
@@ -99,7 +100,7 @@ export const sendNotify = async (req, res) => {
               }
               break
             default: {
-              // NOTE: 3.1.1.2 More than limit?
+              // NOTE: 3.1.1.2 More than limit? Send special common single msg
               const singleMessage = utils.getSingleMessageMD({
                 queueState: queueNow,
               })
@@ -109,16 +110,12 @@ export const sendNotify = async (req, res) => {
                 })
               )
               // TODO: How to send link as button? setTimeout(async () => { tgResp.push() }, 500)
-
               break
             }
           }
         } else {
-          // console.log('3.1.2')
-          // NOTE: 3.1.2 Send single msg
-          // queueMap.set(chat_id, initialState) // Reset queue state
+          // NOTE: 3.1.2 Reset queue state & Send single msg
           queueDispatcher.resetChat({ chat_id })
-
           tgResp = [
             await req.bot.telegram.sendMessage(chat_id, md, {
               parse_mode: 'Markdown',
@@ -126,11 +123,8 @@ export const sendNotify = async (req, res) => {
           ]
         }
       } else {
-        // console.log('3.2')
-        // NOTE: 3.2 Send single msg
-        // queueMap.set(chat_id, initialState) // Reset queue state
+        // NOTE: 3.2 Reset queue state & Send single msg
         queueDispatcher.resetChat({ chat_id })
-
         tgResp = [
           await req.bot.telegram.sendMessage(chat_id, md, {
             parse_mode: 'Markdown',
@@ -158,7 +152,6 @@ export const sendNotify = async (req, res) => {
     }
     // NOTE: 4. Add to queue
     default: {
-      // console.log('4')
       queueDispatcher.addItem({
         chat_id,
         msg: md,

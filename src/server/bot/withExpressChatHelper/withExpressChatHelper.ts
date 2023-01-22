@@ -213,7 +213,11 @@ export const withExpressChatHelper = (bot: any) => {
   })
 
   bot.command('chat_admin', async (ctx: any) => {
-    const { reply, replyWithMarkdown, deleteMessage } = ctx
+    const {
+      reply,
+      // replyWithMarkdown,
+      deleteMessage,
+    } = ctx
     const delaySeconds = 30
 
     if (!ctx.message?.from?.username)
@@ -225,7 +229,10 @@ export const withExpressChatHelper = (bot: any) => {
       console.log(err)
     }
 
-    const { username, id } = ctx.update.message.from
+    const {
+      username,
+      // id,
+    } = ctx.update.message.from
 
     if (username !== 'pravosleva') {
       return reply('⛔ Доступ закрыт')
@@ -259,7 +266,12 @@ export const withExpressChatHelper = (bot: any) => {
   })
 
   bot.action('express-chat-helper.backup-state', async (ctx: any) => {
-    const { reply, replyWithMarkdown, deleteMessage, answerCbQuery } = ctx
+    const {
+      reply,
+      replyWithMarkdown,
+      // deleteMessage,
+      answerCbQuery,
+    } = ctx
 
     // try { deleteMessage() }
     // catch (err) { console.log(err) }
