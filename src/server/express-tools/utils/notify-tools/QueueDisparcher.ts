@@ -1,13 +1,15 @@
 /* eslint-disable no-return-await */
 /* eslint-disable no-loop-func */
 /* eslint-disable no-nested-ternary */
+import { Response as IResponse } from 'express'
 import {
   wasSentInTime,
   TWasSentInTimeResponse,
 } from '~/bot/utils/wasSentInTime'
 import { TQueueState } from './interfaces'
 import { isNumber } from '~/bot/utils/isNumber'
-import { Utils } from './offline-tradein/upload-wizard/Utils'
+import { freeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatcher'
+import { Utils } from '~/express-tools/utils/notify-tools/Utils'
 
 type TTimersMap = Map<number, { ts: number }>
 
@@ -48,6 +50,7 @@ export class QueueDisparcher {
   }
 
   init({ chat_id, delay }: { chat_id: number; delay?: number }): void {
+    freeDispatcher.init({ chat_id })
     if (!this.queueMap.has(chat_id))
       this.queueMap.set(chat_id, {
         ...initialState,
@@ -81,7 +84,7 @@ export class QueueDisparcher {
     this.tsMap.set(chat_id, { ts: new Date().getTime() })
   }
 
-  addItem({
+  _addItemToQueue({
     chat_id,
     msg,
     row,
@@ -132,7 +135,7 @@ export class QueueDisparcher {
       : { value: 0, message: 'No chat_id' }
   }
 
-  async sendNow<TR>(arg: {
+  async _sendNow<TR>(arg: {
     chat_id: number
     newItem?: {
       msg: string
@@ -258,7 +261,7 @@ export class QueueDisparcher {
         )
       if (queueState && !!this.botInstance) {
         // NOTE: Отправляем все что есть в очереди
-        this.sendNow({
+        this._sendNow({
           chat_id,
           targetAction: async ({ msg, chat_id }) => {
             return await this.botInstance.telegram.sendMessage(chat_id, msg, {
@@ -282,16 +285,147 @@ export class QueueDisparcher {
   // NOTE: При отправке ивента на этот сервер можно передать параметр delay
   // для его переустановки для конкретного пользователя:
   // TODO: setDelay({ chat_id , value }) {}
+
+  async add({
+    chat_id,
+    newItem,
+    utils,
+    res,
+    onFail,
+    onSendNow,
+    onSendLater,
+    reqBody,
+  }: {
+    chat_id: number
+    res?: IResponse
+    onFail: ({ res }: { res?: IResponse }) => void
+    onSendNow: ({
+      res,
+    }: {
+      res?: IResponse
+      toClient: { [key: string]: any }
+    }) => void
+    onSendLater: ({
+      res,
+    }: {
+      res?: IResponse
+      toClient: { [key: string]: any }
+    }) => void
+    newItem: {
+      row: any[][]
+      id: number
+      ts: number
+    }
+    reqBody: {
+      rowValues: any[][]
+      resultId: number
+      delay?: number
+      oddFree?: number
+    }
+    utils: Utils
+  }) {
+    const md = utils.getSingleMessageMD()
+    const { isNotifUselessness } = utils
+
+    if (isNotifUselessness) return await onFail({ res })
+
+    const { rowValues, resultId } = reqBody
+
+    // 1. Check timers in this startup session; sample { isOk: true, message: 'Ok' }
+    const isSentInTime = await this.isSentInTimePromise({
+      chat_id,
+    })
+
+    // 2. Get user data - httpClient.checkUser({ chat_id })
+    let data: any
+    let tgResp: any[] = []
+
+    switch (true) {
+      // NOTE: 3. Send now or later?
+      case isSentInTime.isOk || freeDispatcher.isAllowed({ chat_id }): {
+        // -- SEND LOGIC
+        tgResp = await this._sendNow<any[]>({
+          chat_id,
+          utils,
+          newItem: {
+            msg: md,
+            ...newItem,
+          },
+          targetAction: async ({ msg, chat_id }) => {
+            return await this.botInstance.telegram.sendMessage(chat_id, msg, {
+              parse_mode: 'Markdown',
+            })
+          },
+          cb: (q) => {
+            q.resetTimestamp({ chat_id })
+            freeDispatcher.fix({ chat_id })
+          },
+        })
+        // --
+
+        const toClient: any = {
+          ok: true,
+          data,
+          originalBody: reqBody,
+          _serviceInfo: {
+            'freeDispatcher.getChatState': freeDispatcher.getChatState({
+              chat_id,
+            }),
+            'queueDispatcher.getQueueState': this.getQueueState({
+              chat_id,
+            }),
+          },
+        }
+        if (tgResp.length > 0) toClient.tgResp = tgResp
+
+        return await onSendNow({ res, toClient })
+      }
+      // NOTE: 4. Add to queue
+      default: {
+        this._addItemToQueue({
+          chat_id,
+          msg: md,
+          row: rowValues,
+          id: resultId,
+          ts: newItem.ts,
+          delay: reqBody.delay,
+          utils,
+        })
+        const queueLengthResult = this.getQueueState({
+          chat_id,
+        })
+
+        return await onSendLater({
+          res,
+          toClient: {
+            ok: false,
+            message:
+              isSentInTime.message ||
+              `No isSentInTime.message or !freeDispatcher.isAllowed({ chat_id: ${chat_id} })`,
+            _serviceInfo: {
+              'freeDispatcher.getChatState': freeDispatcher.getChatState({
+                chat_id,
+              }),
+              'freeDispatcher.isAllowed': freeDispatcher.isAllowed({ chat_id }),
+              'queueDispatcher.getQueueState': queueLengthResult,
+            },
+            _originalBody: reqBody,
+          },
+        })
+      }
+    }
+  }
 }
 
 // NOTE: Персональные очереди для пользователей (с таймером)
 export const queueDispatcher = QueueDisparcher.getInstance({
   // NOTE: Время, не чаще которого беспокоить пользователя
   // defaultDelay: 1000 * 60 * 1, // 1 min
-  defaultDelay: 1000 * 60 * 30, // 30 min
+  defaultDelay: 1000 * 60 * 5,
+  // defaultDelay: 1000 * 60 * 30, // 30 min
   // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
 
   // NOTE: Количество сообщений в очереди, которые можно отправить подряд по одному
-  differentMsgsLimitNumber: 2,
+  differentMsgsLimitNumber: 1,
 })

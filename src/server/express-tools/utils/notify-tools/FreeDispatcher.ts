@@ -60,15 +60,18 @@ class FreeDispatcher {
     return this.cacheMap.get(chat_id) || null
   }
 
-  // getLimit({ chat_id }): number {
-  //   return this.cacheMap.has(chat_id)
-  //     ? this.cacheMap.get(chat_id).free
-  //     : this.defaultOddFree
-  // }
+  setOddFree({ chat_id, value }: { chat_id: number; value?: number }): void {
+    const chatState = this.cacheMap.get(chat_id)
+    if (chatState) {
+      const newState = { ...chatState }
+      if ((!!value || value === 0) && isNumber(value)) newState.free = value
+      this.cacheMap.set(chat_id, newState)
+    }
+  }
 }
 
 // NOTE: Менеджер частоты доставки
 // (без таймера, только учет количества + допустимое количество возможных сообщений вне очереди)
 export const freeDispatcher = new FreeDispatcher({
-  defaultOddFree: 5, // NOTE: x сообщений будут доставлены, независимо от временной задержки
+  defaultOddFree: 2, // NOTE: x сообщений будут доставлены, независимо от временной задержки
 })

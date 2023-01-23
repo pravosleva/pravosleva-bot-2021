@@ -1,56 +1,15 @@
+/* eslint-disable no-useless-constructor */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { getTimeAgo } from '~/bot/utils/getTimeAgo'
 import { TQueueState } from '~/express-tools/utils/notify-tools/interfaces'
+import { Utils } from '~/express-tools/utils/notify-tools/Utils'
 
 const commonHeader = 'SP Offline Trade-In notifier'
 
-enum EEventCodes {
-  UPLOAD_ERR = 'upload_err',
-  UPLOAD_OK = 'upload_ok',
-  USER_REPORT = 'user_report',
-  TRDEIN_ID_ENTERED = 'tradein_id_entered',
-}
-type TNotifyCodesMap = {
-  [key in EEventCodes]: {
-    symbol: string
-    descr: string
-    doNotify: boolean
-    validate?: (rowValues: any[]) => boolean
+export class SPOfflineTradeInUploadWizardUtils extends Utils {
+  constructor(ps: { req: any }) {
+    super(ps)
   }
-}
-
-export class Utils {
-  req: any
-  constructor({ req }) {
-    this.req = req
-  }
-  get notifyCodes(): TNotifyCodesMap {
-    return {
-      [EEventCodes.UPLOAD_ERR]: {
-        symbol: '⛔',
-        descr: 'Ошибка загрузки файла',
-        doNotify: true,
-      },
-      [EEventCodes.UPLOAD_OK]: {
-        symbol: '✅',
-        descr: 'Все файлы загруженны',
-        doNotify: true,
-        // NOTE: Отправка требуется только для последнего фото
-        validate: (rowValues: any[]): boolean => rowValues[4] === rowValues[8],
-      },
-      [EEventCodes.USER_REPORT]: {
-        symbol: 'ℹ️',
-        descr: 'Пользователь сообщил об ошибке',
-        doNotify: true,
-      },
-      [EEventCodes.TRDEIN_ID_ENTERED]: {
-        symbol: '⌨️',
-        descr: 'Пользователь ввел tradein_id',
-        doNotify: false,
-      },
-    }
-  }
-
   // NOTE: One message
   getSingleMessageMD() {
     const { rowValues } = this.req.body
@@ -148,7 +107,7 @@ export class Utils {
       if (!msgsObj[eventCode])
         msgsObj[eventCode] = {
           counter: 1,
-          msg: `${eventCode}`, // NOTE: Universal message for all items! // index from #${fromIndex}
+          msg: eventCode, // NOTE: Universal message for all items! // index from #${fromIndex}
           // : ${this.notifyCodes[eventCode]?.descr || 'No descr'}
           partners,
           fromIndex,
@@ -180,11 +139,11 @@ export class Utils {
               msgsObj[key].msg
             } | ${Array.from(msgsObj[key].partners).join(', ')}\`\n\n\`#${
               msgsObj[key].fromIndex
-            }\` - first table index / ${getTimeAgo(
+            }\` __first table index (${getTimeAgo(
               msgsObj[key].firstDate
-            )}\n\`#${
+            )})__\n\`#${
               msgsObj[key].lastIndex
-            }\` - last table index / ${getTimeAgo(msgsObj[key].lastDate)}`
+            }\` __last table index (${getTimeAgo(msgsObj[key].lastDate)})__`
         )
         .join('\n\n')
     }

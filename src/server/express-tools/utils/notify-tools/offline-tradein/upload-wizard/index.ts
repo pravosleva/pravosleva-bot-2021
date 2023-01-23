@@ -1,2 +1,2 @@
-export * from './Utils'
+export * from './SPOfflineTradeInUploadWizardUtils'
 export * from './_help'
