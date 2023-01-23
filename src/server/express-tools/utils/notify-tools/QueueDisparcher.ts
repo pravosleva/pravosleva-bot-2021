@@ -131,15 +131,15 @@ export class QueueDisparcher {
     }: {
       msg: string
       chat_id: number
-    }) => Promise<TR>
+    }) => Promise<any>
     utils: Utils
     cb: (q: QueueDisparcher) => void
-  }): Promise<any> {
+  }): Promise<TR> {
     const { newItem, targetAction, utils, cb } = arg
     const { chat_id, msg, row, id, ts } = newItem
 
     const hasChat = this.hasChat({ chat_id })
-    let tgResp = []
+    let tgResp: any = []
     if (hasChat) {
       const queueNow = this.getChatData({ chat_id })
       if (Array.isArray(queueNow.msgs) && queueNow.msgs.length > 0) {
