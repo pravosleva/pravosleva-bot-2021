@@ -1,3 +1,4 @@
+/* eslint-disable no-return-await */
 /* eslint-disable no-loop-func */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-promise-reject-errors */
@@ -40,72 +41,25 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
     // NOTE: 3. SEND NOW?
     case isSentInTime.isOk || freeDispatcher.isAllowed({ chat_id }): {
       // -- SEND LOGIC
-      const hasChat = queueDispatcher.hasChat({ chat_id })
-      if (hasChat) {
-        // NOTE: 3.1. Get queue -> reset timer & reset queue & send current queue state
-        const queueNow = queueDispatcher.getChatData({ chat_id }) // queueMap.get(chat_id)
-        if (Array.isArray(queueNow.msgs) && queueNow.msgs.length > 0) {
-          queueDispatcher.resetChat({ chat_id })
-          queueNow.msgs.push(md)
-          queueNow.rows.push(rowValues)
-          queueNow.ids.push(resultId)
-          queueNow.tss.push(ts)
-
-          // NOTE: 3.1.1 Send some msgs
-          const differentMsgsLimitNumber = 3
-          // NOTE: Если больше - отправка будет одним общим сообщением
-          switch (true) {
-            // NOTE: 3.1.1.1 Less than limit?
-            case queueNow.msgs.length <= differentMsgsLimitNumber:
-              for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
-                setTimeout(async () => {
-                  tgResp.push(
-                    await req.bot.telegram.sendMessage(
-                      chat_id,
-                      queueNow.msgs[i],
-                      {
-                        parse_mode: 'Markdown',
-                      }
-                    )
-                  )
-                }, i * 500)
-              }
-              break
-            default: {
-              // NOTE: 3.1.1.2 More than limit? Send special common single msg
-              const singleMessage = utils.getSingleMessageMD({
-                queueState: queueNow,
-              })
-              tgResp.push(
-                await req.bot.telegram.sendMessage(chat_id, singleMessage, {
-                  parse_mode: 'Markdown',
-                })
-              )
-              // TODO: How to send link as button? setTimeout(async () => { tgResp.push() }, 500)
-              break
-            }
-          }
-        } else {
-          // NOTE: 3.1.2 Reset queue state & Send single msg
-          queueDispatcher.resetChat({ chat_id })
-          tgResp = [
-            await req.bot.telegram.sendMessage(chat_id, md, {
-              parse_mode: 'Markdown',
-            }),
-          ]
-        }
-      } else {
-        // NOTE: 3.2 Reset queue state & Send single msg
-        queueDispatcher.resetChat({ chat_id })
-        tgResp = [
-          await req.bot.telegram.sendMessage(chat_id, md, {
+      tgResp = await queueDispatcher.sendNow({
+        utils,
+        newItem: {
+          chat_id,
+          msg: md,
+          row: rowValues,
+          id: resultId,
+          ts,
+        },
+        targetAction: async ({ msg, chat_id }) => {
+          return await req.bot.telegram.sendMessage(chat_id, msg, {
             parse_mode: 'Markdown',
-          }),
-        ]
-      }
-
-      queueDispatcher.resetTimer({ chat_id })
-      freeDispatcher.fix({ chat_id })
+          })
+        },
+        cb: (q) => {
+          q.resetTimer({ chat_id })
+          freeDispatcher.fix({ chat_id })
+        },
+      })
       // --
 
       const toClient: any = {

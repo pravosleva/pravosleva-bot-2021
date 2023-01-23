@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 /* eslint-disable no-nested-ternary */
 import {
   wasSentInTime,
@@ -5,6 +6,7 @@ import {
 } from '~/bot/utils/wasSentInTime'
 import { TQueueState } from './interfaces'
 import { isNumber } from '~/bot/utils/isNumber'
+import { Utils } from './Utils'
 
 type TTimersMap = Map<number, { ts: number }>
 
@@ -113,6 +115,83 @@ export class QueueDisparcher {
         ? { value: this.queueMap.get(chat_id).msgs?.length }
         : { value: 0, message: 'ERR1: No length' }
       : { value: 0, message: 'No chat_id' }
+  }
+
+  async sendNow({
+    newItem,
+    targetAction,
+    utils,
+    cb,
+  }: {
+    newItem: {
+      chat_id: number
+      msg: string
+      row: any[][]
+      id: number
+      ts: number
+    }
+    targetAction: ({
+      msg,
+      chat_id,
+    }: {
+      msg: string
+      chat_id: number
+    }) => Promise<any>
+    utils: Utils
+    cb: (q: QueueDisparcher) => void
+  }): Promise<any> {
+    const { chat_id, msg, row, id, ts } = newItem
+
+    const hasChat = this.hasChat({ chat_id })
+    let tgResp = []
+    if (hasChat) {
+      const queueNow = this.getChatData({ chat_id })
+      if (Array.isArray(queueNow.msgs) && queueNow.msgs.length > 0) {
+        this.resetChat({ chat_id })
+        queueNow.msgs.push(msg)
+        queueNow.rows.push(row)
+        queueNow.ids.push(id)
+        queueNow.tss.push(ts)
+
+        // NOTE: 3.1.1 Send some msgs
+        const differentMsgsLimitNumber = 3
+        // NOTE: Если больше - отправка будет одним общим сообщением
+        switch (true) {
+          // NOTE: 3.1.1.1 Less than limit?
+          case queueNow.msgs.length <= differentMsgsLimitNumber:
+            for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
+              setTimeout(async () => {
+                tgResp.push(await targetAction({ msg, chat_id }))
+              }, i * 500)
+            }
+            break
+          default: {
+            // NOTE: 3.1.1.2 More than limit? Send special common single msg
+            tgResp.push(
+              await targetAction({
+                msg: utils.getSingleMessageMD({
+                  queueState: queueNow,
+                }),
+                chat_id,
+              })
+            )
+            // TODO: How to send link as button? setTimeout(async () => { tgResp.push() }, 500)
+            break
+          }
+        }
+      } else {
+        // NOTE: 3.1.2 Reset queue state & Send single msg
+        this.resetChat({ chat_id })
+        tgResp = [await targetAction({ msg, chat_id })]
+      }
+    } else {
+      // NOTE: 3.2 Reset queue state & Send single msg
+      this.resetChat({ chat_id })
+      tgResp = [await targetAction({ msg, chat_id })]
+    }
+    if (cb) cb(this)
+
+    return tgResp
   }
 }
 
