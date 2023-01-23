@@ -426,6 +426,7 @@ export const queueDispatcher = QueueDisparcher.getInstance({
   // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
 
-  // NOTE: Количество сообщений в очереди, которые можно отправить подряд по одному
+  // NOTE: Количество сообщений в очереди, когда можно отправить подряд по одному
+  // (если в очереди больше, то отправится все одним сообщением)
   differentMsgsLimitNumber: 1,
 })
