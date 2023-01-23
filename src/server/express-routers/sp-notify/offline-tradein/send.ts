@@ -10,22 +10,21 @@ import {
   QueueDisparcher,
 } from '~/bot/utils/notify-tools/offline-tradein'
 
-// NOTE: x сообщений будут доставлены, независимо от временной задержки
-const unlimitedFreeMessagesNumber = 5
-
-// NOTE: Персональные очререди для пользователей
+// NOTE: Персональные очререди для пользователей (с таймером)
 const queueDispatcher = new QueueDisparcher({
-  defaultDelay: 1000 * 60 * 1, // -> 10 min
-  differenceMessagesPackLimit: unlimitedFreeMessagesNumber,
+  defaultDelay: 1000 * 60 * 1,
+  // NOTE: 1000 * 60 * 10 (10 min)
+  // NOTE: 1000 * 60 * 60 * 1 (1 hour)
+  // NOTE: 1000 * 60 * 60 * 24 * 1 (1 day)
 })
 
-// NOTE: Менеджер частоты доставки
+// NOTE: Менеджер частоты доставки (без таймера, только учет количества)
 const freeDispatcher = new FreeDispatcher({
-  defaultOddFree: unlimitedFreeMessagesNumber,
+  defaultOddFree: 5, // NOTE: x сообщений будут доставлены, независимо от временной задержки
 })
 
 export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
-  const { chat_id, delay } = req.body
+  const { chat_id, delay, oddFree, ts } = req.body
 
   // -- NOTE: Errs handler (TODO: Make as middleware)
   const errs: string[] = []
@@ -45,7 +44,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   // --
 
   queueDispatcher.init({ chat_id, delay })
-  freeDispatcher.init({ chat_id })
+  freeDispatcher.init({ chat_id, oddFree })
 
   // NOTE: v2
   // 1. Check timers in this startup session
@@ -79,12 +78,13 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           queueNow.msgs.push(md)
           queueNow.rows.push(rowValues)
           queueNow.ids.push(resultId)
+          queueNow.tss.push(ts)
 
           // NOTE: 3.1.1 Send some msgs
           // NOTE: Если больше - отправка будет одним общим сообщением
           switch (true) {
             // NOTE: 3.1.1.1 Less than limit?
-            case queueNow.msgs.length <= queueDispatcher.limit:
+            case queueNow.msgs.length <= freeDispatcher.getLimit({ chat_id }):
               for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
                 setTimeout(async () => {
                   tgResp.push(
@@ -144,6 +144,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           'freeDispatcher.getChatState': freeDispatcher.getChatState({
             chat_id,
           }),
+          'queueDispatcher.getQueueLength': queueDispatcher.getQueueLength({
+            chat_id,
+          }),
         },
       }
       if (tgResp.length > 0) toClient.tgResp = tgResp
@@ -157,6 +160,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         msg: md,
         row: rowValues,
         id: resultId,
+        ts,
         delay,
       })
 
@@ -170,6 +174,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
             chat_id,
           }),
           'freeDispatcher.isAllowed': freeDispatcher.isAllowed({ chat_id }),
+          'queueDispatcher.getQueueLength': queueDispatcher.getQueueLength({
+            chat_id,
+          }),
         },
         _originalBody: req.body,
       })

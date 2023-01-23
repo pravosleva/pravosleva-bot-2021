@@ -7,26 +7,20 @@ import { isNumber } from '~/bot/utils/isNumber'
 
 type TTimersMap = Map<number, { ts: number }>
 
-const initialState = { msgs: [], rows: [], ids: [] }
+const initialState = { msgs: [], rows: [], ids: [], tss: [] }
 
 type TQueueArgs = {
   defaultDelay?: number
-  differenceMessagesPackLimit?: number
 }
 
 export class QueueDisparcher {
   queueMap: Map<number, TQueueState>
   defaultDelay: number
   timersMap: TTimersMap
-  differenceMessagesPackLimit: number
 
-  constructor({ defaultDelay, differenceMessagesPackLimit }: TQueueArgs) {
+  constructor({ defaultDelay }: TQueueArgs) {
     this.defaultDelay =
       !!defaultDelay && isNumber(defaultDelay) ? defaultDelay : 1000 * 60 * 10 // 10 min
-    this.differenceMessagesPackLimit =
-      !!differenceMessagesPackLimit && isNumber(differenceMessagesPackLimit)
-        ? differenceMessagesPackLimit
-        : 5
     this.queueMap = new Map()
     this.timersMap = new Map()
   }
@@ -70,12 +64,14 @@ export class QueueDisparcher {
     msg,
     row,
     id,
+    ts,
     delay,
   }: {
     chat_id: number
     msg: string
     row: any[][]
     id: number
+    ts: number
     delay?: number
   }): void {
     const queue = this.queueMap.get(chat_id)
@@ -84,22 +80,26 @@ export class QueueDisparcher {
       queue.msgs.push(msg)
       queue.rows.push(row)
       queue.ids.push(id)
+      queue.tss.push(ts)
       this.queueMap.set(chat_id, queue)
     } else {
       this.queueMap.set(chat_id, {
         msgs: [msg],
         rows: [row],
         ids: [id],
+        tss: [ts],
         delay: !!delay && isNumber(delay) ? delay : this.defaultDelay,
       })
     }
   }
 
-  get limit(): number {
-    return this.differenceMessagesPackLimit
-  }
-
   hasChat({ chat_id }: { chat_id: number }): boolean {
     return this.queueMap.has(chat_id)
+  }
+
+  getQueueLength({ chat_id }): number | null {
+    return this.queueMap.has(chat_id)
+      ? this.queueMap.get(chat_id).msgs?.length || null
+      : null
   }
 }

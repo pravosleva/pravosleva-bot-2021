@@ -1,3 +1,5 @@
+import { isNumber } from '~/bot/utils/isNumber'
+
 type TChatState = { counter: number; free: number }
 type TFreeDispatchMap = Map<number, TChatState>
 
@@ -13,7 +15,10 @@ export class FreeDispatcher {
     if (!this.cacheMap.has(chat_id))
       this.cacheMap.set(chat_id, {
         counter: 0,
-        free: oddFree || this.defaultOddFree,
+        free:
+          (!!oddFree || oddFree === 0) && isNumber(oddFree)
+            ? oddFree
+            : this.defaultOddFree,
       })
   }
 
@@ -44,5 +49,11 @@ export class FreeDispatcher {
 
   getChatState({ chat_id }: { chat_id: number }): TChatState {
     return this.cacheMap.get(chat_id) || null
+  }
+
+  getLimit({ chat_id }): number {
+    return this.cacheMap.has(chat_id)
+      ? this.cacheMap.get(chat_id).free
+      : this.defaultOddFree
   }
 }

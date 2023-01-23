@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { getTimeAgo } from '../../getTimeAgo'
 import { TQueueState } from './interfaces'
+
+const commonHeader = 'SP Offline Trade-In notifier'
 
 export class Utils {
   req: any
@@ -10,20 +13,24 @@ export class Utils {
     return {
       upload_err: {
         symbol: '⛔',
+        // descr: 'Ошибка загрузки файла',
         doNotify: true,
       },
       upload_ok: {
         symbol: '✅',
+        // descr: 'Все файлы загруженны',
         doNotify: true,
         // NOTE: Отправка требуется только для последнего фото
         validate: (rowValues: any[]): boolean => rowValues[4] === rowValues[8],
       },
       user_report: {
         symbol: 'ℹ️',
+        // descr: 'Пользователь сообщил об ошибке',
         doNotify: true,
       },
       tradein_id_entered: {
         symbol: '⌨️',
+        // descr: 'Пользователь ввел tradein_id',
         doNotify: false,
       },
     }
@@ -67,9 +74,9 @@ export class Utils {
     }
     const jsonFromBack = getBackResponseMD(originalServerResponseStr)
 
-    result += `*SP notify${
-      this.req.body.resultId ? ` #${this.req.body.resultId}` : ''
-    } | ${partnerName} ${tradeinId || '?'}*\n\n${
+    result += `*${commonHeader}${
+      this.req.body.resultId ? ` | #${this.req.body.resultId}` : ''
+    } ${partnerName} ${tradeinId || '?'}*\n\n${
       this.notifyCodes[eventCode].symbol
     } \`${eventCode} (${curFileCounter} of ${totalFilesLeftCounter})\`${
       additionalInfo ? `\n\n${additionalInfo}` : ''
@@ -89,13 +96,16 @@ export class Utils {
     )
   }
   getSingleMessageMD({ queueState }: { queueState: TQueueState }) {
-    const header = `SP notify (${queueState.ids.length} events)`
+    const header = `${commonHeader} | ${queueState.ids.length} events`
     const msgsObj: {
       [key: string]: {
         counter: number
         msg: string
         partners: Set<string>
         fromIndex: number
+        lastIndex: number
+        firstDate: Date
+        lastDate: Date
       }
     } = {}
     let res = ''
@@ -103,8 +113,11 @@ export class Utils {
 
     for (let i = 0, max = queueState.ids.length; i < max; i++) {
       const rowValues = queueState.rows[i]
+      const firstDate = new Date(queueState.tss[i])
+      const lastDate = new Date(queueState.tss[i])
       const eventCode = rowValues[2]
       const fromIndex = queueState.ids[i]
+      const lastIndex = queueState.ids[i]
       const partnerName = rowValues[7]
       contragents.add(partnerName)
       const partners = msgsObj[eventCode]?.partners || new Set()
@@ -116,11 +129,23 @@ export class Utils {
           msg: `${eventCode}`, // NOTE: Universal message for all items! // index from #${fromIndex}
           partners,
           fromIndex,
+          lastIndex,
+          firstDate,
+          lastDate,
         }
       else {
         msgsObj[eventCode].counter += 1
         if (fromIndex < msgsObj[eventCode].fromIndex)
           msgsObj[eventCode].fromIndex = fromIndex
+
+        if (lastIndex > msgsObj[eventCode].lastIndex)
+          msgsObj[eventCode].lastIndex = lastIndex
+
+        if (msgsObj[eventCode].firstDate > firstDate)
+          msgsObj[eventCode].firstDate = firstDate
+
+        if (msgsObj[eventCode].lastDate < lastDate)
+          msgsObj[eventCode].lastDate = lastDate
       }
     }
 
@@ -130,9 +155,13 @@ export class Utils {
           (key) =>
             `\`${this.notifyCodes[key].symbol} (${msgsObj[key].counter}) ${
               msgsObj[key].msg
-            } | ${Array.from(msgsObj[key].partners).join(', ')} | down from #${
+            } | ${Array.from(msgsObj[key].partners).join(', ')}\`\n\n\`#${
               msgsObj[key].fromIndex
-            }\``
+            }\` - first table index - ${getTimeAgo(
+              msgsObj[key].firstDate
+            )}\n\`#${
+              msgsObj[key].lastIndex
+            }\` - last table index - ${getTimeAgo(msgsObj[key].lastDate)}`
         )
         .join('\n\n')
     }
