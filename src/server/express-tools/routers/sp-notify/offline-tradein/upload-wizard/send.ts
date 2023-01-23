@@ -42,9 +42,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
     case isSentInTime.isOk || freeDispatcher.isAllowed({ chat_id }): {
       // -- SEND LOGIC
       tgResp = await queueDispatcher.sendNow<any[]>({
+        chat_id,
         utils,
         newItem: {
-          chat_id,
           msg: md,
           row: rowValues,
           id: resultId,
@@ -56,7 +56,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           })
         },
         cb: (q) => {
-          q.resetTimer({ chat_id })
+          q.resetTimestamp({ chat_id })
           freeDispatcher.fix({ chat_id })
         },
       })
@@ -88,6 +88,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         id: resultId,
         ts,
         delay,
+        utils,
       })
       const queueLengthResult = queueDispatcher.getQueueState({
         chat_id,

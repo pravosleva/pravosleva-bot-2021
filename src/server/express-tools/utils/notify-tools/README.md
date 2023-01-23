@@ -18,10 +18,12 @@ export const freeDispatcher = new FreeDispatcher({
 // NOTE: Персональные очереди для пользователей (с таймером)
 import { queueDispatcher } from '~/express-tools/utils/notify-tools/QueueDisparcher'
 
+// NOTE: Персональные очереди для пользователей (с таймером)
 export const queueDispatcher = QueueDisparcher.getInstance({
-  defaultDelay: 1000 * 60 * 1, // 1 min
-  // defaultDelay: 1000 * 60 * 10 // 10 min
-  // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
-  // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
+  // NOTE: Время, не чаще которого беспокоить пользователя
+  defaultDelay: 1000 * 60 * 30, // 30 min
+  
+  // NOTE: Количество сообщений в очереди, которые можно отправить подряд по одному
+  differentMsgsLimitNumber: 2,
 })
 ```

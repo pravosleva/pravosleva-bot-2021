@@ -1,3 +1,4 @@
+/* eslint-disable no-return-await */
 /* eslint-disable no-loop-func */
 /* eslint-disable no-nested-ternary */
 import {
@@ -14,19 +15,29 @@ const initialState = { msgs: [], rows: [], ids: [], tss: [] }
 
 type TQueueArgs = {
   defaultDelay?: number
+  differentMsgsLimitNumber?: number
 }
 
 export class QueueDisparcher {
   queueMap: Map<number, TQueueState>
   defaultDelay: number
-  timersMap: TTimersMap
+  tsMap: TTimersMap
+  timersMap: Map<number, NodeJS.Timeout>
   static instance: any
+  botInstance: any
+  differentMsgsLimitNumber: number
 
-  public constructor({ defaultDelay }: TQueueArgs) {
+  public constructor({ defaultDelay, differentMsgsLimitNumber }: TQueueArgs) {
+    this.botInstance = null
     this.defaultDelay =
       !!defaultDelay && isNumber(defaultDelay) ? defaultDelay : 1000 * 60 * 10 // 10 min
+    this.differentMsgsLimitNumber =
+      !!differentMsgsLimitNumber && isNumber(differentMsgsLimitNumber)
+        ? differentMsgsLimitNumber
+        : 0
     this.queueMap = new Map()
-    this.timersMap = new Map()
+    this.tsMap = new Map()
+    this.timersMap = new Map() // NOTE: Для отправки через setTimeout, независимо от приходящих ивентов
   }
 
   public static getInstance(ps: TQueueArgs): QueueDisparcher {
@@ -47,7 +58,7 @@ export class QueueDisparcher {
   async isSentInTimePromise({ chat_id }): Promise<TWasSentInTimeResponse> {
     const res = await wasSentInTime({
       key: chat_id,
-      jsMap: this.timersMap,
+      jsMap: this.tsMap,
       delayMs: this.defaultDelay,
     })
       .then((r) => r)
@@ -66,8 +77,8 @@ export class QueueDisparcher {
     })
   }
 
-  resetTimer({ chat_id }): void {
-    this.timersMap.set(chat_id, { ts: new Date().getTime() })
+  resetTimestamp({ chat_id }): void {
+    this.tsMap.set(chat_id, { ts: new Date().getTime() })
   }
 
   addItem({
@@ -77,6 +88,7 @@ export class QueueDisparcher {
     id,
     ts,
     delay,
+    utils,
   }: {
     chat_id: number
     msg: string
@@ -84,6 +96,7 @@ export class QueueDisparcher {
     id: number
     ts: number
     delay?: number
+    utils: Utils
   }): void {
     const queue = this.queueMap.get(chat_id)
 
@@ -102,6 +115,8 @@ export class QueueDisparcher {
         delay: !!delay && isNumber(delay) ? delay : this.defaultDelay,
       })
     }
+
+    this.runTimer({ chat_id, utils }) // NOTE: Запланируем отложеннау отправку на случай, если ивентов больше не придет
   }
 
   hasChat({ chat_id }: { chat_id: number }): boolean {
@@ -118,8 +133,8 @@ export class QueueDisparcher {
   }
 
   async sendNow<TR>(arg: {
-    newItem: {
-      chat_id: number
+    chat_id: number
+    newItem?: {
       msg: string
       row: any[][]
       id: number
@@ -133,31 +148,41 @@ export class QueueDisparcher {
       chat_id: number
     }) => Promise<any>
     utils: Utils
-    cb: (q: QueueDisparcher) => void
+    cb?: (q: QueueDisparcher) => void
   }): Promise<TR> {
-    const { newItem, targetAction, utils, cb } = arg
-    const { chat_id, msg, row, id, ts } = newItem
-
+    const { chat_id, newItem, targetAction, utils, cb } = arg
     const hasChat = this.hasChat({ chat_id })
     let tgResp: any = []
     if (hasChat) {
       const queueNow = this.getChatData({ chat_id })
       if (Array.isArray(queueNow.msgs) && queueNow.msgs.length > 0) {
         this.resetChat({ chat_id })
-        queueNow.msgs.push(msg)
-        queueNow.rows.push(row)
-        queueNow.ids.push(id)
-        queueNow.tss.push(ts)
+
+        if (newItem) {
+          const {
+            // chat_id,
+            msg,
+            row,
+            id,
+            ts,
+          } = newItem
+
+          queueNow.msgs.push(msg)
+          queueNow.rows.push(row)
+          queueNow.ids.push(id)
+          queueNow.tss.push(ts)
+        }
 
         // NOTE: 3.1.1 Send some msgs
-        const differentMsgsLimitNumber = 3
         // NOTE: Если больше - отправка будет одним общим сообщением
         switch (true) {
           // NOTE: 3.1.1.1 Less than limit?
-          case queueNow.msgs.length <= differentMsgsLimitNumber:
+          case queueNow.msgs.length <= this.differentMsgsLimitNumber:
             for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
               setTimeout(async () => {
-                tgResp.push(await targetAction({ msg, chat_id }))
+                tgResp.push(
+                  await targetAction({ msg: queueNow.msgs[i], chat_id })
+                )
               }, i * 500)
             }
             break
@@ -178,23 +203,95 @@ export class QueueDisparcher {
       } else {
         // NOTE: 3.1.2 Reset queue state & Send single msg
         this.resetChat({ chat_id })
-        tgResp = [await targetAction({ msg, chat_id })]
+        if (newItem)
+          tgResp = [await targetAction({ msg: newItem.msg, chat_id })]
       }
     } else {
       // NOTE: 3.2 Reset queue state & Send single msg
       this.resetChat({ chat_id })
-      tgResp = [await targetAction({ msg, chat_id })]
+      if (newItem) tgResp = [await targetAction({ msg: newItem.msg, chat_id })]
     }
     if (cb) cb(this)
 
+    this.cleanupTimer({ chat_id }) // NOTE: Сброс таймера, отложенная отправка больше не требуется
+
     return tgResp
   }
+
+  // NOTE: Таймер будет создан, если он не был запущен раее
+  runTimer({ chat_id, utils }: { chat_id: number; utils: Utils }): void {
+    try {
+      const _queueState = this.queueMap.get(chat_id)
+      if (_queueState) {
+        const { delay } = _queueState
+
+        if (!this.timersMap.has(chat_id))
+          this.timersMap.set(
+            chat_id,
+            setTimeout(() => this.sendOldQueue({ chat_id, utils }), delay)
+          )
+      } else {
+        throw new Error('⛔ TIMER_ERR_1: Не удалось получить _queueState')
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  cleanupTimer({ chat_id }: { chat_id: number }): void {
+    const timer = this.timersMap.get(chat_id)
+    if (timer) {
+      clearTimeout(timer)
+      this.timersMap.delete(chat_id)
+    }
+  }
+
+  // NOTE: Отправка существующей очереди
+  sendOldQueue({ chat_id, utils }: { chat_id: number; utils: Utils }) {
+    try {
+      const queueState = this.queueMap.get(chat_id)
+      if (!this.botInstance)
+        throw new Error(
+          `⛔ TIMER_ERR_3: this.botInstance is ${String(
+            this.botInstance
+          )} (${typeof this.botInstance})`
+        )
+      if (queueState && !!this.botInstance) {
+        // NOTE: Отправляем все что есть в очереди
+        this.sendNow({
+          chat_id,
+          targetAction: async ({ msg, chat_id }) => {
+            return await this.botInstance.telegram.sendMessage(chat_id, msg, {
+              parse_mode: 'Markdown',
+            })
+          },
+          utils,
+        })
+      } else {
+        throw new Error('⛔ TIMER_ERR_2: Не удалось получить queueState')
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  setBotInstance(bot: any): void {
+    this.botInstance = bot
+  }
+
+  // NOTE: При отправке ивента на этот сервер можно передать параметр delay
+  // для его переустановки для конкретного пользователя:
+  // TODO: setDelay({ chat_id , value }) {}
 }
 
 // NOTE: Персональные очереди для пользователей (с таймером)
 export const queueDispatcher = QueueDisparcher.getInstance({
-  defaultDelay: 1000 * 60 * 1, // 1 min
-  // defaultDelay: 1000 * 60 * 10 // 10 min
+  // NOTE: Время, не чаще которого беспокоить пользователя
+  // defaultDelay: 1000 * 60 * 1, // 1 min
+  defaultDelay: 1000 * 60 * 30, // 30 min
   // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
+
+  // NOTE: Количество сообщений в очереди, которые можно отправить подряд по одному
+  differentMsgsLimitNumber: 2,
 })
