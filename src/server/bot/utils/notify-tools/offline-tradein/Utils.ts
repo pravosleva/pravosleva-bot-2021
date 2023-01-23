@@ -66,7 +66,7 @@ export class Utils {
       }
 
       if (_modifiedJSON)
-        res += `\n\`\`\`\n${
+        res += `\`\`\`\n${
           _modifiedJSON ? JSON.stringify(_modifiedJSON, null, 2) : jsonStr
         }\n\`\`\``
 
@@ -76,11 +76,11 @@ export class Utils {
 
     result += `*${commonHeader}${
       this.req.body.resultId ? ` | #${this.req.body.resultId}` : ''
-    } ${partnerName} ${tradeinId || '?'}*\n\n${
+    } ${partnerName} ${tradeinId || '?'}*\n\n\`${
       this.notifyCodes[eventCode].symbol
-    } \`${eventCode} (${curFileCounter} of ${totalFilesLeftCounter})\`${
+    } ${eventCode} (${curFileCounter} of ${totalFilesLeftCounter})\`${
       additionalInfo ? `\n\n${additionalInfo}` : ''
-    }${jsonFromBack ? `\n${jsonFromBack}` : ''}`
+    }${jsonFromBack ? `\n\n${jsonFromBack}` : ''}`
 
     return result
   }
