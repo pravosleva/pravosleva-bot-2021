@@ -4,21 +4,21 @@
 /* eslint-disable prefer-promise-reject-errors */
 import { Response as IResponse } from 'express'
 import { TModifiedRequest } from '~/bot/utils/interfaces'
-// NOTE: Менеджер частоты доставки (без таймера, только учет количества)
+// NOTE: Менеджер частоты доставки
+// (без таймера, только учет количества + допустимое количество возможных сообщений вне очереди)
 import { freeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatcher'
-import {
-  Utils,
-  // NOTE: Персональные очереди для пользователей (с таймером)
-  queueDispatcher,
-} from '~/express-tools/utils/notify-tools/offline-tradein'
+import { Utils } from '~/express-tools/utils/notify-tools/offline-tradein/upload-wizard/Utils'
+// NOTE: Персональные очереди для пользователей (с таймером)
+import { queueDispatcher } from '~/express-tools/utils/notify-tools/QueueDisparcher'
 
 export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
-  const { chat_id, delay, oddFree, ts } = req.body
+  const { chat_id, delay, oddFree, ts: _optionalTs } = req.body
+  const ts = _optionalTs || new Date().getTime()
 
   queueDispatcher.init({ chat_id, delay })
   freeDispatcher.init({ chat_id, oddFree })
 
-  // NOTE: v2
+  // --- NOTE: v2
   // 1. Check timers in this startup session
   const isSentInTime = await queueDispatcher.isSentInTimePromise({
     chat_id,
@@ -29,7 +29,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   let tgResp: any[] = []
 
   const utils = new Utils({ req })
-  const md = utils.getMD()
+  const md = utils.getSingleMessageMD()
   const { isNotifUselessness } = utils
 
   if (isNotifUselessness)
@@ -38,10 +38,10 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   const { rowValues, resultId } = req.body
 
   switch (true) {
-    // NOTE: 3. SEND NOW?
+    // NOTE: 3. SEND NOW? TODO: Move this v2 logic to QueueDispatcher class...
     case isSentInTime.isOk || freeDispatcher.isAllowed({ chat_id }): {
       // -- SEND LOGIC
-      tgResp = await queueDispatcher.sendNow({
+      tgResp = await queueDispatcher.sendNow<any[]>({
         utils,
         newItem: {
           chat_id,
@@ -109,4 +109,5 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
       })
     }
   }
+  // ---
 }

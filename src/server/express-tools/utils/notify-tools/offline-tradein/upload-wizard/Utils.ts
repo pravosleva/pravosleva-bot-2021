@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { getTimeAgo } from '~/bot/utils/getTimeAgo'
-import { TQueueState } from './interfaces'
+import { TQueueState } from '~/express-tools/utils/notify-tools/interfaces'
 
 const commonHeader = 'SP Offline Trade-In notifier'
 
@@ -50,7 +50,9 @@ export class Utils {
       },
     }
   }
-  getMD() {
+
+  // NOTE: One message
+  getSingleMessageMD() {
     const { rowValues } = this.req.body
     const [
       _a,
@@ -113,7 +115,9 @@ export class Utils {
         ))
     )
   }
-  getSingleMessageMD({ queueState }: { queueState: TQueueState }) {
+
+  // NOTE: Multi message
+  getGeneralizedCommonMessageMD({ queueState }: { queueState: TQueueState }) {
     const header = `${commonHeader} | ${queueState.ids.length} events`
     const msgsObj: {
       [key: string]: {

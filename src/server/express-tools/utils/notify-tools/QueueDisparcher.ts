@@ -6,7 +6,7 @@ import {
 } from '~/bot/utils/wasSentInTime'
 import { TQueueState } from './interfaces'
 import { isNumber } from '~/bot/utils/isNumber'
-import { Utils } from './Utils'
+import { Utils } from './offline-tradein/upload-wizard/Utils'
 
 type TTimersMap = Map<number, { ts: number }>
 
@@ -117,12 +117,7 @@ export class QueueDisparcher {
       : { value: 0, message: 'No chat_id' }
   }
 
-  async sendNow({
-    newItem,
-    targetAction,
-    utils,
-    cb,
-  }: {
+  async sendNow<TR>(arg: {
     newItem: {
       chat_id: number
       msg: string
@@ -136,10 +131,11 @@ export class QueueDisparcher {
     }: {
       msg: string
       chat_id: number
-    }) => Promise<any>
+    }) => Promise<TR>
     utils: Utils
     cb: (q: QueueDisparcher) => void
   }): Promise<any> {
+    const { newItem, targetAction, utils, cb } = arg
     const { chat_id, msg, row, id, ts } = newItem
 
     const hasChat = this.hasChat({ chat_id })
@@ -169,7 +165,7 @@ export class QueueDisparcher {
             // NOTE: 3.1.1.2 More than limit? Send special common single msg
             tgResp.push(
               await targetAction({
-                msg: utils.getSingleMessageMD({
+                msg: utils.getGeneralizedCommonMessageMD({
                   queueState: queueNow,
                 }),
                 chat_id,

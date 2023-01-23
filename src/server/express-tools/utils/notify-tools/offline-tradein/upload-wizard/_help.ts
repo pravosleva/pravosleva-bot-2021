@@ -20,8 +20,8 @@ export const _help: THelp = {
       },
       ts: {
         type: 'number',
-        descr: 'timestamp for getTimeAgo function',
-        required: true,
+        descr: 'timestamp for getTimeAgo function (for report UI only)',
+        required: false,
       },
     },
   },
