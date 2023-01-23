@@ -18,6 +18,11 @@ export const _help: THelp = {
         descr: 'Google sheet row index',
         required: false,
       },
+      ts: {
+        type: 'number',
+        descr: 'timestamp for getTimeAgo function',
+        required: true,
+      },
     },
   },
 }

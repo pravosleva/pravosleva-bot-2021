@@ -1,36 +1,51 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { getTimeAgo } from '../../getTimeAgo'
+import { getTimeAgo } from '~/bot/utils/getTimeAgo'
 import { TQueueState } from './interfaces'
 
 const commonHeader = 'SP Offline Trade-In notifier'
+
+enum EEventCodes {
+  UPLOAD_ERR = 'upload_err',
+  UPLOAD_OK = 'upload_ok',
+  USER_REPORT = 'user_report',
+  TRDEIN_ID_ENTERED = 'tradein_id_entered',
+}
+type TNotifyCodesMap = {
+  [key in EEventCodes]: {
+    symbol: string
+    descr: string
+    doNotify: boolean
+    validate?: (rowValues: any[]) => boolean
+  }
+}
 
 export class Utils {
   req: any
   constructor({ req }) {
     this.req = req
   }
-  get notifyCodes() {
+  get notifyCodes(): TNotifyCodesMap {
     return {
-      upload_err: {
+      [EEventCodes.UPLOAD_ERR]: {
         symbol: '⛔',
-        // descr: 'Ошибка загрузки файла',
+        descr: 'Ошибка загрузки файла',
         doNotify: true,
       },
-      upload_ok: {
+      [EEventCodes.UPLOAD_OK]: {
         symbol: '✅',
-        // descr: 'Все файлы загруженны',
+        descr: 'Все файлы загруженны',
         doNotify: true,
         // NOTE: Отправка требуется только для последнего фото
         validate: (rowValues: any[]): boolean => rowValues[4] === rowValues[8],
       },
-      user_report: {
+      [EEventCodes.USER_REPORT]: {
         symbol: 'ℹ️',
-        // descr: 'Пользователь сообщил об ошибке',
+        descr: 'Пользователь сообщил об ошибке',
         doNotify: true,
       },
-      tradein_id_entered: {
+      [EEventCodes.TRDEIN_ID_ENTERED]: {
         symbol: '⌨️',
-        // descr: 'Пользователь ввел tradein_id',
+        descr: 'Пользователь ввел tradein_id',
         doNotify: false,
       },
     }
@@ -76,9 +91,11 @@ export class Utils {
 
     result += `*${commonHeader}${
       this.req.body.resultId ? ` | #${this.req.body.resultId}` : ''
-    } ${partnerName} ${tradeinId || '?'}*\n\n\`${
+    } ${partnerName} ${tradeinId || '?'}*\n\n${
       this.notifyCodes[eventCode].symbol
-    } ${eventCode} (${curFileCounter} of ${totalFilesLeftCounter})\`${
+    } \`${eventCode}\`\n\n${
+      this.notifyCodes[eventCode].descr
+    } (upload photo ui state: ${curFileCounter} of ${totalFilesLeftCounter})${
       additionalInfo ? `\n\n${additionalInfo}` : ''
     }${jsonFromBack ? `\n\n${jsonFromBack}` : ''}`
 
@@ -127,6 +144,7 @@ export class Utils {
         msgsObj[eventCode] = {
           counter: 1,
           msg: `${eventCode}`, // NOTE: Universal message for all items! // index from #${fromIndex}
+          // : ${this.notifyCodes[eventCode]?.descr || 'No descr'}
           partners,
           fromIndex,
           lastIndex,
@@ -157,11 +175,11 @@ export class Utils {
               msgsObj[key].msg
             } | ${Array.from(msgsObj[key].partners).join(', ')}\`\n\n\`#${
               msgsObj[key].fromIndex
-            }\` - first table index - ${getTimeAgo(
+            }\` - first table index / ${getTimeAgo(
               msgsObj[key].firstDate
             )}\n\`#${
               msgsObj[key].lastIndex
-            }\` - last table index - ${getTimeAgo(msgsObj[key].lastDate)}`
+            }\` - last table index / ${getTimeAgo(msgsObj[key].lastDate)}`
         )
         .join('\n\n')
     }

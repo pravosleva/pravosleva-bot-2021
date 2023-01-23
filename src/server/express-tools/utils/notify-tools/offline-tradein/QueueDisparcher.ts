@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import {
   wasSentInTime,
   TWasSentInTimeResponse,
@@ -17,12 +18,20 @@ export class QueueDisparcher {
   queueMap: Map<number, TQueueState>
   defaultDelay: number
   timersMap: TTimersMap
+  static instance: any
 
-  constructor({ defaultDelay }: TQueueArgs) {
+  public constructor({ defaultDelay }: TQueueArgs) {
     this.defaultDelay =
       !!defaultDelay && isNumber(defaultDelay) ? defaultDelay : 1000 * 60 * 10 // 10 min
     this.queueMap = new Map()
     this.timersMap = new Map()
+  }
+
+  public static getInstance(ps: TQueueArgs): QueueDisparcher {
+    if (!QueueDisparcher.instance)
+      QueueDisparcher.instance = new QueueDisparcher(ps)
+
+    return QueueDisparcher.instance
   }
 
   init({ chat_id, delay }: { chat_id: number; delay?: number }): void {
@@ -97,9 +106,20 @@ export class QueueDisparcher {
     return this.queueMap.has(chat_id)
   }
 
-  getQueueLength({ chat_id }): number | null {
+  getQueueState({ chat_id }): { value: number; message?: string } {
     return this.queueMap.has(chat_id)
-      ? this.queueMap.get(chat_id).msgs?.length || null
-      : null
+      ? this.queueMap.get(chat_id).msgs?.length > 0 ||
+        this.queueMap.get(chat_id).msgs?.length === 0
+        ? { value: this.queueMap.get(chat_id).msgs?.length }
+        : { value: 0, message: 'ERR1: No length' }
+      : { value: 0, message: 'No chat_id' }
   }
 }
+
+// NOTE: Персональные очереди для пользователей (с таймером)
+export const queueDispatcher = QueueDisparcher.getInstance({
+  defaultDelay: 1000 * 60 * 1, // 1 min
+  // defaultDelay: 1000 * 60 * 10 // 10 min
+  // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
+  // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
+})

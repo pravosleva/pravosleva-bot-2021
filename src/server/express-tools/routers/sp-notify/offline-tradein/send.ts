@@ -3,45 +3,16 @@
 /* eslint-disable prefer-promise-reject-errors */
 import { Response as IResponse } from 'express'
 import { TModifiedRequest } from '~/bot/utils/interfaces'
-import { FreeDispatcher } from '~/bot/utils/notify-tools/FreeDispatcher'
+// NOTE: Менеджер частоты доставки (без таймера, только учет количества)
+import { freeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatcher'
 import {
   Utils,
-  _help,
-  QueueDisparcher,
-} from '~/bot/utils/notify-tools/offline-tradein'
-
-// NOTE: Персональные очререди для пользователей (с таймером)
-const queueDispatcher = new QueueDisparcher({
-  defaultDelay: 1000 * 60 * 1,
-  // NOTE: 1000 * 60 * 10 (10 min)
-  // NOTE: 1000 * 60 * 60 * 1 (1 hour)
-  // NOTE: 1000 * 60 * 60 * 24 * 1 (1 day)
-})
-
-// NOTE: Менеджер частоты доставки (без таймера, только учет количества)
-const freeDispatcher = new FreeDispatcher({
-  defaultOddFree: 5, // NOTE: x сообщений будут доставлены, независимо от временной задержки
-})
+  // NOTE: Персональные очереди для пользователей (с таймером)
+  queueDispatcher,
+} from '~/express-tools/utils/notify-tools/offline-tradein'
 
 export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   const { chat_id, delay, oddFree, ts } = req.body
-
-  // -- NOTE: Errs handler (TODO: Make as middleware)
-  const errs: string[] = []
-  for (const key in _help.params.body) {
-    if (_help.params.body[key]?.required && !req.body[key])
-      errs.push(
-        `Missing required param: \`${key}\` (${_help.params.body[key].descr})`
-      )
-  }
-  if (errs.length > 0)
-    return res.status(200).send({
-      ok: false,
-      message: `ERR! ${errs.join('; ')}`,
-      _originalBody: req.body,
-      // _help,
-    })
-  // --
 
   queueDispatcher.init({ chat_id, delay })
   freeDispatcher.init({ chat_id, oddFree })
@@ -81,10 +52,11 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           queueNow.tss.push(ts)
 
           // NOTE: 3.1.1 Send some msgs
+          const differentMsgsLimitNumber = 3
           // NOTE: Если больше - отправка будет одним общим сообщением
           switch (true) {
             // NOTE: 3.1.1.1 Less than limit?
-            case queueNow.msgs.length <= freeDispatcher.getLimit({ chat_id }):
+            case queueNow.msgs.length <= differentMsgsLimitNumber:
               for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
                 setTimeout(async () => {
                   tgResp.push(
@@ -144,7 +116,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           'freeDispatcher.getChatState': freeDispatcher.getChatState({
             chat_id,
           }),
-          'queueDispatcher.getQueueLength': queueDispatcher.getQueueLength({
+          'queueDispatcher.getQueueState': queueDispatcher.getQueueState({
             chat_id,
           }),
         },
@@ -163,6 +135,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         ts,
         delay,
       })
+      const queueLengthResult = queueDispatcher.getQueueState({
+        chat_id,
+      })
 
       return res.status(200).send({
         ok: false,
@@ -174,9 +149,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
             chat_id,
           }),
           'freeDispatcher.isAllowed': freeDispatcher.isAllowed({ chat_id }),
-          'queueDispatcher.getQueueLength': queueDispatcher.getQueueLength({
-            chat_id,
-          }),
+          'queueDispatcher.getQueueState': queueLengthResult,
         },
         _originalBody: req.body,
       })

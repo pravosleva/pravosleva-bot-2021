@@ -1,7 +1,7 @@
 import cors from 'cors'
-import { getShadow } from './get-shadow'
-import { sendCode } from './autopark-2022/send-code'
-import { spNotifyRouter } from './sp-notify'
+import { getShadow } from './routers/get-shadow'
+import { sendCode } from './routers/autopark-2022/send-code'
+import { spNotifyRouter } from './routers/sp-notify'
 
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const bodyParser = require('body-parser')

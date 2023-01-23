@@ -1,9 +1,9 @@
+import request from 'request'
 import {
   Request as IRequest,
   Response as IResponse,
   // NextFunction as INextFunction,
 } from 'express'
-import request from 'request'
 
 export const docsShadow = async function (
   req: IRequest & { bot: any },

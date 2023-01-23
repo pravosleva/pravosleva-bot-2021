@@ -2,13 +2,22 @@ import { isNumber } from '~/bot/utils/isNumber'
 
 type TChatState = { counter: number; free: number }
 type TFreeDispatchMap = Map<number, TChatState>
+type TArgs = { defaultOddFree?: number }
 
-export class FreeDispatcher {
+class FreeDispatcher {
   cacheMap: TFreeDispatchMap
   defaultOddFree: number
-  constructor({ defaultOddFree }) {
+  static instance: FreeDispatcher
+  constructor({ defaultOddFree }: TArgs) {
     this.defaultOddFree = defaultOddFree || 5
     this.cacheMap = new Map()
+  }
+
+  public static getInstance(ps: TArgs): FreeDispatcher {
+    if (!FreeDispatcher.instance)
+      FreeDispatcher.instance = new FreeDispatcher(ps)
+
+    return FreeDispatcher.instance
   }
 
   init({ chat_id, oddFree }: { chat_id: number; oddFree?: number }): void {
@@ -51,9 +60,14 @@ export class FreeDispatcher {
     return this.cacheMap.get(chat_id) || null
   }
 
-  getLimit({ chat_id }): number {
-    return this.cacheMap.has(chat_id)
-      ? this.cacheMap.get(chat_id).free
-      : this.defaultOddFree
-  }
+  // getLimit({ chat_id }): number {
+  //   return this.cacheMap.has(chat_id)
+  //     ? this.cacheMap.get(chat_id).free
+  //     : this.defaultOddFree
+  // }
 }
+
+// NOTE: Менеджер частоты доставки (без таймера, только учет количества)
+export const freeDispatcher = new FreeDispatcher({
+  defaultOddFree: 5, // NOTE: x сообщений будут доставлены, независимо от временной задержки
+})
