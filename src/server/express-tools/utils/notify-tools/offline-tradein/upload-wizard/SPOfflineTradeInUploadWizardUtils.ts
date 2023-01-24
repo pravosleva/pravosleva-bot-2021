@@ -133,18 +133,38 @@ export class SPOfflineTradeInUploadWizardUtils extends Utils {
 
     if (Object.keys(msgsObj).length > 0) {
       res += Object.keys(msgsObj)
-        .map(
-          (key) =>
-            `\`${this.notifyCodes[key].symbol} (${msgsObj[key].counter}) ${
-              msgsObj[key].msg
-            } | ${Array.from(msgsObj[key].partners).join(', ')}\`\n\n\`#${
-              msgsObj[key].fromIndex
-            }\` __first table index (${getTimeAgo(
-              msgsObj[key].firstDate
-            )})__\n\`#${
-              msgsObj[key].lastIndex
-            }\` __last table index (${getTimeAgo(msgsObj[key].lastDate)})__`
-        )
+        .map((key) => {
+          switch (true) {
+            case msgsObj[key].counter === 1:
+              return `\`${this.notifyCodes[key].symbol} (${
+                msgsObj[key].counter
+              }) ${msgsObj[key].msg} | ${Array.from(msgsObj[key].partners).join(
+                ', '
+              )}\`\n\n\`#${msgsObj[key].fromIndex}\` ${getTimeAgo(
+                msgsObj[key].firstDate
+              )}`
+            case msgsObj[key].counter === 2:
+              return `\`${this.notifyCodes[key].symbol} (${
+                msgsObj[key].counter
+              }) ${msgsObj[key].msg} | ${Array.from(msgsObj[key].partners).join(
+                ', '
+              )}\`\n\n\`#${msgsObj[key].fromIndex}\` ${getTimeAgo(
+                msgsObj[key].firstDate
+              )}\n\`#${msgsObj[key].lastIndex}\` ${getTimeAgo(
+                msgsObj[key].lastDate
+              )}`
+            default:
+              return `\`${this.notifyCodes[key].symbol} (${
+                msgsObj[key].counter
+              }) ${msgsObj[key].msg} | ${Array.from(msgsObj[key].partners).join(
+                ', '
+              )}\`\n\n\`#${msgsObj[key].fromIndex}\` ${getTimeAgo(
+                msgsObj[key].firstDate
+              )} - first\n\`#${msgsObj[key].lastIndex}\` ${getTimeAgo(
+                msgsObj[key].lastDate
+              )} - last`
+          }
+        })
         .join('\n\n')
     }
 

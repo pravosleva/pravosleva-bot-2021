@@ -284,10 +284,16 @@ export class QueueDisparcher {
 
   // NOTE: При отправке ивента на этот сервер можно передать параметр delay
   // для его переустановки для конкретного пользователя:
-  // TODO: setDelay({ chat_id , value }) {}
+  _setDelay({ chat_id, value }) {
+    const queueState = this.queueMap.get(chat_id)
+    if (queueState)
+      this.queueMap.set(chat_id, {
+        ...queueState,
+        delay: !!value && isNumber(value) ? value : this.defaultDelay,
+      })
+  }
 
   async add({
-    chat_id,
     newItem,
     utils,
     res,
@@ -296,7 +302,6 @@ export class QueueDisparcher {
     onSendLater,
     reqBody,
   }: {
-    chat_id: number
     res?: IResponse
     onFail: ({ res }: { res?: IResponse }) => void
     onSendNow: ({
@@ -317,13 +322,22 @@ export class QueueDisparcher {
       ts: number
     }
     reqBody: {
+      chat_id: number
       rowValues: any[][]
       resultId: number
       delay?: number
       oddFree?: number
+      ts?: number
     }
     utils: Utils
   }) {
+    const { delay, oddFree, chat_id } = reqBody
+    // const ts = _optionalTs || new Date().getTime()
+
+    freeDispatcher.setOddFree({ chat_id, value: oddFree })
+    this.init({ chat_id, delay })
+    this._setDelay({ chat_id, value: delay })
+
     const md = utils.getSingleMessageMD()
     const { isNotifUselessness } = utils
 
@@ -419,10 +433,9 @@ export class QueueDisparcher {
 
 // NOTE: Персональные очереди для пользователей (с таймером)
 export const queueDispatcher = QueueDisparcher.getInstance({
-  // NOTE: Время, не чаще которого беспокоить пользователя
+  // NOTE: Время, не чаще которого разрешается беспокоить пользователя
   // defaultDelay: 1000 * 60 * 1, // 1 min
-  defaultDelay: 1000 * 60 * 5,
-  // defaultDelay: 1000 * 60 * 30, // 30 min
+  defaultDelay: 1000 * 60 * 10, // 10 min
   // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
 
