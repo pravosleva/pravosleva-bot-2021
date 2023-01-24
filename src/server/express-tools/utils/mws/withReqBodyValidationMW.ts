@@ -10,7 +10,7 @@ type TProps = {
   rules: THelp
 }
 
-export const reqBodyValidationMW =
+export const withReqBodyValidationMW =
   ({ rules }: TProps) =>
   (req: IRequest, res: IResponse, next: INextFunction) => {
     // -- NOTE: Errs handler
