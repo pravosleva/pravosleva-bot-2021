@@ -4,7 +4,7 @@ import { getTimeAgo } from '~/bot/utils/getTimeAgo'
 import { TQueueState } from '~/express-tools/utils/notify-tools/interfaces'
 import { Utils } from '~/express-tools/utils/notify-tools/Utils'
 
-const commonHeader = 'SP Offline Trade-In notifier'
+const commonHeader = 'SP Offline Trade-In notifier\n[ upload-wizard ]'
 
 export class SPOfflineTradeInUploadWizardUtils extends Utils {
   constructor(ps: { req: any }) {
@@ -76,8 +76,48 @@ export class SPOfflineTradeInUploadWizardUtils extends Utils {
   }
 
   // NOTE: Multi message
+  _getShortMsg({
+    // rowValues,
+    id,
+    date,
+  }: {
+    rowValues: any[][]
+    id: number
+    date: Date
+  }): string {
+    return `\`#${id}\` - ${getTimeAgo(date)}`
+  }
+  _getShortListMD({ shortMsgs }): string {
+    const msgs = []
+    const limit = 5
+
+    for (let i = 0, max = shortMsgs.length; i < max; i++) {
+      const isLast = i === max - 1
+      const isLastByOne = i === max - 2
+
+      if (max <= limit) {
+        msgs.push(shortMsgs[i])
+      } else {
+        switch (true) {
+          case i + 1 < limit:
+            msgs.push(shortMsgs[i])
+            break
+          case i + 1 > limit && isLastByOne:
+            msgs.push('`...`')
+            break
+          case i + 1 >= limit && isLast:
+            msgs.push(shortMsgs[i])
+            break
+          default:
+            break
+        }
+      }
+    }
+
+    return msgs.join('\n')
+  }
   getGeneralizedCommonMessageMD({ queueState }: { queueState: TQueueState }) {
-    const header = `${commonHeader} | ${queueState.ids.length} events`
+    const header = `${commonHeader} ${queueState.ids.length} events`
     const msgsObj: {
       [key: string]: {
         counter: number
@@ -87,6 +127,7 @@ export class SPOfflineTradeInUploadWizardUtils extends Utils {
         lastIndex: number
         firstDate: Date
         lastDate: Date
+        shortMsgs: string[]
       }
     } = {}
     let res = ''
@@ -94,10 +135,9 @@ export class SPOfflineTradeInUploadWizardUtils extends Utils {
 
     for (let i = 0, max = queueState.ids.length; i < max; i++) {
       const rowValues = queueState.rows[i]
-      const firstDate = new Date(queueState.tss[i])
-      const lastDate = new Date(queueState.tss[i])
+      const date = new Date(queueState.tss[i])
       const eventCode = rowValues[2]
-      const fromIndex = queueState.ids[i]
+      const currentIndex = queueState.ids[i]
       const lastIndex = queueState.ids[i]
       const partnerName = rowValues[7]
       contragents.add(partnerName)
@@ -110,61 +150,44 @@ export class SPOfflineTradeInUploadWizardUtils extends Utils {
           msg: eventCode, // NOTE: Universal message for all items! // index from #${fromIndex}
           // : ${this.notifyCodes[eventCode]?.descr || 'No descr'}
           partners,
-          fromIndex,
+          fromIndex: currentIndex,
           lastIndex,
-          firstDate,
-          lastDate,
+          firstDate: date,
+          lastDate: date,
+          shortMsgs: [this._getShortMsg({ rowValues, id: currentIndex, date })],
         }
       else {
         msgsObj[eventCode].counter += 1
-        if (fromIndex < msgsObj[eventCode].fromIndex)
-          msgsObj[eventCode].fromIndex = fromIndex
+        if (currentIndex < msgsObj[eventCode].fromIndex)
+          msgsObj[eventCode].fromIndex = currentIndex
 
         if (lastIndex > msgsObj[eventCode].lastIndex)
           msgsObj[eventCode].lastIndex = lastIndex
 
-        if (msgsObj[eventCode].firstDate > firstDate)
-          msgsObj[eventCode].firstDate = firstDate
+        if (msgsObj[eventCode].firstDate > date)
+          msgsObj[eventCode].firstDate = date
 
-        if (msgsObj[eventCode].lastDate < lastDate)
-          msgsObj[eventCode].lastDate = lastDate
+        if (msgsObj[eventCode].lastDate < date)
+          msgsObj[eventCode].lastDate = date
+
+        msgsObj[eventCode].shortMsgs.push(
+          this._getShortMsg({ rowValues, id: currentIndex, date })
+        )
       }
     }
 
     if (Object.keys(msgsObj).length > 0) {
       res += Object.keys(msgsObj)
-        .map((key) => {
-          switch (true) {
-            case msgsObj[key].counter === 1:
-              return `\`${this.notifyCodes[key].symbol} (${
-                msgsObj[key].counter
-              }) ${msgsObj[key].msg} | ${Array.from(msgsObj[key].partners).join(
-                ', '
-              )}\`\n\n\`#${msgsObj[key].fromIndex}\` ${getTimeAgo(
-                msgsObj[key].firstDate
-              )}`
-            case msgsObj[key].counter === 2:
-              return `\`${this.notifyCodes[key].symbol} (${
-                msgsObj[key].counter
-              }) ${msgsObj[key].msg} | ${Array.from(msgsObj[key].partners).join(
-                ', '
-              )}\`\n\n\`#${msgsObj[key].fromIndex}\` ${getTimeAgo(
-                msgsObj[key].firstDate
-              )}\n\`#${msgsObj[key].lastIndex}\` ${getTimeAgo(
-                msgsObj[key].lastDate
-              )}`
-            default:
-              return `\`${this.notifyCodes[key].symbol} (${
-                msgsObj[key].counter
-              }) ${msgsObj[key].msg} | ${Array.from(msgsObj[key].partners).join(
-                ', '
-              )}\`\n\n\`#${msgsObj[key].fromIndex}\` ${getTimeAgo(
-                msgsObj[key].firstDate
-              )} - first\n\`#${msgsObj[key].lastIndex}\` ${getTimeAgo(
-                msgsObj[key].lastDate
-              )} - last`
-          }
-        })
+        .map(
+          (key) =>
+            `\`${this.notifyCodes[key].symbol} (${msgsObj[key].counter}) ${
+              msgsObj[key].msg
+            } | ${Array.from(msgsObj[key].partners).join(
+              ', '
+            )}\`\n\n${this._getShortListMD({
+              shortMsgs: msgsObj[key].shortMsgs,
+            })}`
+        )
         .join('\n\n')
     }
 

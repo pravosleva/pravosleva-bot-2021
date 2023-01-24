@@ -435,7 +435,7 @@ export class QueueDisparcher {
 export const queueDispatcher = QueueDisparcher.getInstance({
   // NOTE: Время, не чаще которого разрешается беспокоить пользователя
   // defaultDelay: 1000 * 60 * 1, // 1 min
-  defaultDelay: 1000 * 60 * 10, // 10 min
+  defaultDelay: 1000 * 60 * 30, // 30 min
   // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
 
