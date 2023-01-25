@@ -20,7 +20,7 @@ type TQueueArgs = {
   differentMsgsLimitNumber?: number
 }
 
-export class QueueDisparcher {
+export class QueueDispatcher {
   queueMap: Map<number, TQueueState>
   defaultDelay: number
   tsMap: TTimersMap
@@ -40,13 +40,6 @@ export class QueueDisparcher {
     this.queueMap = new Map()
     this.tsMap = new Map()
     this.timersMap = new Map() // NOTE: Для отправки через setTimeout, независимо от приходящих ивентов
-  }
-
-  public static getInstance(ps: TQueueArgs): QueueDisparcher {
-    if (!QueueDisparcher.instance)
-      QueueDisparcher.instance = new QueueDisparcher(ps)
-
-    return QueueDisparcher.instance
   }
 
   init({ chat_id, delay }: { chat_id: number; delay?: number }): void {
@@ -119,7 +112,7 @@ export class QueueDisparcher {
       })
     }
 
-    this.runTimer({ chat_id, utils }) // NOTE: Запланируем отложеннау отправку на случай, если ивентов больше не придет
+    this.runTimer({ chat_id, utils }) // NOTE: Запланируем отложенную отправку на случай, если ивентов больше не придет
   }
 
   hasChat({ chat_id }: { chat_id: number }): boolean {
@@ -151,7 +144,7 @@ export class QueueDisparcher {
       chat_id: number
     }) => Promise<any>
     utils: Utils
-    cb?: (q: QueueDisparcher) => void
+    cb?: (q: QueueDispatcher) => void
   }): Promise<TR> {
     const { chat_id, newItem, targetAction, utils, cb } = arg
     const hasChat = this.hasChat({ chat_id })
@@ -195,6 +188,7 @@ export class QueueDisparcher {
               await targetAction({
                 msg: utils.getGeneralizedCommonMessageMD({
                   queueState: queueNow,
+                  notifyCodes: utils.notifyCodes,
                 }),
                 chat_id,
               })
@@ -279,7 +273,7 @@ export class QueueDisparcher {
   }
 
   setBotInstance(bot: any): void {
-    this.botInstance = bot
+    if (!this.botInstance) this.botInstance = bot
   }
 
   // NOTE: При отправке ивента на этот сервер можно передать параметр delay
@@ -338,7 +332,7 @@ export class QueueDisparcher {
     this.init({ chat_id, delay })
     this._setDelay({ chat_id, value: delay })
 
-    const md = utils.getSingleMessageMD()
+    const md = utils.getSingleMessageMD({ notifyCodes: utils.notifyCodes })
     const { isNotifUselessness } = utils
 
     if (isNotifUselessness) return await onFail({ res })
@@ -430,16 +424,3 @@ export class QueueDisparcher {
     }
   }
 }
-
-// NOTE: Персональные очереди для пользователей (с таймером)
-export const queueDispatcher = QueueDisparcher.getInstance({
-  // NOTE: Время, не чаще которого разрешается беспокоить пользователя
-  // defaultDelay: 1000 * 60 * 1, // 1 min
-  defaultDelay: 1000 * 60 * 30, // 30 min
-  // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
-  // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
-
-  // NOTE: Количество сообщений в очереди, когда можно отправить подряд по одному
-  // (если в очереди больше, то отправится все одним сообщением)
-  differentMsgsLimitNumber: 1,
-})

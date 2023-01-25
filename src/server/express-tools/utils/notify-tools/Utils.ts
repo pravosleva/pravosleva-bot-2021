@@ -1,80 +1,107 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { TModifiedRequest } from '~/bot/utils/interfaces'
-import { TQueueState } from './interfaces'
-
-enum EEventCodes {
-  UPLOAD_ERR = 'upload_err',
-  UPLOAD_OK = 'upload_ok',
-  USER_REPORT = 'user_report',
-  TRDEIN_ID_ENTERED = 'tradein_id_entered',
-}
-
-type TNotifyCodesMap = {
-  [key in EEventCodes]: {
-    symbol: string
-    descr: string
-    doNotify: boolean
-    validate?: (rowValues: any[]) => boolean
-  }
-}
+import { TQueueState, TNotifyCodesMap } from './interfaces'
+import { getTimeAgo } from '~/bot/utils/getTimeAgo'
 
 export class Utils {
   req: TModifiedRequest
-  constructor({ req }) {
+  isNotifUselessnessValidator: ({
+    notifyCodes,
+  }: {
+    notifyCodes: TNotifyCodesMap
+  }) => boolean
+  getSingleMessageMD: ({
+    notifyCodes,
+  }: {
+    notifyCodes: TNotifyCodesMap
+  }) => string
+  getGeneralizedCommonMessageMD: ({
+    queueState,
+    notifyCodes,
+  }: {
+    queueState: TQueueState
+    notifyCodes: TNotifyCodesMap
+  }) => string
+  rules: TNotifyCodesMap
+  constructor({
+    rules,
+    req,
+    isNotifUselessnessValidator,
+    getSingleMessageMD,
+    getGeneralizedCommonMessageMD,
+  }) {
+    this.rules = rules
     this.req = req
+    this.isNotifUselessnessValidator = isNotifUselessnessValidator
+    this.getSingleMessageMD = getSingleMessageMD
+    this.getGeneralizedCommonMessageMD = getGeneralizedCommonMessageMD
   }
   get notifyCodes(): TNotifyCodesMap {
-    return {
-      [EEventCodes.UPLOAD_ERR]: {
-        symbol: '⛔',
-        descr: 'Ошибка загрузки файла',
-        doNotify: true,
-      },
-      [EEventCodes.UPLOAD_OK]: {
-        symbol: '✅',
-        descr: 'Все файлы загружены',
-        doNotify: true,
-        // NOTE: Отправка требуется только для последнего фото
-        validate: (rowValues: any[]): boolean => rowValues[4] === rowValues[8],
-      },
-      [EEventCodes.USER_REPORT]: {
-        symbol: 'ℹ️',
-        descr: 'Пользователь сообщил об ошибке',
-        doNotify: true,
-      },
-      [EEventCodes.TRDEIN_ID_ENTERED]: {
-        symbol: '⌨️',
-        descr: 'Пользователь ввел tradein_id',
-        doNotify: false,
-      },
-    }
-  }
-  getSingleMessageMD() {
-    try {
-      throw new Error('method getSingleMessageMD should be unitialized')
-    } catch (err) {
-      console.log(err)
-    }
-    return 'ERR'
+    return this.rules
   }
 
-  get isNotifUselessness() {
-    try {
-      throw new Error('getter isNotifUselessness should be unitialized')
-    } catch (err) {
-      console.log(err)
+  static _getShortListMD({
+    shortMsgs,
+    limit,
+  }: {
+    shortMsgs: string[]
+    limit: number
+  }): string {
+    const msgs = []
+
+    for (let i = 0, max = shortMsgs.length; i < max; i++) {
+      const isLast = i === max - 1
+      const isLastByOne = i === max - 2
+
+      if (max <= limit) {
+        msgs.push(shortMsgs[i])
+      } else {
+        switch (true) {
+          case i + 1 < limit:
+            msgs.push(shortMsgs[i])
+            break
+          case i + 1 >= limit && isLastByOne:
+            msgs.push('`...`')
+            break
+          case i + 1 >= limit && isLast:
+            msgs.push(shortMsgs[i])
+            break
+          case isLast:
+            msgs.push(shortMsgs[i])
+            break
+          default:
+            break
+        }
+      }
     }
-    return true
+
+    return msgs.join('\n')
   }
 
-  getGeneralizedCommonMessageMD(_ps: { queueState: TQueueState }) {
+  static _getShortMsg({
+    // rowValues,
+    id,
+    date,
+  }: {
+    rowValues: any[][]
+    id: number
+    date: Date
+  }): string {
+    return `\`#${id}\` - ${getTimeAgo(date)}`
+  }
+
+  get isNotifUselessness(): boolean {
+    let res = false
     try {
-      throw new Error(
-        'method getGeneralizedCommonMessageMD should be unitialized'
+      if (
+        this.isNotifUselessnessValidator({
+          notifyCodes: this.notifyCodes,
+        })
       )
+        res = true
     } catch (err) {
       console.log(err)
     }
-    return 'ERR'
+    return res
   }
 }
