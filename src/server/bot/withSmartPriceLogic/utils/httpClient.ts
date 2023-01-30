@@ -112,7 +112,7 @@ class Singleton {
     | string
   > {
     const data = await this.api({
-      url: '/offline-tradein/run-extra',
+      url: '/run-tg-extra-notifs',
       method: 'POST',
       data: { namespace, chat_id }, // 'offline-tradein/upload-wizard'
     })
