@@ -2,7 +2,10 @@ import { Markup } from 'telegraf'
 
 // NOTE: https://github.com/LetItCode/telegraf
 
-export const withSmartpriceLogic = (bot: any) => {
+import { httpClient } from './utils/httpClient'
+import { ENotifNamespace } from '~/express-tools/routers/sp-notify/run-extra'
+
+export const withSmartPriceLogic = (bot: any) => {
   // 1. Menu:
   bot.command('smartprice', (ctx: any) => {
     const { reply, deleteMessage } = ctx
@@ -53,7 +56,7 @@ export const withSmartpriceLogic = (bot: any) => {
             [
               Markup.callbackButton('⚙️ Local dev', 'smartprice.ssr.local_dev'),
               Markup.callbackButton(
-                '🔥 New workflow 🔥',
+                '🔥 New workflow',
                 'smartprice.ssr.workflow'
               ),
             ],
@@ -142,8 +145,12 @@ export const withSmartpriceLogic = (bot: any) => {
                 'smartprice.offline_tardein.local_dev'
               ),
               Markup.urlButton(
-                '🔥 test.smartprice.ru/tradein',
+                'test.smartprice.ru/tradein',
                 'https://test.smartprice.ru/tradein/'
+              ),
+              Markup.callbackButton(
+                '🔥 Send all notifs now',
+                'smartprice.offline_tardein.send_all_notifs_now'
               ),
             ],
             { columns: 1 }
@@ -166,6 +173,34 @@ export const withSmartpriceLogic = (bot: any) => {
       }
     }
   )
+
+  bot.action(
+    'smartprice.offline_tardein.send_all_notifs_now',
+    async (ctx: any) => {
+      const { answerCbQuery, replyWithMarkdown, deleteMessage } = ctx
+      try {
+        await answerCbQuery()
+        deleteMessage()
+
+        const res: any = await httpClient.runExtraNotifs({
+          chat_id: ctx.update.callback_query.from.id,
+          namespace: ENotifNamespace.OFFLINE_TRADEIN_UPLOAD_WIZARD,
+        })
+
+        const toClient: any = {
+          ok: res?.ok || false,
+        }
+        if (res?.message) toClient.message = res.message
+
+        return replyWithMarkdown(
+          `\`\`\`\n${JSON.stringify(toClient, null, 2)}\n\`\`\``
+        )
+      } catch (err) {
+        return replyWithMarkdown(`ERR: ${err.message || 'No err.message'}`)
+      }
+    }
+  )
+
   // 1.4 Onlime Trade-In:
   bot.action(
     'smartprice.online_tardein',

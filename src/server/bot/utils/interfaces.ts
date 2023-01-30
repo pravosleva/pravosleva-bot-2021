@@ -1,7 +1,17 @@
 import { Request as IRequest } from 'express'
+import { QueueDispatcher } from '~/express-tools/utils/notify-tools'
 // import { Telegraf } from 'telegraf'
+import { FreeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatcher'
 
-export type TModifiedRequest = IRequest & { bot: any }
+export type TModifiedRequest = IRequest & {
+  bot: any
+  notifyTools: {
+    freeDispatcher: FreeDispatcher
+    smartprice: {
+      offlineTradeInQueueDispatcher: QueueDispatcher
+    }
+  }
+}
 
 export type THelp = {
   params: {

@@ -4,13 +4,15 @@ type TChatState = { counter: number; free: number }
 type TFreeDispatchMap = Map<number, TChatState>
 type TArgs = { defaultOddFree?: number }
 
-class FreeDispatcher {
+export class FreeDispatcher {
   cacheMap: TFreeDispatchMap
   defaultOddFree: number
+  botInstance: any
   static instance: FreeDispatcher
   constructor({ defaultOddFree }: TArgs) {
     this.defaultOddFree = defaultOddFree || 5
     this.cacheMap = new Map()
+    this.botInstance = null
   }
 
   public static getInstance(ps: TArgs): FreeDispatcher {
@@ -68,10 +70,14 @@ class FreeDispatcher {
       this.cacheMap.set(chat_id, newState)
     }
   }
+
+  setBotInstance(bot: any): void {
+    if (!this.botInstance) this.botInstance = bot
+  }
 }
 
 // NOTE: Менеджер частоты доставки
 // (без таймера, только учет количества + допустимое количество возможных сообщений вне очереди)
 export const freeDispatcher = new FreeDispatcher({
-  defaultOddFree: 2, // NOTE: x сообщений будут доставлены, независимо от временной задержки
+  defaultOddFree: 1, // NOTE: x сообщений будут доставлены, независимо от временной задержки
 })

@@ -18,7 +18,7 @@ const { Telegraf, session } = require('telegraf')
 const {
   withStartLogic,
   // withLabLogic,
-  withSmartpriceLogic,
+  withSmartPriceLogic,
   // withFeedback,
   withCianHelper,
   withExpressChatHelper,
@@ -72,7 +72,7 @@ class App {
     // --- TODO: Refactoring. Make as middlewares:
     withStartLogic(bot)
     // withLabLogic(bot)
-    withSmartpriceLogic(bot)
+    withSmartPriceLogic(bot)
     // withFeedback(bot)
     withCianHelper(bot)
     withExpressChatHelper(bot)

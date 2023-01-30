@@ -14,6 +14,7 @@ import { Utils } from '~/express-tools/utils/notify-tools/Utils'
 type TTimersMap = Map<number, { ts: number }>
 
 const initialState = { msgs: [], rows: [], ids: [], tss: [] }
+const wait = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
 type TQueueArgs = {
   defaultDelay?: number
@@ -24,7 +25,13 @@ export class QueueDispatcher {
   queueMap: Map<number, TQueueState>
   defaultDelay: number
   tsMap: TTimersMap
-  timersMap: Map<number, NodeJS.Timeout>
+  timersMap: Map<
+    number,
+    {
+      timeout: NodeJS.Timeout
+      utils: Utils
+    }
+  >
   static instance: any
   botInstance: any
   differentMsgsLimitNumber: number
@@ -149,6 +156,7 @@ export class QueueDispatcher {
     const { chat_id, newItem, targetAction, utils, cb } = arg
     const hasChat = this.hasChat({ chat_id })
     let tgResp: any = []
+    let waitCounterMs = 0
     if (hasChat) {
       const queueNow = this.getChatData({ chat_id })
       if (Array.isArray(queueNow.msgs) && queueNow.msgs.length > 0) {
@@ -173,18 +181,21 @@ export class QueueDispatcher {
         // NOTE: Если больше - отправка будет одним общим сообщением
         switch (true) {
           // NOTE: 3.1.1.1 Less than limit?
-          case queueNow.msgs.length <= this.differentMsgsLimitNumber:
+          case queueNow.msgs.length <= this.differentMsgsLimitNumber: {
+            const delayBetweenNotifs = 500
             for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
+              waitCounterMs += i * delayBetweenNotifs
               setTimeout(async () => {
                 tgResp.push(
                   await targetAction({ msg: queueNow.msgs[i], chat_id })
                 )
-              }, i * 500)
+              }, i * delayBetweenNotifs)
             }
             break
+          }
           default: {
             // NOTE: 3.1.1.2 More than limit? Send special common single msg
-            tgResp.push(
+            await tgResp.push(
               await targetAction({
                 msg: utils.getGeneralizedCommonMessageMD({
                   queueState: queueNow,
@@ -212,6 +223,8 @@ export class QueueDispatcher {
 
     this.cleanupTimer({ chat_id }) // NOTE: Сброс таймера, отложенная отправка больше не требуется
 
+    await wait(waitCounterMs + 1000)
+
     return tgResp
   }
 
@@ -223,10 +236,13 @@ export class QueueDispatcher {
         const { delay } = _queueState
 
         if (!this.timersMap.has(chat_id))
-          this.timersMap.set(
-            chat_id,
-            setTimeout(() => this.sendOldQueue({ chat_id, utils }), delay)
-          )
+          this.timersMap.set(chat_id, {
+            timeout: setTimeout(
+              () => this.sendOldQueue({ chat_id, utils }),
+              delay
+            ),
+            utils,
+          })
       } else {
         throw new Error('⛔ TIMER_ERR_1: Не удалось получить _queueState')
       }
@@ -236,15 +252,16 @@ export class QueueDispatcher {
   }
 
   cleanupTimer({ chat_id }: { chat_id: number }): void {
-    const timer = this.timersMap.get(chat_id)
-    if (timer) {
-      clearTimeout(timer)
+    const timerData = this.timersMap.get(chat_id)
+    if (timerData) {
+      clearTimeout(timerData.timeout)
       this.timersMap.delete(chat_id)
     }
   }
 
   // NOTE: Отправка существующей очереди
-  sendOldQueue({ chat_id, utils }: { chat_id: number; utils: Utils }) {
+  async sendOldQueue({ chat_id, utils }: { chat_id: number; utils: Utils }) {
+    let result = null
     try {
       const queueState = this.queueMap.get(chat_id)
       if (!this.botInstance)
@@ -255,7 +272,7 @@ export class QueueDispatcher {
         )
       if (queueState && !!this.botInstance) {
         // NOTE: Отправляем все что есть в очереди
-        this._sendNow({
+        result = await this._sendNow<any[]>({
           chat_id,
           targetAction: async ({ msg, chat_id }) => {
             return await this.botInstance.telegram.sendMessage(chat_id, msg, {
@@ -270,6 +287,7 @@ export class QueueDispatcher {
     } catch (err) {
       console.log(err)
     }
+    return result
   }
 
   setBotInstance(bot: any): void {
@@ -285,6 +303,32 @@ export class QueueDispatcher {
         ...queueState,
         delay: !!value && isNumber(value) ? value : this.defaultDelay,
       })
+  }
+
+  async runExtra({
+    chat_id,
+  }: {
+    chat_id: number
+  }): Promise<{ ok: boolean; message?: string; tgRess?: any[] }> {
+    const targetTimerData = this.timersMap.get(chat_id)
+    let tgRess = null
+
+    if (targetTimerData) {
+      tgRess = await this.sendOldQueue({
+        chat_id,
+        utils: targetTimerData.utils,
+      })
+
+      // clearTimeout(targetTimerData.timeout) // NOTE: Already called in sendOldQueue -> _sendNow -> cleanupTimer
+      // this.timersMap.delete(chat_id) // NOTE: Already called in sendOldQueue -> _sendNow -> cleanupTimer
+      this.resetTimestamp({ chat_id })
+      freeDispatcher.fix({ chat_id })
+      return Promise.resolve({ ok: true, tgRess })
+    }
+    return Promise.resolve({
+      ok: false,
+      message: 'Таймер не установлен (видимо, нет необходимости)',
+    })
   }
 
   async add({

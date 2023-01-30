@@ -5,26 +5,13 @@
 import { Response as IResponse } from 'express'
 import { TModifiedRequest } from '~/bot/utils/interfaces'
 import {
-  QueueDispatcher,
+  // QueueDispatcher,
   TQueueState,
   TNotifyCodesMap,
   TCodeSettings,
   Utils,
 } from '~/express-tools/utils/notify-tools'
 import { EEventCodes } from '~/express-tools/utils/notify-tools/offline-tradein/upload-wizard'
-
-// NOTE: Персональные очереди для пользователей (с таймером)
-export const queueDispatcher = new QueueDispatcher({
-  // NOTE: Время, не чаще которого разрешается беспокоить пользователя
-  // defaultDelay: 1000 * 60 * 1, // 1 min
-  defaultDelay: 1000 * 60 * 30, // 30 min
-  // defaultDelay: 1000 * 60 * 60 * 1 // 1 hour
-  // defaultDelay: 1000 * 60 * 60 * 24 * 1 // 1 day
-
-  // NOTE: Количество сообщений в очереди, когда можно отправить подряд по одному
-  // (если в очереди больше, то отправится все одним сообщением)
-  differentMsgsLimitNumber: 1,
-})
 
 // NOTE: Declarative refactoring roadmap
 // + Формат rowValues должен быть учтен только в этой логике
@@ -75,8 +62,11 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   const { ts: _optionalTs } = req.body
   const ts = _optionalTs || new Date().getTime()
 
-  // NOTE: Init bot instance if necessary
-  queueDispatcher.setBotInstance(req.bot)
+  const { offlineTradeInQueueDispatcher: queueDispatcher } =
+    req.notifyTools.smartprice
+
+  // NOTE: Init bot instance if necessary (already in withHelpfulInstances)
+  // queueDispatcher.setBotInstance(req.bot)
 
   return await queueDispatcher.add({
     res,
