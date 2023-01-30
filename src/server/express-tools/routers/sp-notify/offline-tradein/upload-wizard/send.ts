@@ -253,7 +253,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         // const contragentsArr = Array.from(contragents)
         // if (contragentsArr.length > 0) header += ` | ${contragentsArr.join(', ')}`
 
-        return `*${header}*\n\n${res}\n\n[Full SmartPrice report](https://docs.google.com/spreadsheets/d/1NBXuyGlCznS0SJjJJX52vR3ZzqPAPM8LQPM_GX8T_Wc/edit#gid=36671662)`
+        // res += '\n\n[Full SmartPrice report](https://docs.google.com/spreadsheets/d/1NBXuyGlCznS0SJjJJX52vR3ZzqPAPM8LQPM_GX8T_Wc/edit#gid=36671662)'
+
+        return `*${header}*\n\n${res}`
       },
     }),
 
