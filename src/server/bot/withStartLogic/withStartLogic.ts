@@ -22,8 +22,8 @@ export const withStartLogic = (bot) => {
     }
 
     const messages = [
-      '*Список команд:*',
-      '',
+      // '*Список команд:*',
+      // '',
       '🏎️ AutoPark 2022 - /autopark',
       '',
       '💬 KanBan chat 2021 - /invite',
@@ -55,11 +55,20 @@ export const withStartLogic = (bot) => {
 
       console.log('--')
       console.log({ text, parsedEntry }) // NOTE: Sample for ?start-autopark: { text: '/start autopark', parsedEntry: [ '/start', 'autopark' ] }
+      /*
+        --
+          {
+            text: '/start invite-chat_ux-test',
+            parsedEntry: [ '/start', 'invite-chat_ux-test' ]
+          }
+        --
+      */
       console.log('--')
 
       // -- NOTE: Autopark tool
       if (parsedEntry.length === 2) {
         switch (parsedEntry[1]) {
+          // case ETargetParams.UXTest:
           case ETargetParams.AutoPark: {
             const cmd = '/autopark'
             const update = {
@@ -94,25 +103,51 @@ export const withStartLogic = (bot) => {
       // --
 
       if (parsedEntry[1]) {
-        const parsedParam = parsedEntry[1].split('_')
+        const parsedParam = parsedEntry[1].split('_') // ['invite-chat', 'ux-test']
         const scopeParam = parsedParam[0]
-        const targetParam: string | undefined = parsedParam[1]
+        const targetParam: string | undefined = parsedParam[1] // 'ux-test'
 
         switch (scopeParam) {
           case EScopeParams.InviteChat:
             if (targetParam) {
               switch (targetParam) {
-                case ETargetParams.SP:
-                case ETargetParams.UXTest:
-                case ETargetParams.MFES:
-                  // NOTE: Others...
-                  localStateInstance.set(chatId, {
-                    targetParam,
-                    link: 'http://pravosleva.ru/express-helper/chat/',
-                  })
-                  // messages.push(`targetParam detected: ${targetParam} (set to store if room exists / [or special case like this])`)
-                  break
+                // case ETargetParams.UXTest:
+                //   localStateInstance.set(chatId, {
+                //     targetParam,
+                //     link: 'http://pravosleva.ru/express-helper/chat/#/?room=ux-test',
+                //   })
+                //   break
+                // case ETargetParams.SP:
+                // case ETargetParams.MFES:
+                //   // NOTE: Others...
+                //   localStateInstance.set(chatId, {
+                //     targetParam,
+                //     link: 'http://pravosleva.ru/express-helper/chat/',
+                //   })
+                //   // messages.push(`targetParam detected: ${targetParam} (set to store if room exists / [or special case like this])`)
+                //   break
                 default: {
+                  if (
+                    parsedEntry.length === 2 &&
+                    parsedEntry[1].split('_')[0] === 'invite-chat'
+                  ) {
+                    const cmd = '/invite'
+                    const update = {
+                      message: {
+                        ...ctx.update.message,
+                        text: cmd,
+                        entities: [
+                          {
+                            offset: 0,
+                            length: cmd.length,
+                            type: 'bot_command',
+                          },
+                        ],
+                      },
+                    }
+                    bot.handleUpdate(update)
+                    return
+                  }
                   // 1. Check room
                   const roomInfo = await expressHttpClient
                     .checkRoom({ room_id: targetParam })

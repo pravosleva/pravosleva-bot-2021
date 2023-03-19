@@ -21,8 +21,9 @@ const {
   withSmartPriceLogic,
   // withFeedback,
   withCianHelper,
+  withDetectMembers,
   withExpressChatHelper,
-  withBlackList,
+  // withBlackList,
   withAutoruHelper,
   withMyAutopark,
 } = require('./bot')
@@ -67,7 +68,8 @@ class App {
     const { bot } = this
 
     bot.use(session())
-    bot.use(withBlackList)
+    // bot.use(withBlackList)
+    withDetectMembers(bot)
 
     // --- TODO: Refactoring. Make as middlewares:
     withStartLogic(bot)

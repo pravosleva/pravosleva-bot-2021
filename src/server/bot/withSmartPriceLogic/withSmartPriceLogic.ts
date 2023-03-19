@@ -152,6 +152,10 @@ export const withSmartPriceLogic = (bot: any) => {
                 '🔥 Send all notifs now',
                 'smartprice.offline_tardein.send_all_notifs_now'
               ),
+              // Markup.callbackButton(
+              //   'TRADEIN REPORT',
+              //   'smartprice.offline_tardein.tradein_report'
+              // ),
             ],
             { columns: 1 }
           ).extra()
@@ -386,4 +390,53 @@ export const withSmartPriceLogic = (bot: any) => {
       }
     }
   )
+
+  bot.command('tradein', async (ctx) => {
+    const { replyWithMarkdown, message } = ctx
+
+    const { text } = message // NOTE: Example /tradein 1
+
+    const vals = text.split(' ')
+
+    // NOTE: v1
+    const _text = message.text.slice(ctx.message.text.indexOf(' ') + 1)
+
+    // NOTE: v2
+    /*
+    const entity = ctx.message.entities[0]
+    const text = ctx.message.text.slice(entity.length + 1)
+    */
+
+    // NOTE: v3 https://github.com/OpengramJS/opengram/blob/c0f0ae02178f2f47f45526c91ff988f11b3e3a96/src/composer.js#L619
+
+    if (vals.length < 2) return replyWithMarkdown('⛔ Введите Trade-In id')
+    if (Number.isNaN(Number(_text)))
+      return replyWithMarkdown('⛔ Введите Trade-In id (число)')
+
+    // -- NOTE: Get info from express-helper
+    const res: any = await httpClient.getOfflineTradeinUploadWizardAnalysis({
+      tradeinId: _text,
+    })
+
+    const toClient: any = {
+      ok: res?.ok || false,
+    }
+    if (res?.message) toClient.message = res.message
+
+    if (res?.report?.md) {
+      return replyWithMarkdown(
+        `🔥 Trade-In ${_text} timing report\n\n${res?.report?.md}`
+      )
+    }
+    toClient._message = 'No result'
+
+    return replyWithMarkdown(
+      `⚠️ Trade-In ${_text} timing report\n\n\`\`\`\n${JSON.stringify(
+        { ...toClient, _text },
+        null,
+        2
+      )}\`\`\``
+    )
+    // --
+  })
 }

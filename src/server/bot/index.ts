@@ -1,6 +1,7 @@
 export * from './withAutoruHelper'
 export * from './withBlackList'
 export * from './withCianHelper'
+export * from './widthDetectMembers'
 export * from './withExpressChatHelper'
 export * from './withLabLogic'
 export * from './withSmartPriceLogic'

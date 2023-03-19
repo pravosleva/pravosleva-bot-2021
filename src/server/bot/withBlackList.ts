@@ -8,12 +8,11 @@ export const withBlackList = async (ctx, next) => {
   try {
     const update = ctx.update.message || ctx.update.callback_query
 
-    // console.log(update)
+    console.log(update?.from)
     if (!!update?.from && hasAccess(update.from)) {
       next()
       return
     }
-
     await ctx.reply("You don't have access. Go away.")
   } catch (err) {
     console.log(err)

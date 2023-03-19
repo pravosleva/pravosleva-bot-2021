@@ -2,7 +2,7 @@ import axios from 'axios'
 // import { EAPIUserCode, EAPIRoomCode } from './types'
 import { ENotifNamespace } from '~/express-tools/routers/sp-notify/run-extra'
 
-const isDev = process.env.NODE_ENV === 'development'
+// const isDev = process.env.NODE_ENV === 'development'
 
 const createCancelTokenSource = () => axios.CancelToken.source()
 const promisifyData = (data: any) => {
@@ -18,9 +18,10 @@ class Singleton {
   private constructor() {
     this.cancelTokenSource1 = null
     this.axiosInstance = axios.create({
-      baseURL: isDev
-        ? 'http://localhost:5000/sp/report/v2'
-        : 'http://pravosleva.ru/express-helper/sp/report/v2',
+      // baseURL: isDev
+      //   ? 'http://localhost:5000/sp/report/v2'
+      //   : 'http://pravosleva.ru/express-helper/sp/report/v2',
+      baseURL: 'http://pravosleva.ru/express-helper/sp/report/v2',
       // timeout: 1000,
       // headers: { 'X-Custom-Header': 'foobar' },
     })
@@ -115,6 +116,29 @@ class Singleton {
       url: '/run-tg-extra-notifs',
       method: 'POST',
       data: { namespace, chat_id }, // 'offline-tradein/upload-wizard'
+    })
+      .then((r) => r)
+      .catch((msg) => msg)
+
+    return promisifyData(data)
+  }
+
+  async getOfflineTradeinUploadWizardAnalysis({
+    tradeinId,
+  }: {
+    tradeinId: string
+  }): Promise<
+    | {
+        ok: boolean
+        state?: { [key: string]: any }
+        message?: string
+      }
+    | string
+  > {
+    const data = await this.api({
+      url: '/offline-tradein/upload-wizard/get-timing-analysis',
+      method: 'POST',
+      data: { tradeinId },
     })
       .then((r) => r)
       .catch((msg) => msg)

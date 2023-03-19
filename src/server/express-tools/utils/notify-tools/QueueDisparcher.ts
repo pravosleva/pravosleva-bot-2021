@@ -275,6 +275,8 @@ export class QueueDispatcher {
         result = await this._sendNow<any[]>({
           chat_id,
           targetAction: async ({ msg, chat_id }) => {
+            console.log(`-- send 2: ${msg}`)
+
             return await this.botInstance.telegram.sendMessage(chat_id, msg, {
               parse_mode: 'Markdown',
             })
@@ -404,6 +406,7 @@ export class QueueDispatcher {
             ...newItem,
           },
           targetAction: async ({ msg, chat_id }) => {
+            console.log(`-- send 1: ${msg}`)
             return await this.botInstance.telegram.sendMessage(chat_id, msg, {
               parse_mode: 'Markdown',
             })

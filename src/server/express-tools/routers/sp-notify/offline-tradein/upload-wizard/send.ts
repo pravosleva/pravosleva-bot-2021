@@ -56,6 +56,36 @@ const rules: { [key in EEventCodes]: TCodeSettings } = {
     doNotify: true,
     showAdditionalInfo: false,
   },
+  [EEventCodes.STATUS_BAD_QUALITY]: {
+    symbol: '👎',
+    descr: 'Оценка: BAD QUALITY',
+    doNotify: true,
+    showAdditionalInfo: true,
+  },
+  [EEventCodes.STATUS_FAKE]: {
+    symbol: '🤬',
+    descr: 'Оценка: FAKE',
+    doNotify: true,
+    showAdditionalInfo: true,
+  },
+  [EEventCodes.STATUS_OK]: {
+    symbol: '⏱️',
+    descr: 'Оценка: OK',
+    doNotify: true,
+    showAdditionalInfo: true,
+  },
+  [EEventCodes.STATUS_NOT_CHECKED_STARTED]: {
+    symbol: '⏳',
+    descr: 'Оценка: NOT CHECKED && STARTED; Все фото загружены (run timer)',
+    doNotify: true,
+    showAdditionalInfo: true,
+  },
+  [EEventCodes.STATUS_NULL]: {
+    symbol: '⚠️',
+    descr: 'Оценка: status -> NULL',
+    doNotify: true,
+    showAdditionalInfo: true,
+  },
 }
 
 export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
@@ -140,13 +170,19 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           result += `*${commonHeader}${
             req.body.resultId ? ` #${req.body.resultId}` : ''
           } ${partnerName} ${tradeinId || '?'}*\n\n${
-            notifyCodes[eventCode].symbol
+            notifyCodes[eventCode] ? notifyCodes[eventCode].symbol : '❓'
           } \`${eventCode}\`${
-            notifyCodes[eventCode].descr
+            !!notifyCodes[eventCode] && notifyCodes[eventCode].descr
               ? `\n\n${notifyCodes[eventCode].descr}`
               : ''
-          } (upload photo ui state: ${curFileCounter} of ${totalFilesLeftCounter})${
-            additionalInfo && notifyCodes[eventCode].showAdditionalInfo
+          }${
+            !!curFileCounter && !!totalFilesLeftCounter
+              ? ` (upload photo ui state: ${curFileCounter} of ${totalFilesLeftCounter})`
+              : ''
+          }${
+            additionalInfo &&
+            !!notifyCodes[eventCode] &&
+            notifyCodes[eventCode].showAdditionalInfo
               ? `\n\n${additionalInfo}`
               : ''
           }${jsonFromBack ? `\n\n${jsonFromBack}` : ''}`
@@ -164,88 +200,97 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         queueState: TQueueState
         notifyCodes: TNotifyCodesMap
       }) {
-        const header = `${commonHeader} ${queueState.ids.length} events`
-        const msgsObj: {
-          [key: string]: {
-            counter: number
-            msg: string
-            partners: Set<string>
-            fromIndex: number
-            lastIndex: number
-            firstDate: Date
-            lastDate: Date
-            shortMsgs: string[]
-          }
-        } = {}
-        let res = ''
-        const contragents = new Set()
-
-        for (let i = 0, max = queueState.ids.length; i < max; i++) {
-          const rowValues = queueState.rows[i]
-          const date = new Date(queueState.tss[i])
-          const eventCode = rowValues[2]
-          const currentIndex = queueState.ids[i]
-          const lastIndex = queueState.ids[i]
-          const partnerName = rowValues[7]
-          contragents.add(partnerName)
-          const partners = msgsObj[eventCode]?.partners || new Set()
-          partners.add(partnerName)
-
-          if (!msgsObj[eventCode])
-            msgsObj[eventCode] = {
-              counter: 1,
-              msg: eventCode,
-              partners,
-              fromIndex: currentIndex,
-              lastIndex,
-              firstDate: date,
-              lastDate: date,
-              shortMsgs: [
-                Utils._getShortMsg({ rowValues, id: currentIndex, date }),
-              ],
+        try {
+          const header = `${commonHeader} ${queueState.ids.length} events`
+          const msgsObj: {
+            [key: string]: {
+              counter: number
+              msg: string
+              partners: Set<string>
+              fromIndex: number
+              lastIndex: number
+              firstDate: Date
+              lastDate: Date
+              shortMsgs: string[]
             }
-          else {
-            msgsObj[eventCode].counter += 1
-            if (currentIndex < msgsObj[eventCode].fromIndex)
-              msgsObj[eventCode].fromIndex = currentIndex
+          } = {}
+          let res = ''
+          const contragents = new Set()
 
-            if (lastIndex > msgsObj[eventCode].lastIndex)
-              msgsObj[eventCode].lastIndex = lastIndex
+          for (let i = 0, max = queueState.ids.length; i < max; i++) {
+            const rowValues = queueState.rows[i]
+            const date = new Date(queueState.tss[i])
+            const eventCode = rowValues[2]
+            const currentIndex = queueState.ids[i]
+            const lastIndex = queueState.ids[i]
+            const partnerName = rowValues[7]
+            contragents.add(partnerName)
+            const partners = msgsObj[eventCode]?.partners || new Set()
+            partners.add(partnerName)
 
-            if (msgsObj[eventCode].firstDate > date)
-              msgsObj[eventCode].firstDate = date
+            if (!msgsObj[eventCode])
+              msgsObj[eventCode] = {
+                counter: 1,
+                msg: eventCode,
+                partners,
+                fromIndex: currentIndex,
+                lastIndex,
+                firstDate: date,
+                lastDate: date,
+                shortMsgs: [
+                  Utils._getShortMsg({ rowValues, id: currentIndex, date }),
+                ],
+              }
+            else {
+              msgsObj[eventCode].counter += 1
+              if (currentIndex < msgsObj[eventCode].fromIndex)
+                msgsObj[eventCode].fromIndex = currentIndex
 
-            if (msgsObj[eventCode].lastDate < date)
-              msgsObj[eventCode].lastDate = date
+              if (lastIndex > msgsObj[eventCode].lastIndex)
+                msgsObj[eventCode].lastIndex = lastIndex
 
-            msgsObj[eventCode].shortMsgs.push(
-              Utils._getShortMsg({ rowValues, id: currentIndex, date })
-            )
+              if (msgsObj[eventCode].firstDate > date)
+                msgsObj[eventCode].firstDate = date
+
+              if (msgsObj[eventCode].lastDate < date)
+                msgsObj[eventCode].lastDate = date
+
+              msgsObj[eventCode].shortMsgs.push(
+                Utils._getShortMsg({ rowValues, id: currentIndex, date })
+              )
+            }
           }
+
+          try {
+            console.log(msgsObj)
+            if (Object.keys(msgsObj).length > 0) {
+              res += Object.keys(msgsObj)
+                .map(
+                  (key) =>
+                    `\`${notifyCodes[key] ? notifyCodes[key].symbol : '❓'} (${
+                      msgsObj[key].counter
+                    }) ${msgsObj[key].msg} | ${Array.from(
+                      msgsObj[key].partners
+                    ).join(', ')}\`\n\n${Utils._getShortListMD({
+                      shortMsgs: msgsObj[key].shortMsgs,
+                      limit: 5,
+                    })}`
+                )
+                .join('\n\n')
+            }
+          } catch (err) {
+            res += err?.message || 'Не удалось сформировать ответ'
+          }
+
+          // const contragentsArr = Array.from(contragents)
+          // if (contragentsArr.length > 0) header += ` | ${contragentsArr.join(', ')}`
+
+          // res += '\n\n[Full SmartPrice report](https://docs.google.com/spreadsheets/d/1NBXuyGlCznS0SJjJJX52vR3ZzqPAPM8LQPM_GX8T_Wc/edit#gid=36671662)'
+
+          return `*${header}*\n\n${res}`
+        } catch (err) {
+          return `ERR001: ${err?.message || 'No err.message'}`
         }
-
-        if (Object.keys(msgsObj).length > 0) {
-          res += Object.keys(msgsObj)
-            .map(
-              (key) =>
-                `\`${notifyCodes[key].symbol} (${msgsObj[key].counter}) ${
-                  msgsObj[key].msg
-                } | ${Array.from(msgsObj[key].partners).join(
-                  ', '
-                )}\`\n\n${Utils._getShortListMD({
-                  shortMsgs: msgsObj[key].shortMsgs,
-                  limit: 5,
-                })}`
-            )
-            .join('\n\n')
-        }
-
-        // const contragentsArr = Array.from(contragents)
-        // if (contragentsArr.length > 0) header += ` | ${contragentsArr.join(', ')}`
-
-        // res += '\n\n[Full SmartPrice report](https://docs.google.com/spreadsheets/d/1NBXuyGlCznS0SJjJJX52vR3ZzqPAPM8LQPM_GX8T_Wc/edit#gid=36671662)'
-
-        return `*${header}*\n\n${res}`
       },
     }),
 
