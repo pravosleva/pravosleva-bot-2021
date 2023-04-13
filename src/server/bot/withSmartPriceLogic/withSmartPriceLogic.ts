@@ -409,9 +409,9 @@ export const withSmartPriceLogic = (bot: any) => {
 
     // NOTE: v3 https://github.com/OpengramJS/opengram/blob/c0f0ae02178f2f47f45526c91ff988f11b3e3a96/src/composer.js#L619
 
-    if (vals.length < 2) return replyWithMarkdown('⛔ Введите Trade-In id')
+    if (vals.length < 2) return replyWithMarkdown('*⛔ Введите Trade-In id*')
     if (Number.isNaN(Number(_text)))
-      return replyWithMarkdown('⛔ Введите Trade-In id (число)')
+      return replyWithMarkdown('*⛔ Введите Trade-In id (число)*')
 
     // -- NOTE: Get info from express-helper
     const res: any = await httpClient.getOfflineTradeinUploadWizardAnalysis({
@@ -425,13 +425,13 @@ export const withSmartPriceLogic = (bot: any) => {
 
     if (res?.report?.md) {
       return replyWithMarkdown(
-        `🔥 Trade-In ${_text} timing report\n\n${res?.report?.md}`
+        `*🔥 Trade-In ${_text} timing report*\n\n${res?.report?.md}`
       )
     }
     toClient._message = 'No result'
 
     return replyWithMarkdown(
-      `⚠️ Trade-In ${_text} timing report\n\n\`\`\`\n${JSON.stringify(
+      `*⚠️ Trade-In ${_text} timing report*\n\n\`\`\`\n${JSON.stringify(
         { ...toClient, _text },
         null,
         2
