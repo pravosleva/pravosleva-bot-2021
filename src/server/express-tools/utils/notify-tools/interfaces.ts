@@ -10,7 +10,7 @@ export type TCodeSettings = {
   symbol: string
   descr: string
   doNotify: boolean
-  validate?: (rowValues: any[]) => boolean
+  validate?: (itemParams: any) => boolean
   showAdditionalInfo: boolean
 }
 

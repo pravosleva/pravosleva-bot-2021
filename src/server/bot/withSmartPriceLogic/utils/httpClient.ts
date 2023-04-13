@@ -1,6 +1,6 @@
 import axios from 'axios'
 // import { EAPIUserCode, EAPIRoomCode } from './types'
-import { ENotifNamespace } from '~/express-tools/routers/sp-notify/run-extra'
+import { ENotifNamespace } from '~/express-tools/routers/notify.smartprice/run-extra'
 
 // const isDev = process.env.NODE_ENV === 'development'
 

@@ -3,7 +3,7 @@ import { Markup } from 'telegraf'
 // NOTE: https://github.com/LetItCode/telegraf
 
 import { httpClient } from './utils/httpClient'
-import { ENotifNamespace } from '~/express-tools/routers/sp-notify/run-extra'
+import { ENotifNamespace } from '~/express-tools/routers/notify.smartprice/run-extra'
 
 export const withSmartPriceLogic = (bot: any) => {
   // 1. Menu:

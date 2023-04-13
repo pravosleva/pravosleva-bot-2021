@@ -78,15 +78,7 @@ export class Utils {
     return msgs.join('\n')
   }
 
-  static _getShortMsg({
-    // rowValues,
-    id,
-    date,
-  }: {
-    rowValues: any[][]
-    id: number
-    date: Date
-  }): string {
+  static _getShortMsg({ id, date }: { id: number; date: Date }): string {
     return `\`#${id}\` - ${getTimeAgo(date)}`
   }
 

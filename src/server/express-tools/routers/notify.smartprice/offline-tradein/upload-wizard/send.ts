@@ -237,9 +237,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
                 lastIndex,
                 firstDate: date,
                 lastDate: date,
-                shortMsgs: [
-                  Utils._getShortMsg({ rowValues, id: currentIndex, date }),
-                ],
+                shortMsgs: [Utils._getShortMsg({ id: currentIndex, date })],
               }
             else {
               msgsObj[eventCode].counter += 1
@@ -256,13 +254,12 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
                 msgsObj[eventCode].lastDate = date
 
               msgsObj[eventCode].shortMsgs.push(
-                Utils._getShortMsg({ rowValues, id: currentIndex, date })
+                Utils._getShortMsg({ id: currentIndex, date })
               )
             }
           }
 
           try {
-            console.log(msgsObj)
             if (Object.keys(msgsObj).length > 0) {
               res += Object.keys(msgsObj)
                 .map(
@@ -310,12 +307,12 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
       await res.status(200).send(toClient),
 
     newItem: {
-      row: req.body.rowValues,
+      item: req.body.rowValues,
       id: req.body.resultId,
       ts,
     },
     // --
 
-    reqBody: req.body,
+    reqBody: { ...req.body, itemParams: req.body.rowValues },
   })
 }

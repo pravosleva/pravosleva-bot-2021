@@ -87,7 +87,7 @@ export class QueueDispatcher {
   _addItemToQueue({
     chat_id,
     msg,
-    row,
+    item,
     id,
     ts,
     delay,
@@ -95,7 +95,7 @@ export class QueueDispatcher {
   }: {
     chat_id: number
     msg: string
-    row: any[][]
+    item: any
     id: number
     ts: number
     delay?: number
@@ -105,14 +105,14 @@ export class QueueDispatcher {
 
     if (!!queue && queue.msgs.length > 0) {
       queue.msgs.push(msg)
-      queue.rows.push(row)
+      queue.rows.push(item)
       queue.ids.push(id)
       queue.tss.push(ts)
       this.queueMap.set(chat_id, queue)
     } else {
       this.queueMap.set(chat_id, {
         msgs: [msg],
-        rows: [row],
+        rows: [item],
         ids: [id],
         tss: [ts],
         delay: !!delay && isNumber(delay) ? delay : this.defaultDelay,
@@ -139,7 +139,7 @@ export class QueueDispatcher {
     chat_id: number
     newItem?: {
       msg: string
-      row: any[][]
+      item: any
       id: number
       ts: number
     }
@@ -166,13 +166,13 @@ export class QueueDispatcher {
           const {
             // chat_id,
             msg,
-            row,
+            item,
             id,
             ts,
           } = newItem
 
           queueNow.msgs.push(msg)
-          queueNow.rows.push(row)
+          queueNow.rows.push(item)
           queueNow.ids.push(id)
           queueNow.tss.push(ts)
         }
@@ -357,13 +357,13 @@ export class QueueDispatcher {
       toClient: { [key: string]: any }
     }) => void
     newItem: {
-      row: any[][]
+      item: any
       id: number
       ts: number
     }
     reqBody: {
       chat_id: number
-      rowValues: any[][]
+      itemParams: any
       resultId: number
       delay?: number
       oddFree?: number
@@ -383,7 +383,7 @@ export class QueueDispatcher {
 
     if (isNotifUselessness) return await onFail({ res })
 
-    const { rowValues, resultId } = reqBody
+    const { itemParams, resultId } = reqBody
 
     // 1. Check timers in this startup session; sample { isOk: true, message: 'Ok' }
     const isSentInTime = await this.isSentInTimePromise({
@@ -440,7 +440,7 @@ export class QueueDispatcher {
         this._addItemToQueue({
           chat_id,
           msg: md,
-          row: rowValues,
+          item: itemParams,
           id: resultId,
           ts: newItem.ts,
           delay: reqBody.delay,
