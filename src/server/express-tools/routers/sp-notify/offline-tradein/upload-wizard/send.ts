@@ -167,7 +167,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         const jsonFromBack = getBackResponseMD(originalServerResponseStr)
 
         try {
-          result += `*${commonHeader}${
+          result += `*${commonHeader}\n${
             req.body.resultId ? ` #${req.body.resultId}` : ''
           } ${partnerName} ${tradeinId || '?'}*\n\n${
             notifyCodes[eventCode] ? notifyCodes[eventCode].symbol : '❓'
@@ -201,7 +201,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         notifyCodes: TNotifyCodesMap
       }) {
         try {
-          const header = `${commonHeader} ${queueState.ids.length} events`
+          const header = `${commonHeader}\n${queueState.ids.length} events`
           const msgsObj: {
             [key: string]: {
               counter: number
