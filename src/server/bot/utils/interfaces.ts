@@ -10,6 +10,12 @@ export type TModifiedRequest = IRequest & {
     smartprice: {
       offlineTradeInQueueDispatcher: QueueDispatcher
     }
+    kanban2021: {
+      queueDispatcher: QueueDispatcher
+    }
+    auditHelper2023: {
+      queueDispatcher: QueueDispatcher
+    }
   }
 }
 

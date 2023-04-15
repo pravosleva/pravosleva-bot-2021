@@ -1,9 +1,5 @@
 /* eslint-disable no-return-await */
-/* eslint-disable no-loop-func */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prefer-promise-reject-errors */
-import { Response as IResponse } from 'express'
-import { TModifiedRequest } from '~/bot/utils/interfaces'
+import { EEventCodes, TReqBody } from './types'
 import {
   // QueueDispatcher,
   TQueueState,
@@ -11,34 +7,23 @@ import {
   TCodeSettings,
   Utils,
 } from '~/express-tools/utils/notify-tools'
-import { EEventCodes, TReqBody } from '../types'
 
-// NOTE: Declarative refactoring roadmap
-// + Формат rowValues должен быть учтен только в этой логике
-// + Вся настройка форматов output notifs описана при создании new Utils,
-// + QueueDisparcher абстрагирован от формата сообщений
-// + Utils не знает про формат очереди TQueueStates
-// + Utils не знает про notifyCodes (должно задаваться при создании new Utils)
-// x QueueDisparcher абстрагирован от reqBody? [No, cuz need chat_id, row, etc.]
-// + Example of QueueDisparcher should not be Singletone
-
-const commonHeader = 'SP Reminder'
+const commonHeader = 'MIAN Reminder'
 const rules: { [key in EEventCodes]: TCodeSettings } = {
-  [EEventCodes.WEEKLY_REMINDER]: {
-    symbol: '🧯',
-    descr: 'Еженедельное напоминание',
+  [EEventCodes.PARSING_RESILT_SUCCESS]: {
+    symbol: '✅',
+    descr: 'Парсер что-то нашел',
     doNotify: true,
     showAdditionalInfo: true,
     validate: () => true,
   },
 }
 
-export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
+export const sendNotify = async (req, res, _next) => {
   const { ts: _optionalTs } = req.body as TReqBody
   const ts = _optionalTs || new Date().getTime()
 
-  const { offlineTradeInQueueDispatcher: queueDispatcher } =
-    req.notifyTools.smartprice
+  const { queueDispatcher } = req.notifyTools.auditHelper2023
 
   // NOTE: Init bot instance if necessary (already in withHelpfulInstances)
   // queueDispatcher.setBotInstance(req.bot)
@@ -78,13 +63,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         notifyCodes: TNotifyCodesMap
       }): string {
         const body = req.body as TReqBody
-        const {
-          eventCode,
-          about,
-          // errMsg,
-          targetMD,
-          // jsonStringified,
-        } = body
+        const { eventCode, links, words } = body
         let result = ''
 
         if (!eventCode || !notifyCodes[eventCode]) {
@@ -92,7 +71,11 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           // NOTE: Should be impossible (эти вещи будем фильтровать в mw)
         } else {
           try {
-            result += `*${commonHeader} | ${notifyCodes[eventCode].descr}*\n\n${notifyCodes[eventCode].symbol} ${about}\n\n${targetMD}`
+            result += `*${commonHeader} | ${notifyCodes[eventCode].descr}*\n\n${
+              notifyCodes[eventCode].symbol
+            } Результат поиска по словам: ${words.join(', ')}\n\n${links.join(
+              '\n'
+            )}`
           } catch (err) {
             console.log(err)
           }
@@ -125,10 +108,10 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           // } = {}
           const res = `TST (generalized) queueState.ids= ${queueState.ids.join(
             ', '
-          )}`
+          )} (комбинированное сообщение не предусмотрено)`
           return `*${header}*\n\n${res}`
         } catch (err) {
-          return `ERR001: ${err?.message || 'No err.message'}`
+          return `ERR_20230415: ${err?.message || 'No err.message'}`
         }
       },
     }),

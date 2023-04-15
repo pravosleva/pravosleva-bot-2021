@@ -3,8 +3,9 @@ import { QueueDispatcher } from '~/express-tools/utils/notify-tools/QueueDisparc
 import { TModifiedRequest } from '~/bot/utils/interfaces'
 import { freeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatcher'
 
+// NOTE: TG_NOTIFS Step 2/3
 // NOTE: Персональные очереди для пользователей (с таймером)
-export const offlineTradeInQueueDispatcher = new QueueDispatcher({
+export const queueDispatcher = new QueueDispatcher({
   // NOTE: Время, не чаще которого разрешается беспокоить пользователя
   // defaultDelay: 1000 * 60 * 1, // 1 min
   // defaultDelay: 1000 * 60 * 30, // 30 min
@@ -16,20 +17,39 @@ export const offlineTradeInQueueDispatcher = new QueueDispatcher({
   differentMsgsLimitNumber: 1,
 })
 
+const queueDispatcherReminder = new QueueDispatcher({
+  defaultDelay: 1000 * 60 * 60 * 1,
+  differentMsgsLimitNumber: 1,
+})
+
+const queueDispatcherAuditHelper2023 = new QueueDispatcher({
+  defaultDelay: 1000 * 60 * 60 * 1,
+  differentMsgsLimitNumber: 1,
+})
+
 export const withHelpfulInstances = (
   req: TModifiedRequest,
   _res: IResponse,
   next: INextFunction
 ) => {
   // -- NOTE: Set bot instance
-  offlineTradeInQueueDispatcher.setBotInstance(req.bot)
+  // NOTE: TG_NOTIFS Step 3/3
+  queueDispatcher.setBotInstance(req.bot)
+  queueDispatcherReminder.setBotInstance(req.bot)
+  queueDispatcherAuditHelper2023.setBotInstance(req.bot)
   freeDispatcher.setBotInstance(req.bot)
   // --
 
   req.notifyTools = {
     freeDispatcher,
     smartprice: {
-      offlineTradeInQueueDispatcher,
+      offlineTradeInQueueDispatcher: queueDispatcher,
+    },
+    kanban2021: {
+      queueDispatcher: queueDispatcherReminder,
+    },
+    auditHelper2023: {
+      queueDispatcher: queueDispatcherAuditHelper2023,
     },
   }
 

@@ -1,5 +1,5 @@
 import { THelp } from '~/bot/utils/interfaces'
-import { EEventCodes } from '~/express-tools/routers/notify.kanban-2021/types'
+import { EEventCodes } from '~/express-tools/routers/notify/kanban-2021/types'
 
 export const _help: THelp = {
   params: {

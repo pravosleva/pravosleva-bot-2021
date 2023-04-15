@@ -1,5 +1,6 @@
 export enum EEventCodes {
   WEEKLY_REMINDER = 'weekly_reminder',
+  DAILY_REMINDER = 'daily_reminder',
 }
 
 export type TReqBody = {
