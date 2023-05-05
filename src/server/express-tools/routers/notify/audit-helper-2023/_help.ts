@@ -1,7 +1,7 @@
 import { THelp } from '~/bot/utils/interfaces'
 import { EEventCodes } from './types'
 
-export const _help: THelp = {
+export const _helpV2: THelp = {
   params: {
     body: {
       chat_id: {
@@ -14,9 +14,9 @@ export const _help: THelp = {
         descr: `Possible values: ${Object.values(EEventCodes).join(', ')}`,
         required: true,
       },
-      links: {
-        type: 'string[]',
-        descr: 'Links (parsing details)',
+      report: {
+        type: '{ [key: string]: { elmTextList: string[] } }',
+        descr: 'Parsing report details',
         required: true,
       },
       words: {

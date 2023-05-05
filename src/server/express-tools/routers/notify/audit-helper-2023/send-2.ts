@@ -1,5 +1,5 @@
 /* eslint-disable no-return-await */
-import { EEventCodes, TReqBody } from './types'
+import { EEventCodesV2, TReqBodyV2 } from './types'
 import {
   // QueueDispatcher,
   TQueueState,
@@ -9,18 +9,38 @@ import {
 } from '~/express-tools/utils/notify-tools'
 
 const commonHeader = 'MIAN Reminder'
-const rules: { [key in EEventCodes]: TCodeSettings } = {
-  [EEventCodes.PARSING_RESILT_SUCCESS]: {
+const rules: { [key in EEventCodesV2]: TCodeSettings } = {
+  [EEventCodesV2.PARSING_RESILT_SUCCESS_V2]: {
     symbol: '✅',
     descr: 'Парсер что-то нашел',
     doNotify: true,
     showAdditionalInfo: true,
-    validate: () => true,
+    validate: ({ words, report, eventCode }) => true,
   },
 }
 
-export const sendNotify = async (req, res, _next) => {
-  const { ts: _optionalTs } = req.body as TReqBody
+const getReportMD = (report: {
+  [key: string]: { elmTextList: string[] }
+}): string => {
+  const items: string[] = []
+
+  for (const key in report) {
+    const itemHeader = `[Link](${key})`
+    const { elmTextList } = report[key]
+
+    const itemsTextList = []
+    for (const text of elmTextList) {
+      itemsTextList.push(`\`- ${text.replace(/\t/g, '')}\``)
+    }
+
+    items.push(`${itemHeader}\n${itemsTextList.join('\n')}`)
+  }
+
+  return `${items.join('\n\n')}`
+}
+
+export const sendNotifyV2 = async (req, res, _next) => {
+  const { ts: _optionalTs } = req.body as TReqBodyV2
   const ts = _optionalTs || new Date().getTime()
 
   const { queueDispatcher } = req.notifyTools.auditHelper2023
@@ -41,7 +61,7 @@ export const sendNotify = async (req, res, _next) => {
       }) => {
         let res = false
         try {
-          const body = req.body as TReqBody
+          const body = req.body as TReqBodyV2
           const targetEventCode = body.eventCode
           if (
             !targetEventCode ||
@@ -62,8 +82,8 @@ export const sendNotify = async (req, res, _next) => {
       }: {
         notifyCodes: TNotifyCodesMap
       }): string {
-        const body = req.body as TReqBody
-        const { eventCode, links, words } = body
+        const body = req.body as TReqBodyV2
+        const { eventCode, report, words } = body
         let result = ''
 
         if (!eventCode || !notifyCodes[eventCode]) {
@@ -73,8 +93,8 @@ export const sendNotify = async (req, res, _next) => {
           try {
             result += `*${commonHeader} | ${notifyCodes[eventCode].descr}*\n\n${
               notifyCodes[eventCode].symbol
-            } Результат поиска по словам: ${words.join(', ')}\n\n${links.join(
-              '\n'
+            } Результат поиска по словам: ${words.join(', ')}\n\n${getReportMD(
+              report
             )}`
           } catch (err) {
             console.log(err)
@@ -106,19 +126,19 @@ export const sendNotify = async (req, res, _next) => {
           //     shortMsgs: string[]
           //   }
           // } = {}
-          const res = `TST (generalized) queueState.ids= ${queueState.ids.join(
-            ', '
-          )} (комбинированное сообщение не предусмотрено)`
+          const res = `TST (combined) queueState.ids= ${queueState.ids
+            .map((n) => String(n))
+            .join(', ')} (комбинированное сообщение не предусмотрено)`
           return `*${header}*\n\n${res}`
         } catch (err) {
-          return `ERR_20230415: ${err?.message || 'No err.message'}`
+          return `ERR_20230415-2: ${err?.message || 'No err.message'}`
         }
       },
     }),
 
     // -- TODO: Refactoring: json for client should be made here...
     onFail: async ({ res }) => {
-      const body = req.body as TReqBody
+      const body = req.body as TReqBodyV2
       const targetEventCode = body.eventCode
       await res.status(200).send({
         ok: false,
@@ -134,7 +154,7 @@ export const sendNotify = async (req, res, _next) => {
 
     newItem: {
       item: req.body,
-      id: req.body.resultId,
+      id: req.body.resultId || String(ts),
       ts,
     },
     // --

@@ -308,7 +308,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
 
     newItem: {
       item: req.body.rowValues,
-      id: req.body.resultId,
+      id: req.body.resultId || String(ts),
       ts,
     },
     // --

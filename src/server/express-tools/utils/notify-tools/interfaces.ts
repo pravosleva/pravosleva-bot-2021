@@ -8,6 +8,7 @@ export type TQueueState = {
 
 export type TCodeSettings = {
   symbol: string
+  dontShowSymbol?: boolean
   descr: string
   doNotify: boolean
   validate?: (itemParams: any) => boolean

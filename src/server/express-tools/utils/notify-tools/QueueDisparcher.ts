@@ -441,7 +441,7 @@ export class QueueDispatcher {
           chat_id,
           msg: md,
           item: itemParams,
-          id: resultId,
+          id: resultId || newItem.ts,
           ts: newItem.ts,
           delay: reqBody.delay,
           utils,

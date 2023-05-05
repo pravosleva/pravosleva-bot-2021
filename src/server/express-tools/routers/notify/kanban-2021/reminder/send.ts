@@ -22,18 +22,27 @@ import { EEventCodes, TReqBody } from '../types'
 // x QueueDisparcher абстрагирован от reqBody? [No, cuz need chat_id, row, etc.]
 // + Example of QueueDisparcher should not be Singletone
 
-const commonHeader = 'SP Reminder'
+const commonHeader = 'Виртуальный попугай'
 const rules: { [key in EEventCodes]: TCodeSettings } = {
-  [EEventCodes.WEEKLY_REMINDER]: {
+  [EEventCodes.SP_REMINDER_WEEKLY]: {
     symbol: '🧯',
-    descr: 'Weekly',
+    descr: 'SP Weekly',
     doNotify: true,
     showAdditionalInfo: true,
     validate: () => true,
   },
-  [EEventCodes.DAILY_REMINDER]: {
-    symbol: 'ℹ️',
-    descr: 'Daily',
+  [EEventCodes.SP_REMINDER_DAILY]: {
+    symbol: null, // 'ℹ️',
+    dontShowSymbol: true,
+    descr: 'SP Daily',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+  [EEventCodes.MAGAZ_REMINDER_DAILY]: {
+    symbol: null,
+    dontShowSymbol: true,
+    descr: 'Magaz Daily',
     doNotify: true,
     showAdditionalInfo: true,
     validate: () => true,
@@ -98,7 +107,11 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           // NOTE: Should be impossible (эти вещи будем фильтровать в mw)
         } else {
           try {
-            result += `*${commonHeader} | ${notifyCodes[eventCode].descr}*\n\n${notifyCodes[eventCode].symbol} ${about}\n\n${targetMD}`
+            result += `*${commonHeader} | ${notifyCodes[eventCode].descr}*\n\n${
+              !notifyCodes[eventCode].dontShowSymbol
+                ? `${notifyCodes[eventCode].symbol} `
+                : ''
+            }${about}\n\n${targetMD}`
           } catch (err) {
             console.log(err)
           }
@@ -157,7 +170,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
 
     newItem: {
       item: req.body,
-      id: req.body.resultId,
+      id: req.body.resultId || String(ts),
       ts,
     },
     // --
