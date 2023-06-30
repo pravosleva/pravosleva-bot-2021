@@ -8,8 +8,8 @@ export const withBlackList = async (ctx, next) => {
   try {
     const update = ctx.update.message || ctx.update.callback_query
 
-    console.log(update?.from)
-    if (!!update?.from && hasAccess(update.from)) {
+    console.log(update?.message)
+    if (!!update?.message?.from && hasAccess(update?.message?.from)) {
       next()
       return
     }

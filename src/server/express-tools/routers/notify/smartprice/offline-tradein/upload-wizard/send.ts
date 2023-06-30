@@ -167,9 +167,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         const jsonFromBack = getBackResponseMD(originalServerResponseStr)
 
         try {
-          result += `*${commonHeader}\n${
-            req.body.resultId ? ` #${req.body.resultId}` : ''
-          } ${partnerName} ${tradeinId || '?'}*\n\n${
+          result += `*${commonHeader}\n#${partnerName} ${
+            tradeinId ? `#tradein${tradeinId}` : '⚠️ Trade-In ID not specified!'
+          }*\n${req.body.resultId ? `report ${req.body.resultId}` : ''}\n\n${
             notifyCodes[eventCode] ? notifyCodes[eventCode].symbol : '❓'
           } \`${eventCode}\`${
             !!notifyCodes[eventCode] && notifyCodes[eventCode].descr
@@ -266,9 +266,9 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
                   (key) =>
                     `\`${notifyCodes[key] ? notifyCodes[key].symbol : '❓'} (${
                       msgsObj[key].counter
-                    }) ${msgsObj[key].msg} | ${Array.from(
-                      msgsObj[key].partners
-                    ).join(', ')}\`\n\n${Utils._getShortListMD({
+                    }) ${msgsObj[key].msg}\` ${Array.from(msgsObj[key].partners)
+                      .map((name) => `#${name}`)
+                      .join(' ')}\n\n${Utils._getShortListMD({
                       shortMsgs: msgsObj[key].shortMsgs,
                       limit: 5,
                     })}`

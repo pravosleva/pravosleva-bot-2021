@@ -13,6 +13,7 @@ const AUTOPARK_2022_BASE_URL =
 
 export const withMyAutopark = (bot: any) => {
   bot.command('autopark', async (ctx) => {
+    console.log('-- tst')
     // TODO:
     // 1. Check is user exists?
     // console.log(ctx.update.message.from.id)
@@ -21,7 +22,7 @@ export const withMyAutopark = (bot: any) => {
       .then((data) => data)
       .catch((msg) => msg)
 
-    // console.log(data)
+    console.log(data)
     if (typeof data === 'string') return ctx.replyWithMarkdown(`ERR: ${data}`)
 
     const {

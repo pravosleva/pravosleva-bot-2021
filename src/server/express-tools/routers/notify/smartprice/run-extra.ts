@@ -7,7 +7,7 @@ export enum ENotifNamespace {
 }
 
 export const runExtra = async (req: TModifiedRequest, res: IResponse) => {
-  const { chat_id, namespace } = req.body
+  const { chat_id, message_thread_id, namespace } = req.body
   const result: any = {
     ok: false,
   }
@@ -17,7 +17,10 @@ export const runExtra = async (req: TModifiedRequest, res: IResponse) => {
       const { offlineTradeInQueueDispatcher: queueDispatcher } =
         req.notifyTools.smartprice
 
-      const _result = await queueDispatcher.runExtra({ chat_id })
+      const _result = await queueDispatcher.runExtra({
+        chat_id,
+        message_thread_id,
+      })
       result.ok = _result.ok
       if (_result.message) result.message = _result.message
       result._service = {

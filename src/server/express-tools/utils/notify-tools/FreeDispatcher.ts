@@ -79,5 +79,5 @@ export class FreeDispatcher {
 // NOTE: Менеджер частоты доставки
 // (без таймера, только учет количества + допустимое количество возможных сообщений вне очереди)
 export const freeDispatcher = new FreeDispatcher({
-  defaultOddFree: 10, // NOTE: x сообщений будут доставлены, независимо от временной задержки
+  defaultOddFree: 5, // NOTE: x сообщений будут доставлены, независимо от временной задержки
 })

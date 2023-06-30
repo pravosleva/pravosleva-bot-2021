@@ -75,7 +75,7 @@ export const withSmartPriceLogic = (bot: any) => {
         await answerCbQuery()
         deleteMessage()
         return replyWithMarkdown(
-          'Для локальной разработки нужно:\n\n1) runtime_data [Как копировать RD](http://code-samples.space/notes/615eaf85844868774d5396b1)\n\n2) Переменные среды [Local dev envs](http://code-samples.space/notes/60bcd2e0a8f340671f9da000)'
+          'Для локальной разработки нужно:\n\n1) runtime data [Как копировать RD](http://code-samples.space/notes/615eaf85844868774d5396b1)\n\n2) Переменные среды [Local dev envs](http://code-samples.space/notes/60bcd2e0a8f340671f9da000)'
         )
       } catch (err) {
         return replyWithMarkdown('ERR')

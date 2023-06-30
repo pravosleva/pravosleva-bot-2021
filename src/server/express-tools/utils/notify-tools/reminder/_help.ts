@@ -9,6 +9,11 @@ export const _help: THelp = {
         descr: 'TG chat_id',
         required: true,
       },
+      message_thread_id: {
+        type: 'number',
+        descr: 'TG message_thread_id (in chat)',
+        required: false,
+      },
       eventCode: {
         type: 'string',
         descr: `Possible values: ${Object.values(EEventCodes).join(', ')}`,

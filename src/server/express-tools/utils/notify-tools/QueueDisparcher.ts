@@ -86,6 +86,7 @@ export class QueueDispatcher {
 
   _addItemToQueue({
     chat_id,
+    message_thread_id,
     msg,
     item,
     id,
@@ -94,6 +95,7 @@ export class QueueDispatcher {
     utils,
   }: {
     chat_id: number
+    message_thread_id?: number
     msg: string
     item: any
     id: number
@@ -119,7 +121,7 @@ export class QueueDispatcher {
       })
     }
 
-    this.runTimer({ chat_id, utils }) // NOTE: Запланируем отложенную отправку на случай, если ивентов больше не придет
+    this.runTimer({ chat_id, utils, message_thread_id }) // NOTE: Запланируем отложенную отправку на случай, если ивентов больше не придет
   }
 
   hasChat({ chat_id }: { chat_id: number }): boolean {
@@ -137,6 +139,7 @@ export class QueueDispatcher {
 
   async _sendNow<TR>(arg: {
     chat_id: number
+    message_thread_id?: number
     newItem?: {
       msg: string
       item: any
@@ -146,14 +149,16 @@ export class QueueDispatcher {
     targetAction: ({
       msg,
       chat_id,
+      message_thread_id,
     }: {
       msg: string
       chat_id: number
+      message_thread_id?: number
     }) => Promise<any>
     utils: Utils
     cb?: (q: QueueDispatcher) => void
   }): Promise<TR> {
-    const { chat_id, newItem, targetAction, utils, cb } = arg
+    const { chat_id, message_thread_id, newItem, targetAction, utils, cb } = arg
     const hasChat = this.hasChat({ chat_id })
     let tgResp: any = []
     let waitCounterMs = 0
@@ -187,7 +192,11 @@ export class QueueDispatcher {
               waitCounterMs += i * delayBetweenNotifs
               setTimeout(async () => {
                 tgResp.push(
-                  await targetAction({ msg: queueNow.msgs[i], chat_id })
+                  await targetAction({
+                    msg: queueNow.msgs[i],
+                    chat_id,
+                    message_thread_id,
+                  })
                 )
               }, i * delayBetweenNotifs)
             }
@@ -202,6 +211,7 @@ export class QueueDispatcher {
                   notifyCodes: utils.notifyCodes,
                 }),
                 chat_id,
+                message_thread_id,
               })
             )
             // TODO: How to send link as button? setTimeout(async () => { tgResp.push() }, 500)
@@ -212,12 +222,21 @@ export class QueueDispatcher {
         // NOTE: 3.1.2 Reset queue state & Send single msg
         this.resetChat({ chat_id })
         if (newItem)
-          tgResp = [await targetAction({ msg: newItem.msg, chat_id })]
+          tgResp = [
+            await targetAction({
+              msg: newItem.msg,
+              chat_id,
+              message_thread_id,
+            }),
+          ]
       }
     } else {
       // NOTE: 3.2 Reset queue state & Send single msg
       this.resetChat({ chat_id })
-      if (newItem) tgResp = [await targetAction({ msg: newItem.msg, chat_id })]
+      if (newItem)
+        tgResp = [
+          await targetAction({ msg: newItem.msg, chat_id, message_thread_id }),
+        ]
     }
     if (cb) cb(this)
 
@@ -229,7 +248,15 @@ export class QueueDispatcher {
   }
 
   // NOTE: Таймер будет создан, если он не был запущен раее
-  runTimer({ chat_id, utils }: { chat_id: number; utils: Utils }): void {
+  runTimer({
+    chat_id,
+    message_thread_id,
+    utils,
+  }: {
+    chat_id: number
+    message_thread_id?: number
+    utils: Utils
+  }): void {
     try {
       const _queueState = this.queueMap.get(chat_id)
       if (_queueState) {
@@ -238,7 +265,7 @@ export class QueueDispatcher {
         if (!this.timersMap.has(chat_id))
           this.timersMap.set(chat_id, {
             timeout: setTimeout(
-              () => this.sendOldQueue({ chat_id, utils }),
+              () => this.sendOldQueue({ chat_id, utils, message_thread_id }),
               delay
             ),
             utils,
@@ -260,7 +287,15 @@ export class QueueDispatcher {
   }
 
   // NOTE: Отправка существующей очереди
-  async sendOldQueue({ chat_id, utils }: { chat_id: number; utils: Utils }) {
+  async sendOldQueue({
+    chat_id,
+    message_thread_id,
+    utils,
+  }: {
+    chat_id: number
+    message_thread_id?: number
+    utils: Utils
+  }) {
     let result = null
     try {
       const queueState = this.queueMap.get(chat_id)
@@ -274,12 +309,29 @@ export class QueueDispatcher {
         // NOTE: Отправляем все что есть в очереди
         result = await this._sendNow<any[]>({
           chat_id,
-          targetAction: async ({ msg, chat_id }) => {
+          message_thread_id,
+          targetAction: async ({ msg, chat_id, message_thread_id }) => {
             console.log(`-- send 2: ${msg}`)
 
-            return await this.botInstance.telegram.sendMessage(chat_id, msg, {
-              parse_mode: 'Markdown',
-            })
+            try {
+              return await this.botInstance.telegram.sendMessage(chat_id, msg, {
+                parse_mode: 'Markdown',
+                message_thread_id,
+              })
+            } catch (err) {
+              return await this.botInstance.telegram.sendMessage(
+                // chat_id
+                432590698, // NOTE: Den Pol,
+                `⛔ ERR2: Ошибка отправки / \`${
+                  typeof err === 'string'
+                    ? err
+                    : err.message || 'No err.message'
+                }\`\n\n${msg}`,
+                {
+                  parse_mode: 'Markdown',
+                }
+              )
+            }
           },
           utils,
         })
@@ -309,8 +361,10 @@ export class QueueDispatcher {
 
   async runExtra({
     chat_id,
+    message_thread_id,
   }: {
     chat_id: number
+    message_thread_id?: number
   }): Promise<{ ok: boolean; message?: string; tgRess?: any[] }> {
     const targetTimerData = this.timersMap.get(chat_id)
     let tgRess = null
@@ -319,6 +373,7 @@ export class QueueDispatcher {
       tgRess = await this.sendOldQueue({
         chat_id,
         utils: targetTimerData.utils,
+        message_thread_id,
       })
 
       // clearTimeout(targetTimerData.timeout) // NOTE: Already called in sendOldQueue -> _sendNow -> cleanupTimer
@@ -363,6 +418,7 @@ export class QueueDispatcher {
     }
     reqBody: {
       chat_id: number
+      message_thread_id?: number
       itemParams: any
       resultId: number
       delay?: number
@@ -371,7 +427,7 @@ export class QueueDispatcher {
     }
     utils: Utils
   }) {
-    const { delay, oddFree, chat_id } = reqBody
+    const { delay, oddFree, chat_id, message_thread_id } = reqBody
     // const ts = _optionalTs || new Date().getTime()
 
     freeDispatcher.setOddFree({ chat_id, value: oddFree })
@@ -400,16 +456,37 @@ export class QueueDispatcher {
         // -- SEND LOGIC
         tgResp = await this._sendNow<any[]>({
           chat_id,
+          message_thread_id,
           utils,
           newItem: {
             msg: md,
             ...newItem,
           },
-          targetAction: async ({ msg, chat_id }) => {
-            console.log(`-- send 1: ${msg}`)
-            return await this.botInstance.telegram.sendMessage(chat_id, msg, {
+          targetAction: async ({ msg, chat_id, message_thread_id }) => {
+            const opts: any = {
               parse_mode: 'Markdown',
-            })
+            }
+            if (message_thread_id) opts.message_thread_id = message_thread_id
+            try {
+              return await this.botInstance.telegram.sendMessage(
+                chat_id,
+                msg,
+                opts
+              )
+            } catch (err) {
+              return await this.botInstance.telegram.sendMessage(
+                // chat_id
+                432590698, // NOTE: Den Pol,
+                `⛔ ERR1: Ошибка отправки / \`${
+                  typeof err === 'string'
+                    ? err
+                    : err.message || 'No err.message'
+                }\`\n\n${msg}`,
+                {
+                  parse_mode: 'Markdown',
+                }
+              )
+            }
           },
           cb: (q) => {
             q.resetTimestamp({ chat_id })
@@ -439,6 +516,7 @@ export class QueueDispatcher {
       default: {
         this._addItemToQueue({
           chat_id,
+          message_thread_id,
           msg: md,
           item: itemParams,
           id: resultId || newItem.ts,

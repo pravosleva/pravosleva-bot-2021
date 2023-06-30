@@ -71,6 +71,13 @@ class App {
     // bot.use(withBlackList)
     withDetectMembers(bot)
 
+    // -- NOTE: Logs
+    // bot.use((ctx, next) => {
+    //   console.log(ctx.update)
+    //   next()
+    // })
+    // --
+
     // --- TODO: Refactoring. Make as middlewares:
     withStartLogic(bot)
     // withLabLogic(bot)

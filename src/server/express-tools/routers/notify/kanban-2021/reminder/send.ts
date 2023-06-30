@@ -24,13 +24,6 @@ import { EEventCodes, TReqBody } from '../types'
 
 const commonHeader = 'Виртуальный попугай'
 const rules: { [key in EEventCodes]: TCodeSettings } = {
-  [EEventCodes.SP_REMINDER_WEEKLY]: {
-    symbol: '🧯',
-    descr: 'SP Weekly',
-    doNotify: true,
-    showAdditionalInfo: true,
-    validate: () => true,
-  },
   [EEventCodes.SP_REMINDER_DAILY]: {
     symbol: null, // 'ℹ️',
     dontShowSymbol: true,
@@ -39,10 +32,50 @@ const rules: { [key in EEventCodes]: TCodeSettings } = {
     showAdditionalInfo: true,
     validate: () => true,
   },
+  [EEventCodes.SP_REMINDER_WEEKLY]: {
+    symbol: '🧯',
+    descr: 'SP Weekly',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+
   [EEventCodes.MAGAZ_REMINDER_DAILY]: {
     symbol: null,
     dontShowSymbol: true,
     descr: 'Magaz Daily',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+  [EEventCodes.MAGAZ_REMINDER_WEEKLY]: {
+    symbol: '🗒',
+    dontShowSymbol: false,
+    descr: 'Magaz Weekly',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+  [EEventCodes.MAGAZ_REMINDER_MONTHLY]: {
+    symbol: '📅',
+    dontShowSymbol: false,
+    descr: 'Magaz Monthly',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+  [EEventCodes.MAGAZ_SPRINT_REMINDER_WEEKLY]: {
+    symbol: '🗒',
+    dontShowSymbol: true,
+    descr: 'Magaz Sprint Weekly',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+  [EEventCodes.MAGAZ_TASKLIST_REMINDER_DAILY]: {
+    symbol: '🗒',
+    dontShowSymbol: true,
+    descr: 'Magaz Tasklist Daily',
     doNotify: true,
     showAdditionalInfo: true,
     validate: () => true,
