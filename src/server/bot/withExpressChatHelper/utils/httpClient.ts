@@ -19,7 +19,7 @@ class Singleton {
     this.axiosInstance = axios.create({
       baseURL: isDev
         ? 'http://localhost:5000/chat'
-        : 'http://pravosleva.ru/express-helper/chat',
+        : 'https://pravosleva.ru/express-helper/chat',
       // timeout: 1000,
       // headers: { 'X-Custom-Header': 'foobar' },
     })
