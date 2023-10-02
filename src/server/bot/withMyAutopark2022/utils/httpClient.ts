@@ -20,7 +20,7 @@ class Singleton {
     this.axiosInstance = axios.create({
       baseURL: isDev
         ? 'http://localhost:5000/pravosleva-bot-2021'
-        : 'http://pravosleva.ru/express-helper/pravosleva-bot-2021',
+        : 'http://pravosleva.pro/express-helper/pravosleva-bot-2021',
       // timeout: 1000,
       // headers: { 'X-Custom-Header': 'foobar' },
       validateStatus: (_s: number) => true,
@@ -34,6 +34,7 @@ class Singleton {
 
   universalAxiosResponseHandler(validator) {
     return (axiosRes) => {
+      console.log(axiosRes)
       if (!validator(axiosRes)) {
         throw new Error('Data is incorrect')
       }

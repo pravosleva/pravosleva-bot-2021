@@ -16,7 +16,7 @@ export type TDocument = {
   file_unique_id: string // "AgAD1RAAAqlD8Eg",
   file_size: number // 55712
 
-  // Special for additional pravosleva.ru service (основная задача - не палить TG_BOT_TOKEN):
+  // Special for additional pravosleva.pro service (основная задача - не палить TG_BOT_TOKEN):
   _pravosleva_service: TSpecialService
 }
 export type TPhoto = {

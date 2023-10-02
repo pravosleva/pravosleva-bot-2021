@@ -24,7 +24,7 @@ const addPhotoToSession = async (ctx: any) => {
 
   addToSession(ctx, fileId, {
     _pravosleva_service: {
-      fileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow-photos/${_specialTGFileName}`,
+      fileUrl: `https://pravosleva.pro/express-helper/pravosleva-bot-2021/get-file-shadow-photos/${_specialTGFileName}`,
     },
   })
 
@@ -40,7 +40,7 @@ const addDocumentToSession = async (document: TDocument, ctx: any) => {
   addToSession(ctx, fileId, {
     ...ctx.message.document,
     _pravosleva_service: {
-      fileUrl: `http://pravosleva.ru/express-helper/pravosleva-bot-2021/get-file-shadow-documents/${_specialTGFileName}`,
+      fileUrl: `https://pravosleva.pro/express-helper/pravosleva-bot-2021/get-file-shadow-documents/${_specialTGFileName}`,
     },
   })
   // NOTE: Update state json:

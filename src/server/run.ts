@@ -20,7 +20,7 @@ const {
   // withLabLogic,
   withSmartPriceLogic,
   // withFeedback,
-  withCianHelper,
+  // withCianHelper,
   withDetectMembers,
   withExpressChatHelper,
   // withBlackList,
@@ -84,7 +84,7 @@ class App {
     // withLabLogic(bot)
     withSmartPriceLogic(bot)
     // withFeedback(bot)
-    withCianHelper(bot)
+    // withCianHelper(bot)
     withExpressChatHelper(bot)
     withAutoruHelper(bot)
     withMyAutopark(bot)

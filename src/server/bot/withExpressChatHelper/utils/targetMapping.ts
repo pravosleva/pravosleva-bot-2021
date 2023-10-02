@@ -4,21 +4,21 @@ const targetMapping: {
   [key: string]: { link: string; uiName: string }
 } = {
   [ETargetParams.SP]: {
-    link: 'https://pravosleva.ru/express-helper/chat/#/?room=sp.pravosleva',
+    link: 'https://pravosleva.pro/express-helper/chat/#/?room=sp.pravosleva',
     uiName: '🔗 SP WORK CHAT',
   },
   [ETargetParams.UXTest]: {
-    link: 'https://pravosleva.ru/express-helper/chat/#/?room=ux-test',
+    link: 'https://pravosleva.pro/express-helper/chat/#/?room=ux-test',
     uiName: '🔗 UX-TEST CHAT',
   },
   [ETargetParams.MFES]: {
-    link: 'https://pravosleva.ru/express-helper/chat/#/?room=microfrontends',
+    link: 'https://pravosleva.pro/express-helper/chat/#/?room=microfrontends',
     uiName: '🔗 MICROFRONTENDS CHAT',
   },
 }
 
 const defaultItem: { link: string; uiName: string } = {
-  link: 'https://pravosleva.ru/express-helper/chat/',
+  link: 'https://pravosleva.pro/express-helper/chat/',
   uiName: '🔗 PUB 2021',
 }
 

@@ -9,7 +9,7 @@ import { EAPIUserCode } from '~/bot/withExpressChatHelper/utils/types'
 import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 
 const AUTOPARK_2022_BASE_URL =
-  process.env.AUTOPARK_2022_BASE_URL || 'http://pravosleva.ru/autopark-2022'
+  process.env.AUTOPARK_2022_BASE_URL || 'http://pravosleva.pro/autopark-2022'
 
 export const withMyAutopark = (bot: any) => {
   bot.command('autopark', async (ctx) => {

@@ -145,7 +145,7 @@ export const withLabLogic = (bot) => {
   })
 
   // bot.command('qr', (ctx) => {
-  //   return ctx.replyWithPhoto({ url: 'http://pravosleva.ru/static/img/covid-trash/fake-qr-pravosleva.gosuslugi.png' },
+  //   return ctx.replyWithPhoto({ url: 'http://pravosleva.pro/static/img/covid-trash/fake-qr-pravosleva.gosuslugi.png' },
   //     Extra.load({ caption: 'QR' })
   //       .markdown()
   //       .markup((m) =>
@@ -156,7 +156,7 @@ export const withLabLogic = (bot) => {
   //   )
   // })
   // bot.action('qr.gosuslugi', async (ctx) => {
-  //   return ctx.replyWithPhoto({ url: 'http://pravosleva.ru/static/img/covid-trash/covid-trash-v3-Screenshot_2021-06-27-14-39-58-696_com.miui.gallery.jpg' },
+  //   return ctx.replyWithPhoto({ url: 'http://pravosleva.pro/static/img/covid-trash/covid-trash-v3-Screenshot_2021-06-27-14-39-58-696_com.miui.gallery.jpg' },
   //     Extra.load({ caption: 'QR' })
   //       .markdown()
   //   )

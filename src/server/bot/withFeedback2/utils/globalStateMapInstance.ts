@@ -6,9 +6,9 @@ import { IUserState, TUserId, TFile, TContact, TPhotoItem } from './interfaces'
 
 const API_FEEDBACK_TARGET =
   process.env.API_FEEDBACK_TARGET ||
-  'http://pravosleva.ru/express-helper/pravosleva-bot-2021/add-entry'
+  'http://pravosleva.pro/express-helper/pravosleva-bot-2021/add-entry'
 const TELEGRAM_DOCS_SHADOW_API =
-  process.env.TELEGRAM_DOCS_SHADOW_API || 'http://pravosleva.ru/tg-bot-2021'
+  process.env.TELEGRAM_DOCS_SHADOW_API || 'http://pravosleva.pro/tg-bot-2021'
 
 const initialUserState: IUserState = {
   files: {},

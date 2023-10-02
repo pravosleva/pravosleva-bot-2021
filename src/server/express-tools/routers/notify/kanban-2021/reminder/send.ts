@@ -72,12 +72,21 @@ const rules: { [key in EEventCodes]: TCodeSettings } = {
     showAdditionalInfo: true,
     validate: () => true,
   },
-  [EEventCodes.MAGAZ_TASKLIST_REMINDER_DAILY]: {
+  [EEventCodes.TASKLIST_REMINDER_DAILY]: {
     symbol: '🗒',
     dontShowSymbol: true,
-    descr: 'Magaz Tasklist Daily',
+    descr: 'Tasklist Daily',
     doNotify: true,
     showAdditionalInfo: true,
+    validate: () => true,
+  },
+
+  [EEventCodes.AUX_SERVICE]: {
+    symbol: '⚙️',
+    dontShowSymbol: false,
+    descr: 'Service',
+    doNotify: true,
+    showAdditionalInfo: false,
     validate: () => true,
   },
 }

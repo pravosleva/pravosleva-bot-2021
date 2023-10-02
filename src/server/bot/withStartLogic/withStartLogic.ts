@@ -91,7 +91,7 @@ export const withStartLogic = (bot) => {
             // return replyWithMarkdown(
             //   Markup.urlButton(
             //     'Перейти к проектам',
-            //     `http://pravosleva.ru/autopark-2022/${chatId}`
+            //     `http://pravosleva.pro/autopark-2022/${chatId}`
             //   ),
             // )
             // break
@@ -114,7 +114,7 @@ export const withStartLogic = (bot) => {
                 // case ETargetParams.UXTest:
                 //   localStateInstance.set(chatId, {
                 //     targetParam,
-                //     link: 'http://pravosleva.ru/express-helper/chat/#/?room=ux-test',
+                //     link: 'http://pravosleva.pro/express-helper/chat/#/?room=ux-test',
                 //   })
                 //   break
                 // case ETargetParams.SP:
@@ -122,7 +122,7 @@ export const withStartLogic = (bot) => {
                 //   // NOTE: Others...
                 //   localStateInstance.set(chatId, {
                 //     targetParam,
-                //     link: 'http://pravosleva.ru/express-helper/chat/',
+                //     link: 'http://pravosleva.pro/express-helper/chat/',
                 //   })
                 //   // messages.push(`targetParam detected: ${targetParam} (set to store if room exists / [or special case like this])`)
                 //   break
@@ -160,7 +160,7 @@ export const withStartLogic = (bot) => {
                         targetParam,
                         link:
                           roomInfo.link ||
-                          `http://pravosleva.ru/express-helper/chat/#/${targetParam}`,
+                          `https://pravosleva.pro/express-helper/chat/#/${targetParam}`,
                       })
                       if (isDev) messages.push(`Room ${targetParam} exists`)
                       break
@@ -206,7 +206,7 @@ export const withStartLogic = (bot) => {
                         messages.push(
                           `\n✅ Hello, ${username}! Lets go to chat:\n${
                             roomInfo.link ||
-                            'http://pravosleva.ru/express-helper/chat/'
+                            'https://pravosleva.pro/express-helper/chat/'
                           }\n`
                         )
                       }
@@ -225,7 +225,7 @@ export const withStartLogic = (bot) => {
 
                     // Room not found, user exists
                     case userInfo.code === EAPIUserCode.UserExists:
-                      // messages.push('http://pravosleva.ru/express-helper/chat/')
+                      // messages.push('https://pravosleva.pro/express-helper/chat/')
                       break
 
                     default:

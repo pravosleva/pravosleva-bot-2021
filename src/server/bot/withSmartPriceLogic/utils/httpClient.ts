@@ -20,8 +20,8 @@ class Singleton {
     this.axiosInstance = axios.create({
       // baseURL: isDev
       //   ? 'http://localhost:5000/sp/report/v2'
-      //   : 'http://pravosleva.ru/express-helper/sp/report/v2',
-      baseURL: 'http://pravosleva.ru/express-helper/sp/report/v2',
+      //   : 'http://pravosleva.pro/express-helper/sp/report/v2',
+      baseURL: 'http://pravosleva.pro/express-helper/sp/report/v2',
       // timeout: 1000,
       // headers: { 'X-Custom-Header': 'foobar' },
     })
