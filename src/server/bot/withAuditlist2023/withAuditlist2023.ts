@@ -4,7 +4,8 @@ import {
 } from 'telegraf'
 
 const TODO_2023_BASE_URL =
-  process.env.TODO_2023_BASE_URL || 'https://pravosleva.pro/subprojects/todo'
+  process.env.TODO_2023_BASE_URL ||
+  'https://pravosleva.pro/subprojects/audit-list'
 
 export const withAuditlist2023 = (bot: any) => {
   bot.command('auditlist', async (ctx) => {

@@ -83,7 +83,7 @@ const rules: { [key in EEventCodes]: TCodeSettings } = {
 
   [EEventCodes.AUX_SERVICE]: {
     symbol: '⚙️',
-    dontShowSymbol: false,
+    dontShowSymbol: true,
     descr: 'Service',
     doNotify: true,
     showAdditionalInfo: false,
