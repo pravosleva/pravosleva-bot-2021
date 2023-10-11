@@ -10,6 +10,7 @@ export enum EEventCodes {
   TASKLIST_REMINDER_DAILY = 'tasklist_reminder_daily',
 
   AUX_SERVICE = 'aux_service',
+  SINGLE_REMINDER = 'single_reminder',
 }
 
 export type TReqBody = {

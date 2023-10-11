@@ -9,6 +9,8 @@ import { EAPIUserCode } from './utils/types'
 import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 import { getReportMarkdown } from '~/bot/utils/getReportMarkdown'
 
+// const localStateInstance = State.getInstance()
+
 // const isDev: boolean = process.env.NODE_ENV === 'development'
 
 export const withExpressChatHelper = (bot: any) => {
@@ -75,12 +77,27 @@ export const withExpressChatHelper = (bot: any) => {
       case EAPIUserCode.UserExists:
         try {
           // 1.2: Пользователь не менял ник (предлагаем кнопку Сбросить пароль)
+          const myState = localStateInstance.get(id)
+          const targetParam = myState?.targetParam // NOTE: Target chat name
+
+          console.log('- debug 2.1: targetParam')
+          console.log(targetParam)
+          console.log('-')
+
+          const link =
+            myState?.link || 'https://pravosleva.pro/express-helper/chat/'
+
           const newData = await replyWithMarkdown(
             `Пользователь ${username} был зарегистрирован ранее`,
             Markup.inlineKeyboard([
               Markup.callbackButton(
                 'Забыл пароль',
                 'express-chat-helper.signup'
+              ),
+              Markup.urlButton(
+                `Link${targetParam ? ` ${targetParam}` : ''}`,
+                link
+                // true
               ),
             ])
               .oneTime()

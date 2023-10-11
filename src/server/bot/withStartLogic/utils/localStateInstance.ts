@@ -2,8 +2,12 @@
 /* eslint-disable no-shadow */
 // import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 
+import { proxyMap } from 'valtio/utils'
+
 type TChatId = number
 type TData = { targetParam: string; link?: string }
+
+export const localStateInstance = proxyMap<TChatId, TData>()
 
 export class Singleton {
   private static instance: Singleton
@@ -53,5 +57,3 @@ export class Singleton {
   //   this.state.set(chatId, newState)
   // }
 }
-
-export const localStateInstance = Singleton.getInstance()

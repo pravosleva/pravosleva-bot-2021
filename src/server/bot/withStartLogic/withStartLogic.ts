@@ -7,6 +7,8 @@ import {
   EAPIUserCode,
 } from '~/bot/withExpressChatHelper/utils/types'
 
+// const localStateInstance = State.getInstance()
+
 const { NODE_ENV } = process.env
 const isDev = NODE_ENV === 'development'
 
@@ -22,13 +24,13 @@ export const withStartLogic = (bot) => {
     }
 
     const messages = [
-      // '*Список команд:*',
-      // '',
-      '🏎️ AutoPark 2022 - /autopark',
+      'AuditList 2023 - /auditlist',
+      '',
+      'AutoPark 2022 - /autopark',
       '',
       '💬 KanBan chat 2021 - /invite',
-      '',
-      '🏠 Найти съемное жилье, используя Циан API - /cian',
+      // '',
+      // '🏠 Найти съемное жилье, используя Циан API - /cian',
     ]
 
     replyWithMarkdown(messages.join('\n'))
@@ -49,20 +51,16 @@ export const withStartLogic = (bot) => {
     // '/start chat-invite_sp'
     // chat-invite_sp
 
+    console.log('-')
+    console.log(text)
+    console.log('-')
+
     const messages = ['Доброго времени суток!', '', 'ℹ️ Опции бота 👉 /help 👈']
     try {
       const parsedEntry = text.split(' ')
 
       console.log('--')
-      console.log({ text, parsedEntry }) // NOTE: Sample for ?start-autopark: { text: '/start autopark', parsedEntry: [ '/start', 'autopark' ] }
-      /*
-        --
-          {
-            text: '/start invite-chat_ux-test',
-            parsedEntry: [ '/start', 'invite-chat_ux-test' ]
-          }
-        --
-      */
+      console.log({ text, parsedEntry }) // { text: '/start chat_1', parsedEntry: [ '/start', 'chat_1' ] }
       console.log('--')
 
       // -- NOTE: Autopark tool
@@ -96,73 +94,116 @@ export const withStartLogic = (bot) => {
             // )
             // break
           }
+          case ETargetParams.AuditList: {
+            const cmd = '/auditlist'
+            const update = {
+              message: {
+                ...ctx.update.message,
+                text: cmd,
+                entities: [
+                  {
+                    offset: 0,
+                    length: cmd.length,
+                    type: 'bot_command',
+                  },
+                ],
+              },
+            }
+            // await ctx.reply('Вы зашли в Автопарк')
+            // messages.push(`\n🏎️ Вы зашли в Автопарк...`)
+            bot.handleUpdate(update)
+            return
+            // return replyWithMarkdown(
+            //   Markup.urlButton(
+            //     'Перейти к проектам',
+            //     `http://pravosleva.pro/autopark-2022/${chatId}`
+            //   ),
+            // )
+            // break
+          }
           default:
             break
         }
       }
       // --
 
+      // console.log('- debug 1')
+      // console.log(parsedEntry[1]) // 'chat_1'
+      // console.log('-')
+
       if (parsedEntry[1]) {
-        const parsedParam = parsedEntry[1].split('_') // ['invite-chat', 'ux-test']
-        const scopeParam = parsedParam[0]
-        const targetParam: string | undefined = parsedParam[1] // 'ux-test'
+        const parsedParam = parsedEntry[1].split('_') // ['chat', '1']
+        const scopeParam = parsedParam[0] // 'chat'
+        const targetParam: string | undefined = parsedParam[1] // '1'
+        const targetParamNormalized = Number(targetParam)
+
+        console.log('- debug 1.1: targetParamNormalized')
+        console.log(targetParamNormalized) // ?
+        console.log('-')
+
+        const chats = new Map<number, string>()
+        chats.set(0, 'ux-test')
+        chats.set(1, 'ui-test')
+        chats.set(2, 'pravosleva.pro')
+
+        const targetChatName: string | undefined = chats.get(
+          targetParamNormalized
+        )
+
+        console.log('- debug 1.2: targetChatName')
+        console.log(targetChatName) // ?
+        console.log('-')
+
+        console.log('- debug 1.3: scopeParam')
+        console.log(scopeParam) // ?
+        console.log('-')
 
         switch (scopeParam) {
           case EScopeParams.InviteChat:
-            if (targetParam) {
-              switch (targetParam) {
-                // case ETargetParams.UXTest:
-                //   localStateInstance.set(chatId, {
-                //     targetParam,
-                //     link: 'http://pravosleva.pro/express-helper/chat/#/?room=ux-test',
-                //   })
-                //   break
-                // case ETargetParams.SP:
-                // case ETargetParams.MFES:
-                //   // NOTE: Others...
-                //   localStateInstance.set(chatId, {
-                //     targetParam,
-                //     link: 'http://pravosleva.pro/express-helper/chat/',
-                //   })
-                //   // messages.push(`targetParam detected: ${targetParam} (set to store if room exists / [or special case like this])`)
-                //   break
+            if (targetChatName) {
+              switch (targetChatName) {
+                // TODO?
                 default: {
-                  if (
-                    parsedEntry.length === 2 &&
-                    parsedEntry[1].split('_')[0] === 'invite-chat'
-                  ) {
-                    const cmd = '/invite'
-                    const update = {
-                      message: {
-                        ...ctx.update.message,
-                        text: cmd,
-                        entities: [
-                          {
-                            offset: 0,
-                            length: cmd.length,
-                            type: 'bot_command',
-                          },
-                        ],
-                      },
-                    }
-                    bot.handleUpdate(update)
-                    return
-                  }
+                  // if (
+                  //   parsedEntry.length === 2 &&
+                  //   parsedEntry[1].split('_')[0] === 'chat'
+                  // ) {
+                  //   const cmd = '/invite'
+                  //   const update = {
+                  //     message: {
+                  //       ...ctx.update.message,
+                  //       text: cmd,
+                  //       entities: [
+                  //         {
+                  //           offset: 0,
+                  //           length: cmd.length,
+                  //           type: 'bot_command',
+                  //         },
+                  //       ],
+                  //     },
+                  //   }
+                  //   bot.handleUpdate(update)
+                  //   return
+                  // }
                   // 1. Check room
                   const roomInfo = await expressHttpClient
-                    .checkRoom({ room_id: targetParam })
+                    .checkRoom({ room_id: targetChatName })
                     .then((_data) => _data)
                     .catch((msg) => msg)
+
+                  console.log('- debug 1.4: roomInfo (response)')
+                  console.log(roomInfo)
+                  console.log('-')
 
                   switch (roomInfo.code) {
                     case EAPIRoomCode.RoomExists:
                       localStateInstance.set(chatId, {
-                        targetParam,
+                        targetParam: targetChatName,
                         link:
                           roomInfo.link ||
-                          `https://pravosleva.pro/express-helper/chat/#/${targetParam}`,
+                          `https://pravosleva.pro/express-helper/chat/#/chat?room=${targetChatName}`,
                       })
-                      if (isDev) messages.push(`Room ${targetParam} exists`)
+                      if (isDev) messages.push(`Room ${targetChatName} exists`)
                       break
                     case EAPIRoomCode.NotFound:
                       messages.push(
@@ -219,13 +260,15 @@ export const withStartLogic = (bot) => {
                     case roomInfo.code === EAPIRoomCode.RoomExists &&
                       userInfo.code !== EAPIUserCode.UserExists:
                       messages.push(
-                        `⚠️ Oops... Комната ${targetParam} существует, но Вы не зарегистрированы в чате. Регистрация здесь 👉 /invite`
+                        `⚠️ Oops... Комната ${targetChatName} существует, но Вы не зарегистрированы в чате. Регистрация здесь 👉 /invite`
                       )
                       break
 
                     // Room not found, user exists
                     case userInfo.code === EAPIUserCode.UserExists:
-                      // messages.push('https://pravosleva.pro/express-helper/chat/')
+                      messages.push(
+                        'https://pravosleva.pro/express-helper/chat/'
+                      )
                       break
 
                     default:
@@ -241,16 +284,20 @@ export const withStartLogic = (bot) => {
                   break
                 }
               }
-            } else if (isDev) messages.push('W/O params')
-            // messages.push(
-            //   'Для регистрации в чате или сброса пароля выполните /invite'
-            // )
+            } else if (isDev) {
+              messages.push('W/O params')
+              messages.push(
+                'Для регистрации в чате или сброса пароля выполните /invite'
+              )
+            }
             break
           default:
-            if (isDev) messages.push('Unknown scopeParam')
-            // messages.push(
-            //   'Для регистрации в чате или сброса пароля выполните /invite'
-            // )
+            if (isDev) {
+              messages.push('Unknown scopeParam')
+              messages.push(
+                'Для регистрации в чате или сброса пароля выполните /invite'
+              )
+            }
             break
         }
       }

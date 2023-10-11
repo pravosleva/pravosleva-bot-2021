@@ -89,6 +89,14 @@ const rules: { [key in EEventCodes]: TCodeSettings } = {
     showAdditionalInfo: false,
     validate: () => true,
   },
+  [EEventCodes.SINGLE_REMINDER]: {
+    symbol: '⚙️',
+    dontShowSymbol: false,
+    descr: 'Single reminder',
+    doNotify: true,
+    showAdditionalInfo: false,
+    validate: () => true,
+  },
 }
 
 export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
