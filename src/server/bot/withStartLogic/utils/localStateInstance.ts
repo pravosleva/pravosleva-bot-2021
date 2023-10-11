@@ -2,7 +2,7 @@
 /* eslint-disable no-shadow */
 // import { SceneContextMessageUpdate } from 'telegraf/typings/stage.d'
 
-import { proxyMap } from 'valtio/utils'
+import { proxyMap } from 'valtio/vanilla/utils'
 
 type TChatId = number
 type TData = { targetParam: string; link?: string }

@@ -55,7 +55,7 @@ export const withStartLogic = (bot) => {
     console.log(text)
     console.log('-')
 
-    const messages = ['Доброго времени суток!', '', 'ℹ️ Опции бота 👉 /help 👈']
+    const messages = ['Доброго времени суток!', '', 'Опции бота /help']
     try {
       const parsedEntry = text.split(' ')
 
@@ -145,6 +145,7 @@ export const withStartLogic = (bot) => {
         chats.set(0, 'ux-test')
         chats.set(1, 'ui-test')
         chats.set(2, 'pravosleva.pro')
+        chats.set(3, 'magaz')
 
         const targetChatName: string | undefined = chats.get(
           targetParamNormalized
@@ -160,6 +161,7 @@ export const withStartLogic = (bot) => {
 
         switch (scopeParam) {
           case EScopeParams.InviteChat:
+            messages.push('\nЗабыли пароль? /invite')
             if (targetChatName) {
               switch (targetChatName) {
                 // TODO?
@@ -237,20 +239,14 @@ export const withStartLogic = (bot) => {
                       } catch (err) {
                         console.log(err)
                       }
-                      if (isDev)
-                        messages.push(`User ${username} exists: Go /invite`)
-                      if (roomInfo.link) {
-                        messages.push(
-                          `\n✅ Hello, ${username}! Lets go to room:\n${roomInfo.link}\n`
-                        )
-                      } else {
-                        messages.push(
-                          `\n✅ Hello, ${username}! Lets go to chat:\n${
-                            roomInfo.link ||
-                            'https://pravosleva.pro/express-helper/chat/'
-                          }\n`
-                        )
-                      }
+                      // if (isDev) messages.push(`User ${username} exists: Go /invite`)
+
+                      messages.push(
+                        `\n✅ Hello, ${username}! Thats target chat:\n${
+                          roomInfo.link ||
+                          'https://pravosleva.pro/express-helper/chat/'
+                        }\n`
+                      )
                       break
                     case userInfo.code === EAPIUserCode.NotFound:
                       messages.push(
