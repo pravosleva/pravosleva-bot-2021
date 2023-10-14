@@ -11,9 +11,9 @@ export const getReportMarkdown = ({
   for (const key in cfg) {
     if (res[key]) {
       results.push(
-        `${cfg[key]}\n\n\`\`\`\n${JSON.stringify(res[key], null, 2)}\n\`\`\``
+        `${cfg[key]}\n\`\`\`\n${JSON.stringify(res[key], null, 2)}\n\`\`\``
       )
     }
   }
-  return results.join('\n\n')
+  return results.join('\n')
 }
