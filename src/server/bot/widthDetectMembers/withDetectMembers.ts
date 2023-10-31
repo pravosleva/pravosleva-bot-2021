@@ -49,7 +49,7 @@ export const withDetectMembers = (bot) => {
       const { replyWithMarkdown, message } = ctx
 
       replyWithMarkdown(
-        `Event *new_chat_members*\n\n\`\`\`\n${JSON.stringify(
+        `Event *new_chat_members*\n\n\`\`\`json\n${JSON.stringify(
           { message },
           null,
           2

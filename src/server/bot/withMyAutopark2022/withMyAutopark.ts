@@ -97,7 +97,7 @@ export const withMyAutopark = (bot: any) => {
         }
       default:
         return ctx.replyWithMarkdown(
-          `\`\`\`\n${JSON.stringify(data, null, 2)}\n\`\`\``
+          `\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
         )
     }
   })
@@ -145,7 +145,7 @@ export const withMyAutopark = (bot: any) => {
             )
           default:
             return replyWithMarkdown(
-              `Response by express-helper:\n\n\`\`\`\n${JSON.stringify(
+              `Response by express-helper:\n\n\`\`\`json\n${JSON.stringify(
                 data,
                 null,
                 2
@@ -193,7 +193,7 @@ export const withMyAutopark = (bot: any) => {
           )
         }
         return replyWithMarkdown(
-          `Response by express-helper:\n\n\`\`\`\n${JSON.stringify(
+          `Response by express-helper:\n\n\`\`\`json\n${JSON.stringify(
             data,
             null,
             2

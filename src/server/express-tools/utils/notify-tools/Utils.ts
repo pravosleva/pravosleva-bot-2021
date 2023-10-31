@@ -79,7 +79,7 @@ export class Utils {
   }
 
   static _getShortMsg({ id, date }: { id: number; date: Date }): string {
-    return `${id} - ${getTimeAgo(date)}`
+    return `• ${id} - ${getTimeAgo(date)}`
   }
 
   get isNotifUselessness(): boolean {

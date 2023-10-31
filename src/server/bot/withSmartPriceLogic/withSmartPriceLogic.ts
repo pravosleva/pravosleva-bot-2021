@@ -431,11 +431,11 @@ export const withSmartPriceLogic = (bot: any) => {
     toClient._message = 'No result'
 
     return replyWithMarkdown(
-      `*⚠️ Trade-In ${_text} timing report*\n\n\`\`\`\n${JSON.stringify(
+      `*⚠️ Trade-In ${_text} timing report*\n\n\`\`\`json\n${JSON.stringify(
         { ...toClient, _text },
         null,
         2
-      )}\`\`\``
+      )}\n\`\`\``
     )
     // --
   })

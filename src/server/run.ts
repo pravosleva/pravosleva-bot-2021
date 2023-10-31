@@ -5,6 +5,7 @@ import express, {
   Response as IResponse,
   NextFunction as INextFunction,
 } from 'express'
+import axios from 'axios'
 
 const moduleAlias = require('module-alias')
 const path = require('path')
@@ -97,6 +98,26 @@ class App {
   public start() {
     this.server.listen(this.port, () => {
       console.log(`Server listening on http://localhost:${this.port}`)
+      axios
+        .post(
+          'https://pravosleva.pro/tg-bot-2021/notify/kanban-2021/reminder/send',
+          {
+            resultId: new Date().getTime(),
+            chat_id: 432590698, // NOTE: Den Pol
+            ts: new Date().getTime(),
+            eventCode: 'aux_service',
+            about: `\`/tg-bot\`\n🚀 Started on TCP ${PORT}`,
+            targetMD: `\`\`\`json\n${JSON.stringify(
+              {
+                NODE_ENV: process.env.NODE_ENV,
+              },
+              null,
+              2
+            )}\n\`\`\``,
+          }
+        )
+        .then((res) => res.data)
+        .catch((err) => err)
     })
     this.runBot()
   }

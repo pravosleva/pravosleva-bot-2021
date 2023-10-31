@@ -186,7 +186,7 @@ export const withExpressChatHelper = (bot: any) => {
       if (data.ok) {
         if (data.password) {
           return replyWithMarkdown(
-            `\`\`\`\n${JSON.stringify(
+            `\`\`\`json\n${JSON.stringify(
               { login: username, passwd: data.password },
               null,
               2

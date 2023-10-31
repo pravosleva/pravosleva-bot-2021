@@ -146,7 +146,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
         ] = rowValues
         let result = ''
 
-        const getBackResponseMD = (jsonStr) => {
+        const getBackResponseMD = (jsonStr: any) => {
           if (!jsonStr) return ''
 
           let res = ''
@@ -158,7 +158,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           }
 
           if (_modifiedJSON)
-            res += `\`\`\`\n${
+            res += `\`\`\`json\n${
               _modifiedJSON ? JSON.stringify(_modifiedJSON, null, 2) : jsonStr
             }\n\`\`\``
 
