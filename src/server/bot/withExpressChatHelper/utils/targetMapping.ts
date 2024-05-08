@@ -18,8 +18,8 @@ const targetMapping: {
 }
 
 const defaultItem: { link: string; uiName: string } = {
-  link: 'https://pravosleva.pro/express-helper/chat/',
-  uiName: '🔗 PUB 2021',
+  link: 'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat',
+  uiName: '🔗 KanBan 2021',
 }
 
 export const getTargetData = (

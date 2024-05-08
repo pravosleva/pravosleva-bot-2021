@@ -203,7 +203,7 @@ export const withStartLogic = (bot) => {
                         targetParam: targetChatName,
                         link:
                           roomInfo.link ||
-                          `https://pravosleva.pro/express-helper/chat/#/chat?room=${targetChatName}`,
+                          `https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat?room=${targetChatName}`,
                       })
                       if (isDev) messages.push(`Room ${targetChatName} exists`)
                       break
@@ -244,7 +244,7 @@ export const withStartLogic = (bot) => {
                       messages.push(
                         `\n✅ Hello, ${username}! Thats target chat:\n${
                           roomInfo.link ||
-                          'https://pravosleva.pro/express-helper/chat/'
+                          'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat'
                         }\n`
                       )
                       break
@@ -263,7 +263,7 @@ export const withStartLogic = (bot) => {
                     // Room not found, user exists
                     case userInfo.code === EAPIUserCode.UserExists:
                       messages.push(
-                        'https://pravosleva.pro/express-helper/chat/'
+                        'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat'
                       )
                       break
 

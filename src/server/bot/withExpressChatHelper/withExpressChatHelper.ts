@@ -85,7 +85,8 @@ export const withExpressChatHelper = (bot: any) => {
           console.log('-')
 
           const link =
-            myState?.link || 'https://pravosleva.pro/express-helper/chat/'
+            myState?.link ||
+            'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat'
 
           const newData = await replyWithMarkdown(
             `Пользователь ${username} был зарегистрирован ранее`,
