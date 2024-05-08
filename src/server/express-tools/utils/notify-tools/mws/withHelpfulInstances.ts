@@ -17,11 +17,11 @@ export const queueDispatcher = new QueueDispatcher({
 })
 const queueDispatcherKanban2021 = new QueueDispatcher({
   // defaultDelay: 1000 * 60 * 60 * 1,
-  defaultDelay: 1000 * 20, // sec
+  defaultDelay: 1000 * 60 * 60 * 1, // hrs
   differentMsgsLimitNumber: 1,
 })
 const queueDispatcherAuditHelper2023 = new QueueDispatcher({
-  defaultDelay: 1000 * 60 * 60 * 1,
+  defaultDelay: 1000 * 60 * 60 * 1, // hrs
   differentMsgsLimitNumber: 5,
 })
 // --
