@@ -113,7 +113,7 @@ class App {
               },
               null,
               2
-            )}\n\`\`\``,
+            )}\`\`\``,
           }
         )
         .then((res) => res.data)

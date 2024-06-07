@@ -22,7 +22,7 @@ import { EEventCodes, TReqBody } from '../types'
 // x QueueDisparcher абстрагирован от reqBody? [No, cuz need chat_id, row, etc.]
 // + Example of QueueDisparcher should not be Singletone
 
-const commonHeader = 'Виртуальный попугай'
+const commonHeader = 'Digital parrot'
 const rules: { [key in EEventCodes]: TCodeSettings } = {
   [EEventCodes.SP_REMINDER_DAILY]: {
     symbol: null, // 'ℹ️',
@@ -192,12 +192,12 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           //     shortMsgs: string[]
           //   }
           // } = {}
-          const res = `TST (generalized) queueState.ids= ${queueState.ids.join(
+          const res = `Generalized msg tetsing: queueState.ids= ${queueState.ids.join(
             ', '
-          )} (комбинированное сообщение не предусмотрено)`
+          )}\n\n${queueState.msgs.map((m) => `• ${m}`).join('\n\n')}`
           return `*${header}*\n\n${res}`
         } catch (err) {
-          return `ERR001: ${err?.message || 'No err.message'}`
+          return `ERR001A: ${err?.message || 'No err.message'}`
         }
       },
     }),

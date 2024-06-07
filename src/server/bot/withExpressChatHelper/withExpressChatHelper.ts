@@ -191,7 +191,7 @@ export const withExpressChatHelper = (bot: any) => {
               { login: username, passwd: data.password },
               null,
               2
-            )}\n\`\`\`\n${data.message || 'Пароль можно поменять в ЛК'}\n\n[${
+            )}\`\`\`\n${data.message || 'Пароль можно поменять в ЛК'}\n\n[${
               targetData.uiName
             }](${targetData.link})`
           )
@@ -252,9 +252,7 @@ export const withExpressChatHelper = (bot: any) => {
       // id,
     } = ctx.update.message.from
 
-    if (username !== 'pravosleva') {
-      return reply('⛔ Доступ закрыт')
-    }
+    if (username !== 'pravosleva') return reply('⛔ Доступ закрыт')
 
     try {
       const newData = await reply(

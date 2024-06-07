@@ -160,7 +160,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           if (_modifiedJSON)
             res += `\`\`\`json\n${
               _modifiedJSON ? JSON.stringify(_modifiedJSON, null, 2) : jsonStr
-            }\n\`\`\``
+            }\`\`\``
 
           return res
         }

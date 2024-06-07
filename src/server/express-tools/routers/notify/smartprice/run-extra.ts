@@ -4,6 +4,7 @@ import { THelp, TModifiedRequest } from '~/bot/utils/interfaces'
 
 export enum ENotifNamespace {
   OFFLINE_TRADEIN_UPLOAD_WIZARD = 'offline-tradein/upload-wizard',
+  // PRAVOSLEVA = 'pravosleva',
 }
 
 export const runExtra = async (req: TModifiedRequest, res: IResponse) => {

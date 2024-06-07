@@ -197,7 +197,7 @@ export const withSmartPriceLogic = (bot: any) => {
         if (res?.message) toClient.message = res.message
 
         return replyWithMarkdown(
-          `\`\`\`\n${JSON.stringify(toClient, null, 2)}\n\`\`\``
+          `\`\`\`json\n${JSON.stringify(toClient, null, 2)}\`\`\``
         )
       } catch (err) {
         return replyWithMarkdown(`ERR: ${err.message || 'No err.message'}`)
@@ -435,7 +435,7 @@ export const withSmartPriceLogic = (bot: any) => {
         { ...toClient, _text },
         null,
         2
-      )}\n\`\`\``
+      )}\`\`\``
     )
     // --
   })
