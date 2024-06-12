@@ -7,8 +7,8 @@ import { freeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatche
 // NOTE: Персональные очереди для пользователей (с таймером)
 export const queueDispatcher = new QueueDispatcher({
   // NOTE: Время, не чаще которого разрешается беспокоить пользователя
-  // defaultDelay: 1000 * 60 * 30, // 30 min
-  defaultDelay: 1000 * 60 * 60 * 1, // 1 hour
+  defaultDelay: 1000 * 60 * 30, // 30 min
+  // defaultDelay: 1000 * 60 * 60 * 1, // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24, * 1 // 1 day
 
   // NOTE: Количество сообщений в очереди, когда можно отправить подряд по одному
@@ -16,12 +16,12 @@ export const queueDispatcher = new QueueDispatcher({
   differentMsgsLimitNumber: 1,
 })
 const queueDispatcherKanban2021 = new QueueDispatcher({
-  // defaultDelay: 1000 * 60 * 60 * 1,
-  defaultDelay: 1000 * 60 * 60 * 1, // hrs
+  defaultDelay: 1000 * 60 * 20, // min
+  // defaultDelay: 1000 * 60 * 60 * 1, // hour
   differentMsgsLimitNumber: 1,
 })
 const queueDispatcherAuditHelper2023 = new QueueDispatcher({
-  defaultDelay: 1000 * 60 * 60 * 1, // hrs
+  defaultDelay: 1000 * 60 * 60 * 1, // hour
   differentMsgsLimitNumber: 5,
 })
 // --

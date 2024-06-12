@@ -4,6 +4,7 @@ import { THelp, TModifiedRequest } from '~/bot/utils/interfaces'
 
 export enum ENotifNamespace {
   OFFLINE_TRADEIN_UPLOAD_WIZARD = 'offline-tradein/upload-wizard',
+  OFFLINE_TRADEIN_MTSMAIN = 'offline-tradein/mtsmain',
   // PRAVOSLEVA = 'pravosleva',
 }
 
@@ -14,7 +15,8 @@ export const runExtra = async (req: TModifiedRequest, res: IResponse) => {
   }
 
   switch (namespace) {
-    case ENotifNamespace.OFFLINE_TRADEIN_UPLOAD_WIZARD: {
+    case ENotifNamespace.OFFLINE_TRADEIN_UPLOAD_WIZARD:
+    case ENotifNamespace.OFFLINE_TRADEIN_MTSMAIN: {
       const { offlineTradeInQueueDispatcher: queueDispatcher } =
         req.notifyTools.smartprice
 

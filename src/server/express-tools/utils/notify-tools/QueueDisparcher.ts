@@ -322,11 +322,14 @@ export class QueueDispatcher {
               return await this.botInstance.telegram.sendMessage(
                 // chat_id
                 432590698, // NOTE: Den Pol,
-                `⛔ ERR2: Ошибка отправки / \`${
+                [
+                  '⛔ ERR2: Ошибка отправки',
+                  '',
+                  'by TG:',
                   typeof err === 'string'
                     ? err
-                    : err.message || 'No err.message'
-                }\`\n\n${msg}`,
+                    : err.message || 'No err.message',
+                ].join('\n'),
                 {
                   parse_mode: 'Markdown',
                 }
@@ -477,11 +480,14 @@ export class QueueDispatcher {
               return await this.botInstance.telegram.sendMessage(
                 // chat_id
                 432590698, // NOTE: Den Pol,
-                `⛔ ERR1: Ошибка отправки / \`${
+                [
+                  '⛔ ERR1: Ошибка отправки',
+                  '',
+                  'by TG:',
                   typeof err === 'string'
                     ? err
-                    : err.message || 'No err.message'
-                }\`\n\n${msg}`,
+                    : err.message || 'No err.message',
+                ].join('\n'),
                 {
                   parse_mode: 'Markdown',
                 }

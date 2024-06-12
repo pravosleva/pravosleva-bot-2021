@@ -149,8 +149,12 @@ export const withSmartPriceLogic = (bot: any) => {
                 'https://test.smartprice.ru/tradein/'
               ),
               Markup.callbackButton(
-                '🔥 Send all notifs now',
-                'smartprice.offline_tardein.send_all_notifs_now'
+                'All notifs now (upload-wizard)',
+                'smartprice.offline_tardein_upload_wizard.send_all_notifs_now'
+              ),
+              Markup.callbackButton(
+                'All notifs now (mtsmain)',
+                'smartprice.offline_tardein_mtsmain.send_all_notifs_now'
               ),
               // Markup.callbackButton(
               //   'TRADEIN REPORT',
@@ -179,7 +183,7 @@ export const withSmartPriceLogic = (bot: any) => {
   )
 
   bot.action(
-    'smartprice.offline_tardein.send_all_notifs_now',
+    'smartprice.offline_tardein_upload_wizard.send_all_notifs_now',
     async (ctx: any) => {
       const { answerCbQuery, replyWithMarkdown, deleteMessage } = ctx
       try {
@@ -189,6 +193,32 @@ export const withSmartPriceLogic = (bot: any) => {
         const res: any = await httpClient.runExtraNotifs({
           chat_id: ctx.update.callback_query.from.id,
           namespace: ENotifNamespace.OFFLINE_TRADEIN_UPLOAD_WIZARD,
+        })
+
+        const toClient: any = {
+          ok: res?.ok || false,
+        }
+        if (res?.message) toClient.message = res.message
+
+        return replyWithMarkdown(
+          `\`\`\`json\n${JSON.stringify(toClient, null, 2)}\`\`\``
+        )
+      } catch (err) {
+        return replyWithMarkdown(`ERR: ${err.message || 'No err.message'}`)
+      }
+    }
+  )
+  bot.action(
+    'smartprice.offline_tardein_mtsmain.send_all_notifs_now',
+    async (ctx: any) => {
+      const { answerCbQuery, replyWithMarkdown, deleteMessage } = ctx
+      try {
+        await answerCbQuery()
+        deleteMessage()
+
+        const res: any = await httpClient.runExtraNotifs({
+          chat_id: ctx.update.callback_query.from.id,
+          namespace: ENotifNamespace.OFFLINE_TRADEIN_MTSMAIN,
         })
 
         const toClient: any = {
