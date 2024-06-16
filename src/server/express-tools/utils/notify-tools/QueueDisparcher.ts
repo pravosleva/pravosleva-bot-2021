@@ -311,7 +311,7 @@ export class QueueDispatcher {
           chat_id,
           message_thread_id,
           targetAction: async ({ msg, chat_id, message_thread_id }) => {
-            console.log(`-- send 2: ${msg}`)
+            // console.log(`-- send 2: ${msg}`)
 
             try {
               return await this.botInstance.telegram.sendMessage(chat_id, msg, {
@@ -477,17 +477,35 @@ export class QueueDispatcher {
                 opts
               )
             } catch (err) {
+              const targetChats: {
+                [key: string]: string
+              } = {
+                '432590698': 'pravosleva',
+                '-1001615277747': 'SP devs group',
+                // NOTE: Etc.
+              }
+              const msgs = [
+                `⛔ ERR1: Ошибка отправки${
+                  targetChats[String(chat_id)]
+                    ? ` для ${targetChats[String(chat_id)]}`
+                    : ''
+                }`,
+                '',
+                'Target:',
+                `\`chat_id: ${chat_id}\``,
+              ]
+              if (message_thread_id)
+                msgs.push(`\`message_thread_id: ${message_thread_id}\``)
+
+              msgs.push('')
+              msgs.push('by TG:')
+              msgs.push(
+                typeof err === 'string' ? err : err.message || 'No err.message'
+              )
               return await this.botInstance.telegram.sendMessage(
                 // chat_id
                 432590698, // NOTE: Den Pol,
-                [
-                  '⛔ ERR1: Ошибка отправки',
-                  '',
-                  'by TG:',
-                  typeof err === 'string'
-                    ? err
-                    : err.message || 'No err.message',
-                ].join('\n'),
+                msgs.join('\n'),
                 {
                   parse_mode: 'Markdown',
                 }

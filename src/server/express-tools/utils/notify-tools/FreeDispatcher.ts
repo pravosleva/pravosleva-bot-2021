@@ -80,6 +80,6 @@ export class FreeDispatcher {
 // (без таймера, только учет количества + допустимое количество возможных сообщений вне очереди)
 export const freeDispatcher = new FreeDispatcher({
   // -- // NOTE: x сообщений будут доставлены, независимо от временной задержки, остальные - после нее
-  defaultOddFree: 10,
+  defaultOddFree: 15,
   // --
 })
