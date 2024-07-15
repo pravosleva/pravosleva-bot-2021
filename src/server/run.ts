@@ -74,10 +74,10 @@ class App {
     withDetectMembers(bot)
 
     // -- NOTE: Logs
-    // bot.use((ctx, next) => {
-    //   console.log(ctx.update)
-    //   next()
-    // })
+    bot.use((ctx, next) => {
+      console.log(ctx.update)
+      next()
+    })
     // --
 
     // --- TODO: Refactoring. Make as middlewares:

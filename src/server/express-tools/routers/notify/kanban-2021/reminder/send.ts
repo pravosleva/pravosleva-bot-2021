@@ -149,19 +149,32 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           // errMsg,
           targetMD,
           // jsonStringified,
+          partialHeader,
+          header,
         } = body
         let result = ''
+        const headerParts = []
+        if (header) headerParts.push(header)
+        else {
+          headerParts.push(commonHeader)
+          headerParts.push(partialHeader || notifyCodes[eventCode].descr)
+        }
+        const bodyParts = [`*${headerParts.join(' | ')}*`]
+        bodyParts.push(
+          `${
+            !notifyCodes[eventCode].dontShowSymbol
+              ? `${notifyCodes[eventCode].symbol} `
+              : ''
+          }${about}`
+        )
+        bodyParts.push(targetMD)
 
         if (!eventCode || !notifyCodes[eventCode]) {
           result += `⛔ Неизвестный eventCode ${eventCode}`
           // NOTE: Should be impossible (эти вещи будем фильтровать в mw)
         } else {
           try {
-            result += `*${commonHeader} | ${notifyCodes[eventCode].descr}*\n\n${
-              !notifyCodes[eventCode].dontShowSymbol
-                ? `${notifyCodes[eventCode].symbol} `
-                : ''
-            }${about}\n\n${targetMD}`
+            result += `${bodyParts.join('\n\n')}`
           } catch (err) {
             console.log(err)
           }

@@ -20,4 +20,6 @@ export type TReqBody = {
   errMsg?: string
   targetMD: string
   jsonStringified: string
+  partialHeader?: string
+  header?: string
 }
