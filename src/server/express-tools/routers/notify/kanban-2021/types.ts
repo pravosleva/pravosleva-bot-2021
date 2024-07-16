@@ -16,7 +16,7 @@ export enum EEventCodes {
 export type TReqBody = {
   ts?: number
   eventCode: EEventCodes
-  about: string
+  about?: string
   errMsg?: string
   targetMD: string
   jsonStringified: string

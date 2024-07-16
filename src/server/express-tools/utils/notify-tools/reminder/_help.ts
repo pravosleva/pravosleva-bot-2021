@@ -22,7 +22,17 @@ export const _help: THelp = {
       about: {
         type: 'string',
         descr: 'Description',
-        required: true,
+        required: false,
+      },
+      header: {
+        type: 'string',
+        descr: 'Header',
+        required: false,
+      },
+      partialHeader: {
+        type: 'string',
+        descr: 'Part of header',
+        required: false,
       },
       errMsg: {
         type: 'string',
