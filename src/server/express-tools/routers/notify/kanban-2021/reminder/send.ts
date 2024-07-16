@@ -160,13 +160,14 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
           headerParts.push(partialHeader || notifyCodes[eventCode].descr)
         }
         const bodyParts = [`*${headerParts.join(' | ')}*`]
-        bodyParts.push(
-          `${
-            !notifyCodes[eventCode].dontShowSymbol
-              ? `${notifyCodes[eventCode].symbol} `
-              : ''
-          }${about}`
-        )
+        if (about)
+          bodyParts.push(
+            `${
+              !notifyCodes[eventCode].dontShowSymbol
+                ? `${notifyCodes[eventCode].symbol} `
+                : ''
+            }${about}`
+          )
         bodyParts.push(targetMD)
 
         if (!eventCode || !notifyCodes[eventCode]) {
