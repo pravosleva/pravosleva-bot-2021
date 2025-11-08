@@ -5,25 +5,24 @@ import { freeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatche
 
 // -- NOTE: TG_NOTIFS Step 2/3
 // NOTE: Персональные очереди для пользователей (с таймером)
-export const queueDispatcher = new QueueDispatcher({
+const offlineTradeInQueueDispatcher = new QueueDispatcher({
   // NOTE: Время, не чаще которого разрешается беспокоить пользователя
-  // defaultDelay: 1000 * 60 * 30, // 30 min
   defaultDelay: 1000 * 60 * 20,
+  // defaultDelay: 1000 * 60 * 30, // 30 mins
   // defaultDelay: 1000 * 60 * 60 * 1, // 1 hour
   // defaultDelay: 1000 * 60 * 60 * 24, * 1 // 1 day
 
   // NOTE: Количество сообщений в очереди, когда можно отправить подряд по одному
-  // (если в очереди больше, то отправится все одним сообщением)
-  differentMsgsLimitNumber: 1,
+  // (если в очереди меньше, то отправится все одним сообщением)
+  differentMsgsLimitNumber: 3,
 })
 const queueDispatcherKanban2021 = new QueueDispatcher({
-  defaultDelay: 1000 * 60 * 20, // min
-  // defaultDelay: 1000 * 60 * 60 * 1, // hour
-  differentMsgsLimitNumber: 1,
+  defaultDelay: 1000 * 60 * 20, // mins
+  differentMsgsLimitNumber: 3,
 })
 const queueDispatcherAuditHelper2023 = new QueueDispatcher({
   defaultDelay: 1000 * 60 * 60 * 1, // hour
-  differentMsgsLimitNumber: 5,
+  differentMsgsLimitNumber: 2,
 })
 // --
 
@@ -34,7 +33,7 @@ export const withHelpfulInstances = (
 ) => {
   // -- NOTE: Set bot instance
   // NOTE: TG_NOTIFS Step 3/3
-  queueDispatcher.setBotInstance(req.bot)
+  offlineTradeInQueueDispatcher.setBotInstance(req.bot)
   queueDispatcherKanban2021.setBotInstance(req.bot)
   queueDispatcherAuditHelper2023.setBotInstance(req.bot)
   freeDispatcher.setBotInstance(req.bot)
@@ -43,7 +42,7 @@ export const withHelpfulInstances = (
   req.notifyTools = {
     freeDispatcher,
     smartprice: {
-      offlineTradeInQueueDispatcher: queueDispatcher,
+      queueDispatcher: offlineTradeInQueueDispatcher,
     },
     kanban2021: {
       queueDispatcher: queueDispatcherKanban2021,

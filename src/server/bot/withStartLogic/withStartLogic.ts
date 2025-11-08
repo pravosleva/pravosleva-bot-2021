@@ -11,6 +11,7 @@ import {
 
 const { NODE_ENV } = process.env
 const isDev = NODE_ENV === 'development'
+const CHAT_PUBLIC_BASE_URL = 'https://gosuslugi.pravosleva.pro'
 
 // NOTE: https://github.com/LetItCode/telegraf
 
@@ -203,7 +204,7 @@ export const withStartLogic = (bot) => {
                         targetParam: targetChatName,
                         link:
                           roomInfo.link ||
-                          `https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat?room=${targetChatName}`,
+                          `${CHAT_PUBLIC_BASE_URL}/express-helper/chat/#/chat?room=${targetChatName}`,
                       })
                       if (isDev) messages.push(`Room ${targetChatName} exists`)
                       break
@@ -214,10 +215,9 @@ export const withStartLogic = (bot) => {
                       break
                     default:
                       messages.push(
-                        `E-Helper res: ${
-                          typeof roomInfo === 'string'
-                            ? roomInfo
-                            : roomInfo.code || 'No data.code'
+                        `E-Helper res: ${typeof roomInfo === 'string'
+                          ? roomInfo
+                          : roomInfo.code || 'No data.code'
                         }`
                       )
                       break
@@ -242,9 +242,8 @@ export const withStartLogic = (bot) => {
                       // if (isDev) messages.push(`User ${username} exists: Go /invite`)
 
                       messages.push(
-                        `\n✅ Hello, ${username}! Thats target chat:\n${
-                          roomInfo.link ||
-                          'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat'
+                        `\n✅ Hello, ${username}! Thats target chat:\n${roomInfo.link ||
+                        `${CHAT_PUBLIC_BASE_URL}/express-helper/chat/#/chat`
                         }\n`
                       )
                       break
@@ -263,16 +262,15 @@ export const withStartLogic = (bot) => {
                     // Room not found, user exists
                     case userInfo.code === EAPIUserCode.UserExists:
                       messages.push(
-                        'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat'
+                        `${CHAT_PUBLIC_BASE_URL}/express-helper/chat/#/chat`
                       )
                       break
 
                     default:
                       messages.push(
-                        `⚠️ E-Helper res: ${
-                          typeof userInfo === 'string'
-                            ? userInfo
-                            : userInfo.code || 'No data.code'
+                        `⚠️ E-Helper res: ${typeof userInfo === 'string'
+                          ? userInfo
+                          : userInfo.code || 'No data.code'
                         }`
                       )
                       break

@@ -92,8 +92,7 @@ export const sendNotify = async (req: TModifiedRequest, res: IResponse) => {
   const { ts: _optionalTs } = req.body
   const ts = _optionalTs || new Date().getTime()
 
-  const { offlineTradeInQueueDispatcher: queueDispatcher } =
-    req.notifyTools.smartprice
+  const { queueDispatcher } = req.notifyTools.smartprice
 
   // NOTE: Init bot instance if necessary (already in withHelpfulInstances)
   // queueDispatcher.setBotInstance(req.bot)

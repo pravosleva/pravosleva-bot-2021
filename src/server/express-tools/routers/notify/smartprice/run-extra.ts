@@ -17,8 +17,7 @@ export const runExtra = async (req: TModifiedRequest, res: IResponse) => {
   switch (namespace) {
     case ENotifNamespace.OFFLINE_TRADEIN_UPLOAD_WIZARD:
     case ENotifNamespace.OFFLINE_TRADEIN_MTSMAIN: {
-      const { offlineTradeInQueueDispatcher: queueDispatcher } =
-        req.notifyTools.smartprice
+      const { queueDispatcher } = req.notifyTools.smartprice
 
       const _result = await queueDispatcher.runExtra({
         chat_id,

@@ -39,6 +39,21 @@ const rules: { [key in EEventCodes]: TCodeSettings } = {
     showAdditionalInfo: true,
     validate: () => true,
   },
+  [EEventCodes.MG_REMINDER_DAILY]: {
+    symbol: null,
+    dontShowSymbol: true,
+    descr: 'MG Daily #mainsgroup',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
+  [EEventCodes.MG_REMINDER_WEEKLY]: {
+    symbol: '🧯',
+    descr: 'MG Weekly #mainsgroup',
+    doNotify: true,
+    showAdditionalInfo: true,
+    validate: () => true,
+  },
 
   [EEventCodes.MAGAZ_REMINDER_DAILY]: {
     symbol: null,

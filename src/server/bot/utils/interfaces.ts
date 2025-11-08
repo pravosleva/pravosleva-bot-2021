@@ -1,6 +1,6 @@
 import { Request as IRequest } from 'express'
-import { QueueDispatcher } from '~/express-tools/utils/notify-tools'
 // import { Telegraf } from 'telegraf'
+import { QueueDispatcher } from '~/express-tools/utils/notify-tools'
 import { FreeDispatcher } from '~/express-tools/utils/notify-tools/FreeDispatcher'
 
 export type TModifiedRequest = IRequest & {
@@ -8,7 +8,7 @@ export type TModifiedRequest = IRequest & {
   notifyTools: {
     freeDispatcher: FreeDispatcher
     smartprice: {
-      offlineTradeInQueueDispatcher: QueueDispatcher
+      queueDispatcher: QueueDispatcher
     }
     kanban2021: {
       queueDispatcher: QueueDispatcher

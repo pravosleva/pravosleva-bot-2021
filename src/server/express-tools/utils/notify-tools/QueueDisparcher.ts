@@ -97,7 +97,7 @@ export class QueueDispatcher {
     chat_id: number
     message_thread_id?: number
     msg: string
-    item: any
+    item: (string | number)[][]
     id: number
     ts: number
     delay?: number
@@ -142,7 +142,7 @@ export class QueueDispatcher {
     message_thread_id?: number
     newItem?: {
       msg: string
-      item: any
+      item: (string | number)[][]
       id: number
       ts: number
     }
@@ -183,10 +183,10 @@ export class QueueDispatcher {
         }
 
         // NOTE: 3.1.1 Send some msgs
-        // NOTE: Если больше - отправка будет одним общим сообщением
+        // Если меньше, чем differentMsgsLimitNumber - отправка будет одним общим сообщением
         switch (true) {
-          // NOTE: 3.1.1.1 Less than limit?
-          case queueNow.msgs.length <= this.differentMsgsLimitNumber: {
+          // NOTE: 3.1.1.1 More than limit? Then send messages one-by-one
+          case queueNow.msgs.length >= this.differentMsgsLimitNumber: {
             const delayBetweenNotifs = 500
             for (let i = 0, max = queueNow.msgs.length; i < max; i++) {
               waitCounterMs += i * delayBetweenNotifs
@@ -203,7 +203,7 @@ export class QueueDispatcher {
             break
           }
           default: {
-            // NOTE: 3.1.1.2 More than limit? Send special common single msg
+            // NOTE: 3.1.1.2 Less than limit? Send special common single msg
             await tgResp.push(
               await targetAction({
                 msg: utils.getGeneralizedCommonMessageMD({
@@ -422,7 +422,7 @@ export class QueueDispatcher {
     reqBody: {
       chat_id: number
       message_thread_id?: number
-      itemParams: any
+      itemParams: (string | number)[][]
       resultId: number
       delay?: number
       oddFree?: number

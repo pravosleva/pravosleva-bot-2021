@@ -1,5 +1,7 @@
 // import { ETargetParams } from '~/bot/withStartLogic/utils/types'
 
+const CHAT_PUBLIC_BASE_URL = 'https://gosuslugi.pravosleva.pro'
+
 const targetMapping: {
   [key: string]: { link: string; uiName: string }
 } = {
@@ -18,7 +20,7 @@ const targetMapping: {
 }
 
 const defaultItem: { link: string; uiName: string } = {
-  link: 'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat',
+  link: `${CHAT_PUBLIC_BASE_URL}/express-helper/chat/#/chat`,
   uiName: '🔗 KanBan 2021',
 }
 

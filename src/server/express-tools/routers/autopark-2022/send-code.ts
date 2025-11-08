@@ -115,37 +115,60 @@ export const sendCode = async (req, res) => {
     case isSentInTime.isOk: {
       data = await httpClient
         .checkUser({ chat_id })
-        .then(async (res) => {
-          // console.log(data)
-
+        .then(async (checkUserRes) => {
           timersMap.set(chat_id, { ts: new Date().getTime() })
 
           // 3. If ok -> send code
-          if (typeof res === 'object') {
-            tgResp = await axios
-              .post(
-                `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${chat_id}&text=${
-                  res.password || 'ERR'
-                }`
-              )
-              .then(() => {
-                // console.log('--- RES')
-                // console.log(res)
-                // console.log('--- RES:END')
-              })
-              .catch(() => {
-                // console.log('--- ERR')
-                // console.log(err)
-                // console.log('--- ERR:END')
-              })
+          if (typeof checkUserRes === 'object') {
+            if (checkUserRes.ok) {
+              tgResp = await axios
+                .post(
+                  `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${chat_id}&text=${
+                    checkUserRes.password || 'ERR'
+                  }`
+                )
+                .then(() => {
+                  // console.log('--- RES')
+                  // console.log(checkUserRes)
+                  // console.log('--- RES:END')
+                })
+                .catch(() => {
+                  // console.log('--- ERR')
+                  // console.log(err)
+                  // console.log('--- ERR:END')
+                })
+
+              return {
+                ok: true,
+                _original: {
+                  res: tgResp,
+                  checkUserRes,
+                },
+              }
+            }
+            throw new Error('checkUserRes is object, but not Ok')
+          } else {
+            throw new Error(
+              `Not Ok. checkUserRes is ${typeof res} (should be an object)`
+            )
           }
         })
-        .catch((msg) => msg)
+        .catch((err) => {
+          return {
+            ok: false,
+            message: `checkUser request errored: ${
+              err?.message || 'No err?.message'
+            }`,
+            checkUserRes: err,
+          }
+        })
 
       const toClient: any = {
         ok: true,
         data,
-        originalBody: req.body,
+        _original: {
+          body: req.body,
+        },
       }
       if (tgResp) toClient.tgResp = tgResp
 

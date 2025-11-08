@@ -6,16 +6,17 @@ import { httpClient } from './utils/httpClient'
 import { localStateInstance } from '~/bot/withStartLogic/utils'
 import { getTargetData } from './utils/targetMapping'
 import { EAPIUserCode } from './utils/types'
-import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
+// import { makeDisappearingDelay } from '~/bot/utils/makeDisappearingDelay'
 import { getReportMarkdown } from '~/bot/utils/getReportMarkdown'
 
 // const localStateInstance = State.getInstance()
 
 // const isDev: boolean = process.env.NODE_ENV === 'development'
+const CHAT_PUBLIC_BASE_URL = 'https://gosuslugi.pravosleva.pro'
 
 export const withExpressChatHelper = (bot: any) => {
   bot.command('invite', async (ctx: any) => {
-    const delaySeconds = 30
+    // const delaySeconds = 30
     const { reply, replyWithMarkdown, deleteMessage } = ctx
 
     if (!ctx.message?.from?.username) {
@@ -46,7 +47,7 @@ export const withExpressChatHelper = (bot: any) => {
       case EAPIUserCode.IncorrectUserName:
         try {
           // 1.1: Пользователь менял ник (предлагаем кнопку Пересоздать с новым ником)
-          const newData = await reply(
+          const _newData = await reply(
             `Мы знали Вас ранее как ${data.oldUsername || 'ERR3'}:`,
             Markup.inlineKeyboard([
               Markup.callbackButton(
@@ -63,14 +64,15 @@ export const withExpressChatHelper = (bot: any) => {
               .resize()
               .extra()
           )
-          const descrData = await ctx.replyWithMarkdown(
-            `_Кнопка доступна ${delaySeconds} сек..._`
-          )
+          // const descrData = await ctx.replyWithMarkdown(
+          //   `_Кнопка доступна ${delaySeconds} сек..._`
+          // )
+          // return makeDisappearingDelay(() => {
+          //   ctx.deleteMessage(_newData.message_id)
+          //   ctx.deleteMessage(descrData.message_id)
+          // }, delaySeconds * 1000)
 
-          return makeDisappearingDelay(() => {
-            ctx.deleteMessage(newData.message_id)
-            ctx.deleteMessage(descrData.message_id)
-          }, delaySeconds * 1000)
+          return await ctx.replyWithMarkdown('_Ok._')
         } catch (err) {
           return reply(`ERR: ${err.messate || 'No err msg #1'}`)
         }
@@ -86,9 +88,9 @@ export const withExpressChatHelper = (bot: any) => {
 
           const link =
             myState?.link ||
-            'https://gosuslugi.pravosleva.pro/express-helper/chat/#/chat'
+            `${CHAT_PUBLIC_BASE_URL}/express-helper/chat/#/chat`
 
-          const newData = await replyWithMarkdown(
+          const _newData = await replyWithMarkdown(
             `Пользователь ${username} был зарегистрирован ранее`,
             Markup.inlineKeyboard([
               Markup.callbackButton(
@@ -105,14 +107,15 @@ export const withExpressChatHelper = (bot: any) => {
               .resize()
               .extra()
           )
-          const descrData = await ctx.replyWithMarkdown(
-            `_Кнопка доступна ${delaySeconds} сек..._`
-          )
+          // const descrData = await ctx.replyWithMarkdown(
+          //   `_Кнопка доступна ${delaySeconds} сек..._`
+          // )
+          // return makeDisappearingDelay(() => {
+          //   ctx.deleteMessage(_newData.message_id)
+          //   ctx.deleteMessage(descrData.message_id)
+          // }, delaySeconds * 1000)
 
-          return makeDisappearingDelay(() => {
-            ctx.deleteMessage(newData.message_id)
-            ctx.deleteMessage(descrData.message_id)
-          }, delaySeconds * 1000)
+          return await ctx.replyWithMarkdown('_Ok._')
         } catch (err) {
           return reply(`ERR: ${err.messate || 'No err msg #2'}`)
         }
@@ -120,7 +123,7 @@ export const withExpressChatHelper = (bot: any) => {
       default:
         // 2. NO: Предлагаем создать
         try {
-          const newData = await reply(
+          const _newData = await reply(
             'Вы - новый пользователь',
             Markup.inlineKeyboard([
               Markup.callbackButton(
@@ -132,14 +135,14 @@ export const withExpressChatHelper = (bot: any) => {
               .resize()
               .extra()
           )
-          const descrData = await ctx.replyWithMarkdown(
-            `_Кнопка доступна ${delaySeconds} сек..._`
-          )
-
-          return makeDisappearingDelay(() => {
-            ctx.deleteMessage(newData.message_id)
-            ctx.deleteMessage(descrData.message_id)
-          }, delaySeconds * 1000)
+          // const descrData = await ctx.replyWithMarkdown(
+          //   `_Кнопка доступна ${delaySeconds} сек..._`
+          // )
+          // return makeDisappearingDelay(() => {
+          //   ctx.deleteMessage(_newData.message_id)
+          //   ctx.deleteMessage(descrData.message_id)
+          // }, delaySeconds * 1000)
+          return await ctx.replyWithMarkdown('_Ok._')
         } catch (err) {
           // return reply(`ERR: ${err.messate || 'No err msg #3'}`)
           return console.log(err)
@@ -158,9 +161,9 @@ export const withExpressChatHelper = (bot: any) => {
     // --
     const targetData = myState?.link
       ? {
-          link: myState?.link,
-          uiName: targetParam ? targetParam.toUpperCase() : 'CHAT',
-        }
+        link: myState?.link,
+        uiName: targetParam ? targetParam.toUpperCase() : 'CHAT',
+      }
       : getTargetData(targetParam || undefined)
 
     try {
@@ -191,8 +194,7 @@ export const withExpressChatHelper = (bot: any) => {
               { login: username, passwd: data.password },
               null,
               2
-            )}\`\`\`\n${data.message || 'Пароль можно поменять в ЛК'}\n\n[${
-              targetData.uiName
+            )}\`\`\`\n${data.message || 'Пароль можно поменять в ЛК'}\n\n[${targetData.uiName
             }](${targetData.link})`
           )
         }
@@ -255,7 +257,7 @@ export const withExpressChatHelper = (bot: any) => {
     if (username !== 'pravosleva') return reply('⛔ Доступ закрыт')
 
     try {
-      const newData = await reply(
+      const _newData = await reply(
         `Welcome, ${username}, u're admin`,
         Markup.inlineKeyboard([
           Markup.callbackButton(
@@ -267,14 +269,15 @@ export const withExpressChatHelper = (bot: any) => {
           .resize()
           .extra()
       )
-      const descrData = await ctx.replyWithMarkdown(
-        `_Кнопка доступна ${delaySeconds} сек..._`
-      )
+      // const descrData = await ctx.replyWithMarkdown(
+      //   `_Кнопка доступна ${delaySeconds} сек..._`
+      // )
+      // return makeDisappearingDelay(() => {
+      //   ctx.deleteMessage(_newData.message_id)
+      //   ctx.deleteMessage(descrData.message_id)
+      // }, delaySeconds * 1000)
 
-      return makeDisappearingDelay(() => {
-        ctx.deleteMessage(newData.message_id)
-        ctx.deleteMessage(descrData.message_id)
-      }, delaySeconds * 1000)
+      return await ctx.replyWithMarkdown('_Ok._')
     } catch (err) {
       // return reply(`ERR: ${err.messate || 'No err msg #3'}`)
       return console.log(err)

@@ -11,6 +11,9 @@ export enum EEventCodes {
 
   AUX_SERVICE = 'aux_service',
   SINGLE_REMINDER = 'single_reminder',
+
+  MG_REMINDER_DAILY = 'mg_reminder_daily',
+  MG_REMINDER_WEEKLY = 'mg_reminder_weekly',
 }
 
 export type TReqBody = {
@@ -19,7 +22,7 @@ export type TReqBody = {
   about?: string
   errMsg?: string
   targetMD: string
-  jsonStringified: string
+  jsonStringified?: string
   partialHeader?: string
   header?: string
 }
